@@ -166,7 +166,7 @@ function plotVariable(ndx, data, var_x, var_y, minX, maxX, yVars) {
     .margins({top: 10, right: 50, bottom: 30, left: 42})
     .yAxisLabel(var_y)
     .xAxisLabel(var_x)
-    .brushOn(false)
+    .brushOn(true)
 
   chart.yAxis()
     .tickFormat(d3.format(".2s"))
