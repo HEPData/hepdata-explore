@@ -10,6 +10,12 @@ from aggregator.record_writer import RecordWriter
 from aggregator.variable_index import VariableIndex
 from aggregator.shared_dcontext import dcontext
 
+try:
+    from yaml import CSafeLoader as SafeLoader
+except ImportError:
+    print("WARNING: Using Python YAML loader, which is very slow. Please build PyYAML with C extensions.")
+    from yaml import SafeLoader
+
 
 class RecordAggregator(object):
     def __init__(self, root_path):
@@ -19,7 +25,7 @@ class RecordAggregator(object):
 
     def process_submission(self, path):
         with open(os.path.join(path, 'submission.yaml')) as f:
-            submission = list(yaml.safe_load_all(f))
+            submission = list(yaml.load_all(f, Loader=SafeLoader))
 
         header = submission[0]
         tables = submission[1:]
@@ -36,7 +42,7 @@ class RecordAggregator(object):
         """
         dcontext.table = filename = table['data_file']
         with open(os.path.join(submission_path, filename)) as f:
-            doc = yaml.safe_load(f)
+            doc = yaml.load(f, Loader=SafeLoader)
 
         try:
             observables = ', '.join(coerce_list(find_keyword(table, 'observables')))
