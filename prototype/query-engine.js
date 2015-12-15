@@ -84,8 +84,8 @@ function customScatterPlot(parent, chartGroup) {
   var keyToColor = {};
   */
   _chart.getColor = function (d, i) {
-    var key = d.key.inspire_record;
-    return colorScale(d.key.inspire_record);
+    var key = d.key.inspire_record + '-' + d.key.table_num;
+    return colorScale(key);
 
     /* should do the same:
 
@@ -226,6 +226,7 @@ function decodeRecords(buf, strings) {
   while (pos < dv.byteLength) {
     var group = {};
     group.inspire_record = readVarint();
+    group.table_num = readVarint();
     group.cmenergies = readFloat();
     group.reaction = readString();
     group.observables = readString();
@@ -276,6 +277,7 @@ function plotVariable(ndx, data, var_x, var_y, minX, maxX, yVars) {
     var ret = [d.x_center, d.y];
     ret.var_y = d.var_y;
     ret.inspire_record = d.inspire_record;
+    ret.table_num = d.table_num;
     return ret;
   });
 

@@ -41,6 +41,9 @@ class RecordAggregator(object):
         :param table: The dictionary describing the table metadata (as in submission.yaml)
         """
         dcontext.table = filename = table['data_file']
+
+        table_num = int(table['name'].replace('Table ', ''))
+
         with open(os.path.join(submission_path, filename)) as f:
             doc = yaml.load(f, Loader=SafeLoader)
 
@@ -91,6 +94,7 @@ class RecordAggregator(object):
                 record_writer = self.get_record_writer(var_x)
                 table_group_metadata = TableGroupMetadata(
                         inspire_record=inspire_record,
+                        table_num=table_num,
                         reaction=reaction,
                         cmenergies=cmenergies,
                         observables=observables,

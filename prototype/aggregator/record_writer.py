@@ -29,6 +29,7 @@ class RecordWriter(object):
 
     def write_group_header(self, metadata, num_records):
         self.fp_records.write(varint_format(metadata.inspire_record))
+        self.fp_records.write(varint_format(metadata.table_num))
         self.fp_records.write(struct.pack('<f', metadata.cmenergies))
         self.fp_records.write(string_format(metadata.reaction))
         self.fp_records.write(string_format(metadata.observables))
