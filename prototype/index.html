@@ -11,6 +11,7 @@
   <script src="crossfilter.js"></script>
   <script src="dc.js"></script>
   <script src="lodash.min.js"></script>
+  <script src="bluebird.js"></script>
   <script src="utf.js"></script>
 </head>
 <body>
@@ -23,22 +24,27 @@
     </label>
   </div>
 
-  <div>
-    <span id="number-records"></span> records found.
+  <div id="visualization" style="display: none">
+    <div>
+      <span id="number-records"></span> records found.
+    </div>
+
+    <div id="all-vars-chart"></div>
+
+    <div id="cmenergies-chart"></div>
+
+    <div id="reactions-chart"></div>
+
+    <div id="variable-distribution-chart"></div>
+
+    <div id="observables-chart"></div>
+
+    <div id="variable-charts">
+
+    </div>
   </div>
-
-  <div id="all-vars-chart"></div>
-
-  <div id="cmenergies-chart"></div>
-
-  <div id="reactions-chart"></div>
-
-  <div id="variable-distribution-chart"></div>
-
-  <div id="observables-chart"></div>
-
-  <div id="variable-charts">
-
+  <div id="visualization-loading" style="display: none">
+    Loading data...
   </div>
 
   <script src="query-engine.js"></script>

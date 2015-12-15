@@ -1,11 +1,92 @@
 'use strict';
 
-var dataGrouped;
-var indepVars;
+Promise.config({
+  cancellation: true
+});
 
-var numRecordsFormat = function() {
+function RuntimeError(message) {
+  this.name = 'RuntimeError';
+  this.message = message || 'A problem has been detected';
+  this.stack = (new Error()).stack;
+}
+RuntimeError.prototype = Object.create(Error.prototype);
+RuntimeError.prototype.constructor = RuntimeError;
+
+function ServerError(message) {
+  this.name = 'ServerError';
+  this.message = message || 'The server returned an invalid response';
+  this.stack = (new Error()).stack;
+}
+ServerError.prototype = Object.create(Error.prototype);
+ServerError.prototype.constructor = ServerError;
+
+function assert(value, message) {
+  if (!value) {
+    throw new RuntimeError(message || "Assertion failed")
+  }
+}
+
+function customScatterPlot(parent, chartGroup) {
+  var _chart = dc.scatterPlot(parent, chartGroup);
+  var _locator = function (d) {
+    return 'translate(' + _chart.x()(_chart.keyAccessor()(d)) + ',' +
+      _chart.y()(_chart.valueAccessor()(d)) + ')';
+  };
+  var _existenceAccessor = function (d) {
+    return d.value;
+  };
+  var _symbol = d3.svg.symbol();
+
+  var _symbolSize = 3;
+  var _highlightedSize = 5;
+  var _hiddenSize = 0;
+
+  _symbol.size(function (d) {
+    if (!_existenceAccessor(d)) {
+      return _hiddenSize;
+    } else if (this.filtered) {
+      return Math.pow(_highlightedSize, 2);
+    } else {
+      return Math.pow(_symbolSize, 2);
+    }
+  });
+
+  _chart.plotData = function () {
+    var symbols = _chart.chartBodyG().selectAll('path.symbol')
+      .data(_chart.data());
+
+    symbols
+      .enter()
+      .append('path')
+      .attr('class', 'symbol')
+      .attr('opacity', 0)
+      .attr('fill', _chart.getColor)
+      .attr('transform', _locator);
+
+    dc.transition(symbols, _chart.transitionDuration())
+      .attr('opacity', function (d) {
+        return _existenceAccessor(d) ? 1 : 0;
+      })
+      .attr('fill', _chart.getColor)
+      .attr('transform', _locator)
+      .attr('d', _symbol);
+
+    dc.transition(symbols.exit(), _chart.transitionDuration())
+      .attr('opacity', 0).remove();
+  };
+
+  _chart.getColor = function (d, i) {
+    return 'red';
+  };
+
+  return _chart
+}
+
+var dataGrouped;
+
+var numRecordsFormat = function () {
   var numRecordsFormatD3 = d3.format('.2s');
-  return function(num) {
+  return function (num) {
     if (num >= 1000) {
       return numRecordsFormatD3(num);
     } else {
@@ -14,104 +95,139 @@ var numRecordsFormat = function() {
   };
 }();
 
-function readFromCSV() {
-  d3.csv('data.csv', function(data) {
-    data.forEach(function(d) {
-      d.y = +d.y;
-      d.x_low = +d.x_low;
-      d.x_high = +d.x_high;
+function asyncFetch(xhr) {
+  return new Promise(function (resolve, reject, onCancel) {
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve();
+      } else {
+        reject(new ServerError());
+      }
+    };
+    xhr.onerror = reject;
+    xhr.send(null);
+
+    onCancel(function () {
+      xhr.abort();
     })
-
-    startVis(data);
-  })
+  });
 }
 
-function readFromBinary() {
-  var req = new XMLHttpRequest()
-  req.open('GET', 'data.bin', true)
-  req.responseType = 'arraybuffer';
-
-  req.onload = function(event) {
-    var data = decodeBinaryFormat(req.response);
-    startVis(data)
-  }
-  req.send(null)
+function asyncFetchJSON(path) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', path, true);
+  return asyncFetch(xhr)
+    .then(function () {
+      return JSON.parse(xhr.responseText)
+    })
 }
 
-function decodeBinaryFormat(buf) {
-  var records = []
+function asyncFetchLineDelimited(path) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', path, true);
+  return asyncFetch(xhr)
+    .then(function () {
+      return xhr.responseText.split('\n')
+    })
+}
+
+function asyncFetchBinary(path) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', path, true);
+  xhr.responseType = 'arraybuffer';
+  return asyncFetch(xhr)
+    .then(function () {
+      return xhr.response;
+    })
+}
+
+function decodeRecords(buf, strings) {
+  var records = [];
   var dv = new DataView(buf);
   var pos = 0;
 
-  function readSize() {
-    var ret = dv.getUint32(pos, true)
+  function readUint8() {
+    var ret = dv.getUint8(pos);
+    pos += 1;
+    return ret;
+  }
+
+  function readVarint() {
+    var piece = readUint8();
+    if (piece <= 0x7f) {
+      return piece;
+    } else {
+      return (readVarint() << 7) | (piece & 0x7f);
+    }
+  }
+
+  function readUint32() {
+    var ret = dv.getUint32(pos, true);
     pos += 4;
     return ret;
   }
+
+  var readSize = readVarint;
+
   function readFloat() {
-    var ret = dv.getFloat32(pos, true)
+    var ret = dv.getFloat32(pos, true);
     pos += 4;
     return ret;
   }
+
   function readString() {
     var length = readSize();
-    var stringBinary = new Uint8Array(dv.buffer, pos, length)
+    var stringBinary = new Uint8Array(dv.buffer, pos, length);
     pos += length;
     return Utf8ArrayToStr(stringBinary);
   }
 
-  while (pos < dv.byteLength) {
-    var group = {}
-    group.cmenergies = readFloat()
-    group.reaction = readString()
-    group.observables = readString()
-    group.var_x = readString()
-    group.var_y = readString()
+  function readList(itemFn) {
+    var length = readSize();
+    var ret = []
+    for (var i = 0; i < length; i++) {
+      ret.push(itemFn());
+    }
+    return ret;
+  }
 
-    var numRecords = readSize()
+  function readErrors() {
+    return readList(function readError() {
+      var errorLabelId = readVarint();
+      var plus = readFloat();
+      var minus = readFloat();
+
+      var errorLabel = strings[errorLabelId];
+      assert(errorLabel !== undefined);
+
+      return {plus: plus, minus: minus, errorLabel: errorLabel};
+    })
+  }
+
+  while (pos < dv.byteLength) {
+    var group = {};
+    group.inspire_record = readVarint();
+    group.cmenergies = readFloat();
+    group.reaction = readString();
+    group.observables = readString();
+    group.var_y = readString();
+
+    var numRecords = readSize();
     for (var i = 0; i < numRecords; i++) {
-      var record = _.clone(group)
-      record.x_low = readFloat()
-      record.x_high = readFloat()
-      record.y = readFloat()
+      var record = _.clone(group);
+      record.x_low = readFloat();
+      record.x_high = readFloat();
+      record.x_center = (record.x_high + record.x_low) / 2;
+      record.y = readFloat();
+      record.errors = readErrors();
       records.push(record)
     }
   }
   return records;
 }
-function startVis(data) {
-  // group by xVar
-  dataGrouped = _.groupBy(data, function(d,i) {
-    return d.var_x;
-  })
-  // independent variables sorted by more to less elements
-  var indepVars = _.sortBy(_.keys(dataGrouped), function(d,i) {
-    return -dataGrouped[d].length;
-  })
-
-  $('#indepVarSelect')
-    .html(
-      _.map(indepVars, function(d,i) {
-        var numberRecords = dataGrouped[d].length;
-        return $('<option/>', {
-          value: d,
-          text: d + ' [' + numRecordsFormat(numberRecords) + ' records]'
-        });
-      })
-    )
-    .on('change', function(ev) {
-      updateVarXChooser()
-    })
-
-  updateVarXChooser()
-}
-
-function updateVarXChooser() {
-  showGraphsByVarX($('#indepVarSelect').val())
-}
 
 function showGraphsByVarX(var_x) {
-  var data = dataGrouped[var_x]
+  var data = dataGrouped[var_x];
   showGraphs(data, var_x)
 }
 
@@ -120,7 +236,7 @@ function rowChartLabels(chart, xLabel, yLabel) {
     .append('text')
     .attr('class', 'x-axis-label')
     .attr("text-anchor", "middle")
-    .attr("x", chart.width()/2)
+    .attr("x", chart.width() / 2)
     .attr("y", chart.height())
     .text(xLabel);
 
@@ -136,25 +252,21 @@ function rowChartLabels(chart, xLabel, yLabel) {
 
 }
 
-function mean_x(d) {
-  return (d.x_low + d.x_high) / 2;
-}
-
 function plotVariable(ndx, data, var_x, var_y, minX, maxX, yVars) {
-  var dimension = ndx.dimension(function(d,i) {
-    var ret = [mean_x(d), d.y]
-    ret.var_y = d.var_y
+  var dimension = ndx.dimension(function (d, i) {
+    var ret = [d.x_center, d.y];
+    ret.var_y = d.var_y;
     return ret;
-  })
+  });
 
-  var newDiv = $('<div/>')
-  var chart = dc.scatterPlot(newDiv[0])
-  $('#variable-charts').append(newDiv)
+  var newDiv = $('<div/>');
+  var chart = customScatterPlot(newDiv[0]);
+  $('#variable-charts').append(newDiv);
   chart
     .width(300)
     .height(300)
-    .data(function(d) {
-      return _.filter(d.all(), function(d,i) {
+    .data(function (d) {
+      return _.filter(d.all(), function (d, i) {
         return d.key.var_y == var_y;
       });
     })
@@ -162,16 +274,16 @@ function plotVariable(ndx, data, var_x, var_y, minX, maxX, yVars) {
     .dimension(dimension)
     .group(dimension.group())
     .x(d3.scale.pow().exponent(.5).domain([minX, maxX]))
- // .y(d3.scale.pow().exponent(.5).domain([chart.yAxisMin(), chart.yAxisMax()]))
+    // .y(d3.scale.pow().exponent(.5).domain([chart.yAxisMin(), chart.yAxisMax()]))
     .margins({top: 10, right: 50, bottom: 30, left: 42})
     .yAxisLabel(var_y)
     .xAxisLabel(var_x)
-    .brushOn(true)
+    .brushOn(true);
 
   chart.yAxis()
-    .tickFormat(d3.format(".2s"))
+    .tickFormat(d3.format(".2s"));
 
-  chart.render()
+  chart.render();
   window.chart = chart
 }
 
@@ -180,41 +292,38 @@ function showGraphs(data, var_x) {
   var ndx = crossfilter(data);
   var all = ndx.groupAll();
 
-  var allVarsChart = dc.barChart('#all-vars-chart')
-  var varDistributionChart = dc.rowChart('#variable-distribution-chart')
-  var numberRecords = dc.numberDisplay('#number-records')
-  var reactionsChart = dc.rowChart('#reactions-chart')
-  var observablesChart = dc.rowChart('#observables-chart')
+  var allVarsChart = dc.barChart('#all-vars-chart');
+  var varDistributionChart = dc.rowChart('#variable-distribution-chart');
+  var numberRecords = dc.numberDisplay('#number-records');
+  var reactionsChart = dc.rowChart('#reactions-chart');
+  var observablesChart = dc.rowChart('#observables-chart');
 
-  var xValues = ndx.dimension(function(d,i) {
+  var xValues = ndx.dimension(function (d, i) {
     return (d.x_low + d.x_high) / 2;
   });
-  var yValues = ndx.dimension(function(d,i) {
-    return d.y;
-  });
-  var yVars = ndx.dimension(function(d,i) {
+  var yVars = ndx.dimension(function (d, i) {
     return d.var_y;
-  })
-  var reactions = ndx.dimension(function(d,i) {
+  });
+  var reactions = ndx.dimension(function (d, i) {
     return d.reaction;
-  })
-  var observables = ndx.dimension(function(d,i) {
+  });
+  var observables = ndx.dimension(function (d, i) {
     return d.observables;
-  })
-  var allCount = ndx.groupAll().reduce(function(p,v) {
+  });
+  var allCount = ndx.groupAll().reduce(function (p, v) {
     p.n++;
     return p;
-  }, function(p,v) {
+  }, function (p, v) {
     p.n--;
     return p;
-  }, function() {
+  }, function () {
     return {n: 0};
-  })
+  });
 
-  var minX = _.min(data, function(d,i) {
+  var minX = _.min(data, function (d, i) {
     return d.x_low;
   }).x_low;
-  var maxX = _.max(data, function(d,i) {
+  var maxX = _.max(data, function (d, i) {
     return d.x_high;
   }).x_high;
 
@@ -223,13 +332,13 @@ function showGraphs(data, var_x) {
     .height(250)
     .margins({top: 10, right: 50, bottom: 30, left: 40})
     .x(d3.scale.pow().exponent(.5).domain([minX, maxX]))
- //     .x(d3.scale.linear().domain([minX, maxX]))
+    //     .x(d3.scale.linear().domain([minX, maxX]))
     .dimension(xValues)
     .group(xValues.group().reduceCount())
     .gap(1)
     .xAxisLabel(var_x)
     .yAxisLabel('# of records')
-    .render()
+    .render();
 
   var yVarsGroup = yVars.group().reduceCount();
   varDistributionChart
@@ -238,7 +347,7 @@ function showGraphs(data, var_x) {
     .elasticX(true)
     .dimension(yVars)
     .group(yVarsGroup)
-    .render()
+    .render();
 
   reactionsChart
     .width(300)
@@ -246,7 +355,7 @@ function showGraphs(data, var_x) {
     .elasticX(true)
     .dimension(reactions)
     .group(reactions.group().reduceCount())
-    .render()
+    .render();
 
   observablesChart
     .width(300)
@@ -254,25 +363,91 @@ function showGraphs(data, var_x) {
     .elasticX(true)
     .dimension(observables)
     .group(observables.group().reduceCount())
-    .render()
+    .render();
 
-  rowChartLabels(reactionsChart, '# of records', 'Reactions')
-  rowChartLabels(varDistributionChart, '# of records', 'Dependent variables')
-  rowChartLabels(observablesChart, '# of records', 'Observables')
+  rowChartLabels(reactionsChart, '# of records', 'Reactions');
+  rowChartLabels(varDistributionChart, '# of records', 'Dependent variables');
+  rowChartLabels(observablesChart, '# of records', 'Observables');
 
   numberRecords
     .formatNumber(d3.format(".2s"))
     .group(allCount)
-    .valueAccessor(function(d) {
+    .valueAccessor(function (d) {
       return d.n;
     })
-    .render()
+    .render();
 
-  $('#variable-charts').empty()
-  yVarsGroup.top(10).forEach(function(d,i) {
-    var varY = d.key
+  $('#variable-charts').empty();
+  yVarsGroup.top(10).forEach(function (d, i) {
+    var varY = d.key;
     plotVariable(ndx, data, var_x, varY, minX, maxX, yVars)
   })
 }
 
-readFromBinary()
+function HepdataExplore(dataUrlPrefix) {
+  var obj = {};
+
+  obj.loadVariablePromise = Promise.resolve();
+
+  function run() {
+    return asyncFetchJSON(dataUrlPrefix + '/variables.json')
+      .then(function (doc) {
+        obj.indepVars = _(doc)
+          .map(function (value, key) {
+            value.name = key;
+            return value;
+          })
+          .sortBy(function (d) {
+            return -d.recordCount;
+          })
+          .value()
+
+        $('#indepVarSelect')
+          .html(
+            _.map(obj.indepVars, function (d, i) {
+              return $('<option/>', {
+                value: i,
+                text: d.name + ' [' + numRecordsFormat(d.recordCount) + ' records]'
+              });
+            })
+          )
+          .on('change', function (ev) {
+            var index = $(this).val();
+            varXChosen(obj.indepVars[index]);
+          })
+          .trigger('change');
+
+        return null;
+      })
+  }
+
+  function varXChosen(xVar) {
+    obj.loadVariablePromise.cancel();
+
+    $('#visualization').hide()
+    $('#visualization-loading').show()
+
+    var dir = dataUrlPrefix + '/' + xVar.dirName;
+    obj.loadVariablePromise = Promise.all([
+      asyncFetchLineDelimited(dir + '/strings.txt'),
+      asyncFetchBinary(dir + '/records.bin')
+    ]).then(function (result) {
+      var strings = result[0];
+      var buffer = result[1];
+
+      obj.records = decodeRecords(buffer, strings);
+
+      showGraphs(obj.records, xVar.name);
+
+      $('#visualization').show()
+      $('#visualization-loading').hide()
+    })
+  }
+
+  return {
+    run: run
+  }
+}
+
+new HepdataExplore('/data')
+  .run();
