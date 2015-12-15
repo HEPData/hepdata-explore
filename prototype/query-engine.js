@@ -469,5 +469,5 @@ function HepdataExplore(dataUrlPrefix) {
   }
 }
 
-new HepdataExplore('/data')
+new HepdataExplore('data')
   .run();
