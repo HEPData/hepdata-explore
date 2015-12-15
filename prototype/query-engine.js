@@ -75,8 +75,27 @@ function customScatterPlot(parent, chartGroup) {
       .attr('opacity', 0).remove();
   };
 
+  var colorScale = d3.scale.category10();
+  /*
+  TODO: compare with colorScale
+
+  var colors = colorScale.range();
+  var nextColorIndex = 0;
+  var keyToColor = {};
+  */
   _chart.getColor = function (d, i) {
-    return 'red';
+    var key = d.key.inspire_record;
+    return colorScale(d.key.inspire_record);
+
+    /* should do the same:
+
+    if (!(key in keyToColor)) {
+      keyToColor[key] = colors[nextColorIndex];
+      nextColorIndex = (nextColorIndex + 1) % colors.length;
+      console.log(key);
+    }
+    return keyToColor[key];
+    */
   };
 
   return _chart
@@ -256,6 +275,7 @@ function plotVariable(ndx, data, var_x, var_y, minX, maxX, yVars) {
   var dimension = ndx.dimension(function (d, i) {
     var ret = [d.x_center, d.y];
     ret.var_y = d.var_y;
+    ret.inspire_record = d.inspire_record;
     return ret;
   });
 
