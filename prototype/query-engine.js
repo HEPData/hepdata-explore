@@ -299,7 +299,7 @@ function showGraphs(data, var_x) {
   var observablesChart = dc.rowChart('#observables-chart');
 
   var xValues = ndx.dimension(function (d, i) {
-    return (d.x_low + d.x_high) / 2;
+    return d.x_center;
   });
   var yVars = ndx.dimension(function (d, i) {
     return d.var_y;
