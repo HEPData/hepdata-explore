@@ -482,9 +482,15 @@ function HepdataExplore(dataUrlPrefix) {
       var strings = result[0];
       var buffer = result[1];
 
+      var t0 = performance.now();
       obj.records = decodeRecords(buffer, strings);
+      var t1 = performance.now();
 
       showGraphs(obj.records, xVar.name);
+      var t2 = performance.now();
+
+      console.log("Data decoded in %.2f ms.", t1 - t0);
+      console.log("Data indexed in %.2f ms.", t2 - t1);
 
       $('#visualization').show()
       $('#visualization-loading').hide()
