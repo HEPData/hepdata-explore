@@ -362,6 +362,8 @@ function showGraphs(data, var_x) {
     .yAxisLabel('# of records')
     .render();
 
+  var plainColor = "#6BAED6";
+
   var yVarsGroup = yVars.group().reduceCount();
   varDistributionChart
     .width(300)
@@ -372,6 +374,7 @@ function showGraphs(data, var_x) {
     .ordering(function (d) {
       return -d.value;
     })
+    .ordinalColors([plainColor])
     .render();
 
   reactionsChart
@@ -383,6 +386,7 @@ function showGraphs(data, var_x) {
     .ordering(function (d) {
       return -d.value;
     })
+    .ordinalColors([plainColor])
     .render();
 
   observablesChart// TODO: remove? is it useful or not?
