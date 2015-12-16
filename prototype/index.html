@@ -1,52 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>HEPData - Data Query Engine</title>
-  <link rel="stylesheet" href="dc.css">
-  <link rel="stylesheet" href="app.css">
-  <script src="jquery-1.11.3.min.js"></script>
-  <script src="d3.js"></script>
-  <script src="d3-transform.min.js"></script>
-  <script src="crossfilter.js"></script>
-  <script src="dc.js"></script>
-  <script src="lodash.min.js"></script>
-  <script src="bluebird.js"></script>
-  <script src="utf.js"></script>
+    <meta charset="UTF-8">
+    <title>HEPData - Data Query Engine</title>
+    <link rel="stylesheet" href="dc.css">
+    <link rel="stylesheet" href="font-awesome-4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="jquery-1.11.3.min.js"></script>
+    <script src="d3.js"></script>
+    <script src="d3-transform.min.js"></script>
+    <script src="crossfilter.js"></script>
+    <script src="dc.js"></script>
+    <script src="lodash.min.js"></script>
+    <script src="bluebird.js"></script>
+    <script src="utf.js"></script>
 </head>
 <body>
-  <div class="privar-box">
-    <h2>Primary variable</h2>
-    <label>
-      <div>Select an independent variable you're interested in</div>
-      <select id="indepVarSelect" size="1">
-      </select>
-    </label>
-  </div>
 
-  <div id="visualization" style="display: none">
-    <div>
-      <span id="number-records"></span> records found.
+<div id="fake-header">
+    <img src="img/hepdata_logo.svg" alt="" height="54">
+</div>
+
+<div class="explore-topbar">
+    <h1 id="topbar-title">Data Query Engine</h1>
+    <div id="number-records-box">
+        <span id="number-records"></span> records found.
+    </div>
+</div>
+
+<div class="explore-body">
+
+    <div class="sidebar">
+        <h2>Primary variable</h2>
+        <label>
+            <div>Select an independent variable you're interested in</div>
+            <select id="indepVarSelect" size="1">
+            </select>
+        </label>
+
+        <h2>Dependent variables</h2>
+        <div id="variable-distribution-chart"></div>
+        <div id="reactions-chart"></div>
     </div>
 
-    <div id="all-vars-chart"></div>
+    <div class="visualization-box">
+        <div id="visualization" style="display: none">
 
-    <div id="cmenergies-chart"></div>
 
-    <div id="reactions-chart"></div>
+            <div id="all-vars-chart"></div>
 
-    <div id="variable-distribution-chart"></div>
+            <div id="cmenergies-chart"></div>
 
-    <div id="observables-chart"></div>
 
-    <div id="variable-charts">
 
+            <div id="variable-charts">
+
+            </div>
+        </div>
+        <div id="visualization-loading" style="display: none">
+            <div class="loading-box">
+                <h2>Please wait...</h2>
+                <div><i id="loading-downloading" class="fa fa-arrow-right loading-arrow"></i> Downloading data</div>
+                <div><i id="loading-processing" class="fa fa-arrow-right loading-arrow"></i> Processing data</div>
+            </div>
+        </div>
     </div>
-  </div>
-  <div id="visualization-loading" style="display: none">
-    Loading data...
-  </div>
 
-  <script src="query-engine.js"></script>
+</div>
+
+<div id="fake-footer">HEPData Explore</div>
+
+<script src="query-engine.js"></script>
 </body>
 </html>

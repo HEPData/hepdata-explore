@@ -77,25 +77,25 @@ function customScatterPlot(parent, chartGroup) {
 
   var colorScale = d3.scale.category10();
   /*
-  TODO: compare with colorScale
+   TODO: compare with colorScale
 
-  var colors = colorScale.range();
-  var nextColorIndex = 0;
-  var keyToColor = {};
-  */
+   var colors = colorScale.range();
+   var nextColorIndex = 0;
+   var keyToColor = {};
+   */
   _chart.getColor = function (d, i) {
     var key = d.key.inspire_record + '-' + d.key.table_num;
     return colorScale(key);
 
     /* should do the same:
 
-    if (!(key in keyToColor)) {
-      keyToColor[key] = colors[nextColorIndex];
-      nextColorIndex = (nextColorIndex + 1) % colors.length;
-      console.log(key);
-    }
-    return keyToColor[key];
-    */
+     if (!(key in keyToColor)) {
+     keyToColor[key] = colors[nextColorIndex];
+     nextColorIndex = (nextColorIndex + 1) % colors.length;
+     console.log(key);
+     }
+     return keyToColor[key];
+     */
   };
 
   return _chart
@@ -351,7 +351,7 @@ function showGraphs(data, var_x) {
 
   allVarsChart
     .width(900)
-    .height(250)
+    .height(130)
     .margins({top: 10, right: 50, bottom: 30, left: 40})
     .x(d3.scale.pow().exponent(.5).domain([minX, maxX]))
     //     .x(d3.scale.linear().domain([minX, maxX]))
@@ -365,7 +365,7 @@ function showGraphs(data, var_x) {
   var yVarsGroup = yVars.group().reduceCount();
   varDistributionChart
     .width(300)
-    .height(400)
+    .height(300)
     .elasticX(true)
     .dimension(yVars)
     .group(yVarsGroup)
@@ -373,7 +373,7 @@ function showGraphs(data, var_x) {
 
   reactionsChart
     .width(300)
-    .height(400)
+    .height(200)
     .elasticX(true)
     .dimension(reactions)
     .group(reactions.group().reduceCount())
@@ -404,6 +404,12 @@ function showGraphs(data, var_x) {
     var varY = d.key;
     plotVariable(ndx, data, var_x, varY, minX, maxX, yVars)
   })
+}
+
+function screenUpdated() {
+  return new Promise(function(resolve, reject) {
+    window.requestAnimationFrame(resolve)
+  });
 }
 
 function HepdataExplore(dataUrlPrefix) {
@@ -449,11 +455,21 @@ function HepdataExplore(dataUrlPrefix) {
     $('#visualization').hide()
     $('#visualization-loading').show()
 
+    $('#loading-downloading').css({visibility: 'visible'});
+    $('#loading-processing').css({visibility: 'hidden'});
+
     var dir = dataUrlPrefix + '/' + xVar.dirName;
     obj.loadVariablePromise = Promise.all([
       asyncFetchLineDelimited(dir + '/strings.txt'),
       asyncFetchBinary(dir + '/records.bin')
     ]).then(function (result) {
+      // Update the UI before proceeding with heavy computation
+      $('#loading-downloading').css({visibility: 'hidden'});
+      $('#loading-processing').css({visibility: 'visible'});
+      return screenUpdated().then(function() {
+        return result;
+      });
+    }).then(function (result) {
       var strings = result[0];
       var buffer = result[1];
 
@@ -471,5 +487,8 @@ function HepdataExplore(dataUrlPrefix) {
   }
 }
 
-new HepdataExplore('data')
-  .run();
+setTimeout(function () {
+  new HepdataExplore('data')
+    .run();
+}, 0);
+
