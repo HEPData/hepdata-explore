@@ -413,6 +413,10 @@ function showGraphs(data, var_x) {
     var varY = d.key;
     plotVariable(ndx, data, var_x, varY, minX, maxX, yVars)
   })
+
+  return {
+    yVarsDimension: yVars
+  };
 }
 
 function screenUpdated() {
@@ -425,6 +429,7 @@ function HepdataExplore(dataUrlPrefix) {
   var obj = {};
 
   obj.loadVariablePromise = Promise.resolve();
+  obj.yVarsDimension = null;
 
   function run() {
     return asyncFetchJSON(dataUrlPrefix + '/variables.json')
@@ -453,6 +458,13 @@ function HepdataExplore(dataUrlPrefix) {
             varXChosen(obj.indepVars[index]);
           })
           .trigger('change');
+
+        $('#download-yaml').on('click', function(ev) {
+          ev.preventDefault();
+          if (obj.yVarsDimension) {
+            downloadSelectionAsYaml(obj.yVarsDimension);
+          }
+        });
 
         return null;
       })
@@ -486,15 +498,23 @@ function HepdataExplore(dataUrlPrefix) {
       obj.records = decodeRecords(buffer, strings);
       var t1 = performance.now();
 
-      showGraphs(obj.records, xVar.name);
+      var ret = showGraphs(obj.records, xVar.name);
       var t2 = performance.now();
-
       console.log("Data decoded in %.2f ms.", t1 - t0);
+
       console.log("Data indexed in %.2f ms.", t2 - t1);
+
+      obj.yVarsDimension = ret.yVarsDimension;
 
       $('#visualization').show()
       $('#visualization-loading').hide()
     })
+  }
+
+  function downloadSelectionAsYaml(dimension) {
+    var content = jsyaml.dump(dimension.top(Infinity));
+    var blob = new Blob([content], {type: "text/x-yaml;charset=utf-8"});
+    saveAs(blob, "hepdata_selection.yaml");
   }
 
   return {

@@ -5,6 +5,7 @@
     <title>HEPData - Data Query Engine</title>
     <link rel="stylesheet" href="dc.css">
     <link rel="stylesheet" href="font-awesome-4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="invenio.css">
     <link rel="stylesheet" href="app.css">
     <script src="jquery-1.11.3.min.js"></script>
     <script src="d3.js"></script>
@@ -14,6 +15,8 @@
     <script src="lodash.min.js"></script>
     <script src="bluebird.js"></script>
     <script src="utf.js"></script>
+    <script src="js-yaml.js"></script>
+    <script src="FileSaver.min.js"></script>
 </head>
 <body>
 
@@ -21,11 +24,16 @@
     <img src="img/hepdata_logo.svg" alt="" height="54">
 </div>
 
-<div class="explore-topbar">
-    <h1 id="topbar-title">Data Query Engine</h1>
-    <div id="number-records-box">
-        <span id="number-records"></span> records found.
-    </div>
+<div class="hep_breadcrumbs">
+    <ul>
+        <li id="topbar-title">Data Query Engine</li>
+        <li id="number-records-box">
+            <span id="number-records"></span> records found.
+        </li>
+        <li class="pull-right">
+            <a id="download-yaml" class="btn btn-primary" href="#">Download selection (YAML)</a>
+        </li>
+    </ul>
 </div>
 
 <div class="explore-body">
@@ -50,7 +58,6 @@
             <div id="all-vars-chart"></div>
 
             <div id="cmenergies-chart"></div>
-
 
 
             <div id="variable-charts">
