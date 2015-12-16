@@ -1,2 +1,3 @@
 #!/bin/bash
-exec rsync -Pr ./ ntrrgc@rufian.eu:/srv/www/ntrrgc.rufian.eu/hepdata-explore/
+chmod -R o+r .
+exec rsync -Ppr ./ ntrrgc@rufian.eu:/srv/www/ntrrgc.rufian.eu/hepdata-explore/
