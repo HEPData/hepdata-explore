@@ -369,6 +369,9 @@ function showGraphs(data, var_x) {
     .elasticX(true)
     .dimension(yVars)
     .group(yVarsGroup)
+    .ordering(function (d) {
+      return -d.value;
+    })
     .render();
 
   reactionsChart
@@ -377,14 +380,20 @@ function showGraphs(data, var_x) {
     .elasticX(true)
     .dimension(reactions)
     .group(reactions.group().reduceCount())
+    .ordering(function (d) {
+      return -d.value;
+    })
     .render();
 
-  observablesChart
+  observablesChart// TODO: remove? is it useful or not?
     .width(300)
     .height(400)
     .elasticX(true)
     .dimension(observables)
     .group(observables.group().reduceCount())
+    .ordering(function (d) {
+      return -d.value;
+    })
     .render();
 
   rowChartLabels(reactionsChart, '# of records', 'Reactions');
