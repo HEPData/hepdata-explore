@@ -401,7 +401,7 @@ function showGraphs(data, var_x) {
   rowChartLabels(observablesChart, '# of records', 'Observables');
 
   numberRecords
-    .formatNumber(d3.format(".2s"))
+    .formatNumber(numRecordsFormat)
     .group(allCount)
     .valueAccessor(function (d) {
       return d.n;
