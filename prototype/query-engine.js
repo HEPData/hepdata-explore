@@ -109,7 +109,7 @@ var numRecordsFormat = function () {
     if (num >= 1000) {
       return numRecordsFormatD3(num);
     } else {
-      return num;
+      return num.toFixed(0);
     }
   };
 }();
