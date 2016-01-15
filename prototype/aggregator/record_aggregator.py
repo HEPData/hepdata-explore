@@ -20,6 +20,30 @@ except ImportError:
     from yaml import SafeLoader
 
 
+def clean_cmenergies(cmenergies):
+    if isinstance(cmenergies, int):
+        cmenergies = float(cmenergies)
+    if isinstance(cmenergies, float):
+        return [cmenergies, cmenergies] # only one data point
+    elif isinstance(cmenergies, str):
+        if cmenergies.endswith(' GeV'):
+            cmenergies = cmenergies.replace(' GeV', '')
+
+        if '-' in cmenergies:
+            # cmenergies is a range
+            cmenergies = [
+                float(n)
+                for n in cmenergies.split('-')
+            ]
+            return cmenergies
+        else:
+            # cmenergies is just a data point
+            cmenergies = [float(cmenergies), float(cmenergies)]
+            return cmenergies
+    else:
+        raise RuntimeError('Invalid type for cmenergies: %s' % type(cmenergies))
+
+
 class RecordAggregator(object):
     def __init__(self, root_path):
         self.root_path = root_path
@@ -99,7 +123,7 @@ class RecordAggregator(object):
                 var_y = dep_var['header']['name']
 
                 try:
-                    cmenergies = float(find_qualifier(dep_var, 'SQRT(S)/NUCLEON'))
+                    cmenergies = find_qualifier(dep_var, 'SQRT(S)/NUCLEON')
                 except KeyError:
                     # Use keyword data instead
                     try:
@@ -111,10 +135,7 @@ class RecordAggregator(object):
                         # Last resort...
                         cmenergies = 0
 
-                    if isinstance(cmenergies, str):
-                        print("Warning: Invalid cmenergies: (%s, %s) %s" %
-                              (dcontext.submission, dcontext.table, cmenergies))
-                        cmenergies = 0
+                cmenergies = clean_cmenergies(cmenergies)
 
                 try:
                     reaction = find_qualifier(dep_var, 'RE', allow_many=True)[0]

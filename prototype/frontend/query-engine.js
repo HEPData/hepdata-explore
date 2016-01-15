@@ -227,7 +227,8 @@ function decodeRecords(buf, strings) {
     var group = {};
     group.inspire_record = readVarint();
     group.table_num = readVarint();
-    group.cmenergies = readFloat();
+    group.cmenergies1 = readFloat();
+    group.cmenergies2 = readFloat();
     group.reaction = readString();
     group.observables = readString();
     group.var_y = readString();

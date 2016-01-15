@@ -44,7 +44,7 @@ class RecordWriter(object):
 
         t.write(self.fp_records, varint_format(metadata.inspire_record))
         t.write(self.fp_records, varint_format(metadata.table_num))
-        t.write(self.fp_records, struct.pack('<f', metadata.cmenergies))
+        t.write(self.fp_records, struct.pack('<ff', *metadata.cmenergies))
         t.write(self.fp_records, string_format(metadata.reaction))
         t.write(self.fp_records, string_format(metadata.observables))
         t.write(self.fp_records, string_format(metadata.var_y))
