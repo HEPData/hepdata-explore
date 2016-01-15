@@ -1,4 +1,5 @@
 from aggregator.shared_dcontext import dcontext
+from aggregator.transactions import get_current_transaction
 
 
 class StringDictionary(object):
@@ -23,7 +24,8 @@ class StringDictionary(object):
         self.load_existing_strings()
 
     def close(self):
-        self.fp.close()
+        t = get_current_transaction()
+        t.close(self.fp)
 
     def load_existing_strings(self):
         dcontext.reading_file = self.path
@@ -43,7 +45,8 @@ class StringDictionary(object):
         self.dict_id_to_str[str_id] = string
         self.dict_str_to_id[string] = str_id
         self.counter += 1
-        self.fp.write(string + '\n')
+        t = get_current_transaction()
+        t.write(self.fp, string + '\n')
 
         return str_id
 

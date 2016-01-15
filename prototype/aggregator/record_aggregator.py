@@ -8,6 +8,8 @@ from aggregator.harmonizing import coerce_list, find_keyword, find_qualifier, \
 from aggregator.lru_cache import LRUCache
 from aggregator.record_types import TableGroupMetadata, Record
 from aggregator.record_writer import RecordWriter
+from aggregator.string_set_store import StringSetStore
+from aggregator.transactions import Transaction, in_transaction
 from aggregator.variable_index import VariableIndex
 from aggregator.shared_dcontext import dcontext
 
@@ -25,6 +27,7 @@ class RecordAggregator(object):
         # Index RecordWriter's by dependent variable name
         self.record_writers_cache = LRUCache(self.construct_record_writer, capacity=100)
         self.var_index = VariableIndex(root_path, 'variables.json')
+        self.existing_submissions = StringSetStore(os.path.join(root_path, 'submissions.txt'))
 
     def construct_record_writer(self, dependent_variable):
         directory = self.var_index.get_var_directory(dependent_variable)
@@ -36,9 +39,23 @@ class RecordAggregator(object):
             submission = list(yaml.load_all(f, Loader=SafeLoader))
 
         header = submission[0]
+        submission_id = 'ins%d' % find_inspire_record(header)
         tables = submission[1:]
-        for table in tables:
-            self.process_table(path, header, table)
+
+        if submission_id not in self.existing_submissions:
+            # We use a transaction so all writes are only performed when the block with exits.
+            # This way a submission is entirely stored or not stored at all, but never is stored partially in case a
+            # format error occurs meanwhile (e.g. in Table2 after Table1 has been written).
+            with in_transaction():
+                for table in tables:
+                    self.process_table(path, header, table)
+
+                # Add the submission to existing_submissions so it is not processed next time
+                self.existing_submissions.add_string(submission_id)
+
+            # Exiting the with block commits the transaction
+        else:
+            print('Warning: Skipping already existing submission %s (%s)' % (submission_id, path))
 
     def process_table(self, submission_path, submission_header, table):
         """
@@ -146,5 +163,5 @@ class RecordAggregator(object):
         dcontext.table = None
 
     def get_record_writer(self, dependent_variable):
-        assert(isinstance(dependent_variable, str))
+        assert (isinstance(dependent_variable, str))
         return self.record_writers_cache.get(dependent_variable)

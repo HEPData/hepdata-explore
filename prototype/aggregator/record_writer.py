@@ -4,6 +4,7 @@ import struct
 from aggregator.string_dictionary import StringDictionary
 from aggregator.binary_formats import size_format, string_format, varint_format
 from aggregator.record_types import Record
+from aggregator.transactions import get_current_transaction
 
 
 def error_to_float(value, error_value):
@@ -28,7 +29,8 @@ class RecordWriter(object):
 
     def close(self):
         assert(not self.closed)
-        self.fp_records.close()
+        t = get_current_transaction()
+        t.close(self.fp_records)
         self.string_dict.close()
         self.closed = True
 
@@ -38,14 +40,16 @@ class RecordWriter(object):
             self.write_record(record)
 
     def write_group_header(self, metadata, num_records):
-        self.fp_records.write(varint_format(metadata.inspire_record))
-        self.fp_records.write(varint_format(metadata.table_num))
-        self.fp_records.write(struct.pack('<f', metadata.cmenergies))
-        self.fp_records.write(string_format(metadata.reaction))
-        self.fp_records.write(string_format(metadata.observables))
-        self.fp_records.write(string_format(metadata.var_y))
+        t = get_current_transaction()
 
-        self.fp_records.write(size_format(num_records))
+        t.write(self.fp_records, varint_format(metadata.inspire_record))
+        t.write(self.fp_records, varint_format(metadata.table_num))
+        t.write(self.fp_records, struct.pack('<f', metadata.cmenergies))
+        t.write(self.fp_records, string_format(metadata.reaction))
+        t.write(self.fp_records, string_format(metadata.observables))
+        t.write(self.fp_records, string_format(metadata.var_y))
+
+        t.write(self.fp_records, size_format(num_records))
 
     def write_record(self, record):
         assert isinstance(record, Record)
