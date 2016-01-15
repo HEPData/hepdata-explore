@@ -226,18 +226,25 @@ function decodeRecords(buf, strings) {
   }
 
   while (pos < dv.byteLength) {
-    var group = {};
-    group.inspire_record = readVarint();
-    group.table_num = readVarint();
-    group.cmenergies1 = readFloat();
-    group.cmenergies2 = readFloat();
-    group.reaction = readString();
-    group.observables = readString();
-    group.var_y = readString();
+    var inspire_record = readVarint();
+    var table_num = readVarint();
+    var cmenergies1 = readFloat();
+    var cmenergies2 = readFloat();
+    var reaction = readString();
+    var observables = readString();
+    var var_y = readString();
 
     var numRecords = readSize();
     for (var i = 0; i < numRecords; i++) {
-      var record = _.clone(group);
+      var record = {
+        inspire_record: inspire_record,
+        table_num: table_num,
+        cmenergies1: cmenergies1,
+        cmenergies2: cmenergies2,
+        reaction: reaction,
+        observables: observables,
+        var_y: var_y
+      };
       record.x_low = readFloat();
       record.x_high = readFloat();
       record.x_center = (record.x_high + record.x_low) / 2;
