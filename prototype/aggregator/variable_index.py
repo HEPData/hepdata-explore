@@ -33,10 +33,23 @@ class VariableIndex(object):
         """Returns the path for a variable directory data storage.
         :param var: The variable name.
         """
+
+        # If a directory has been already set for that variable in the index, use it.
         if var in self.index:
             return self._dir_full_path(self.index[var]['dirName'])
         else:
-            dir_name = self.safe_filename(var)
+            # Assign a new directory for this variable...
+
+            # Calculate a short hash
+            hash = short_hash(var)
+
+            # Sanitize the variable name
+            dir_name = self.safe_filename(var, hash)
+
+            # Hashify the directory so there are not directories with thousands of entries, which would render
+            # filesystems slow and unresponsive
+            dir_name = self.hashify(dir_name, hash)
+
             self.index[var] = {
                 "dirName": dir_name,
                 "recordCount": 0,
@@ -44,7 +57,7 @@ class VariableIndex(object):
             self.update_index()
 
             full_path = self._dir_full_path(dir_name)
-            os.mkdir(full_path)
+            os.makedirs(full_path)
             return full_path
 
     def update_record_count(self, var, num_new_records):
@@ -52,7 +65,7 @@ class VariableIndex(object):
         self.update_index()
 
     @staticmethod
-    def safe_filename(dependent_variable):
+    def safe_filename(dependent_variable, hash):
         """Return a directory name without too many strange characters,
         suitable to use for a dependent variable."""
         keep_characters = (' ', '.', '_')
@@ -60,4 +73,8 @@ class VariableIndex(object):
                                 if c.isalnum() or c in keep_characters)
 
         # Add a hash, just in case some variables have very similar names
-        return safe_var_name + ' - ' + short_hash(dependent_variable)
+        return safe_var_name + ' - ' + hash
+
+    @staticmethod
+    def hashify(dir_name, hash):
+        return os.path.join(hash[-2:], dir_name)
