@@ -13,7 +13,10 @@ def error_to_float(value, error_value):
         percentage = float(error_value[:-1])
         return value * percentage
     else:
-        raise RuntimeError('Invalid error: ' + error_value)
+        try:
+            return float(error_value)
+        except:
+            raise RuntimeError('Invalid error: ' + error_value)
 
 
 class RecordWriter(object):
