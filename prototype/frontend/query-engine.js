@@ -52,6 +52,7 @@ function customScatterPlot(parent, chartGroup) {
   });
 
   _chart.plotData = function () {
+    return;
     var symbols = _chart.chartBodyG().selectAll('path.symbol')
       .data(_chart.data());
 
@@ -62,6 +63,7 @@ function customScatterPlot(parent, chartGroup) {
       .attr('opacity', 0)
       .attr('fill', _chart.getColor)
       .attr('transform', _locator);
+
 
     dc.transition(symbols, _chart.transitionDuration())
       .attr('opacity', function (d) {
@@ -321,18 +323,18 @@ function showGraphs(data, var_x) {
   var reactionsChart = dc.rowChart('#reactions-chart');
   var observablesChart = dc.rowChart('#observables-chart');
 
-  var xValues = ndx.dimension(function (d, i) {
-    return d.x_center;
-  });
-  var yVars = ndx.dimension(function (d, i) {
-    return d.var_y;
-  });
-  var reactions = ndx.dimension(function (d, i) {
-    return d.reaction;
-  });
-  var observables = ndx.dimension(function (d, i) {
-    return d.observables;
-  });
+  //var xValues = ndx.dimension(function (d, i) {
+  //  return d.x_center;
+  //});
+  //var yVars = ndx.dimension(function (d, i) {
+  //  return d.var_y;
+  //});
+  //var reactions = ndx.dimension(function (d, i) {
+  //  return d.reaction;
+  //});
+  //var observables = ndx.dimension(function (d, i) {
+  //  return d.observables;
+  //});
   var allCount = ndx.groupAll().reduce(function (p, v) {
     p.n++;
     return p;
@@ -343,67 +345,67 @@ function showGraphs(data, var_x) {
     return {n: 0};
   });
 
-  var minX = _.min(data, function (d, i) {
-    return d.x_low;
-  }).x_low;
-  var maxX = _.max(data, function (d, i) {
-    return d.x_high;
-  }).x_high;
+  //var minX = _.min(data, function (d, i) {
+  //  return d.x_low;
+  //}).x_low;
+  //var maxX = _.max(data, function (d, i) {
+  //  return d.x_high;
+  //}).x_high;
 
-  allVarsChart
-    .width(900)
-    .height(130)
-    .margins({top: 10, right: 50, bottom: 30, left: 40})
-    .x(d3.scale.pow().exponent(.5).domain([minX, maxX]))
-    //     .x(d3.scale.linear().domain([minX, maxX]))
-    .dimension(xValues)
-    .group(xValues.group().reduceCount())
-    .gap(1)
-    .xAxisLabel(var_x)
-    .yAxisLabel('# of records')
-    .render();
+  //allVarsChart
+  //  .width(900)
+  //  .height(130)
+  //  .margins({top: 10, right: 50, bottom: 30, left: 40})
+  //  .x(d3.scale.pow().exponent(.5).domain([minX, maxX]))
+  //  //     .x(d3.scale.linear().domain([minX, maxX]))
+  //  .dimension(xValues)
+  //  .group(xValues.group().reduceCount())
+  //  .gap(1)
+  //  .xAxisLabel(var_x)
+  //  .yAxisLabel('# of records')
+  //  //.render();
+  //
+  //var plainColor = "#6BAED6";
+  //
+  //var yVarsGroup = yVars.group().reduceCount();
+  //varDistributionChart
+  //  .width(300)
+  //  .height(300)
+  //  .elasticX(true)
+  //  .dimension(yVars)
+  //  .group(yVarsGroup)
+  //  .ordering(function (d) {
+  //    return -d.value;
+  //  })
+  //  .ordinalColors([plainColor])
+  //  //.render();
+  //
+  //reactionsChart
+  //  .width(300)
+  //  .height(200)
+  //  .elasticX(true)
+  //  .dimension(reactions)
+  //  .group(reactions.group().reduceCount())
+  //  .ordering(function (d) {
+  //    return -d.value;
+  //  })
+  //  .ordinalColors([plainColor])
+  //  //.render();
+  //
+  //observablesChart// TODO: remove? is it useful or not?
+  //  .width(300)
+  //  .height(400)
+  //  .elasticX(true)
+  //  .dimension(observables)
+  //  .group(observables.group().reduceCount())
+  //  .ordering(function (d) {
+  //    return -d.value;
+  //  })
+  //  //.render();
 
-  var plainColor = "#6BAED6";
-
-  var yVarsGroup = yVars.group().reduceCount();
-  varDistributionChart
-    .width(300)
-    .height(300)
-    .elasticX(true)
-    .dimension(yVars)
-    .group(yVarsGroup)
-    .ordering(function (d) {
-      return -d.value;
-    })
-    .ordinalColors([plainColor])
-    .render();
-
-  reactionsChart
-    .width(300)
-    .height(200)
-    .elasticX(true)
-    .dimension(reactions)
-    .group(reactions.group().reduceCount())
-    .ordering(function (d) {
-      return -d.value;
-    })
-    .ordinalColors([plainColor])
-    .render();
-
-  observablesChart// TODO: remove? is it useful or not?
-    .width(300)
-    .height(400)
-    .elasticX(true)
-    .dimension(observables)
-    .group(observables.group().reduceCount())
-    .ordering(function (d) {
-      return -d.value;
-    })
-    .render();
-
-  rowChartLabels(reactionsChart, '# of records', 'Reactions');
-  rowChartLabels(varDistributionChart, '# of records', 'Dependent variables');
-  rowChartLabels(observablesChart, '# of records', 'Observables');
+  //rowChartLabels(reactionsChart, '# of records', 'Reactions');
+  //rowChartLabels(varDistributionChart, '# of records', 'Dependent variables');
+  //rowChartLabels(observablesChart, '# of records', 'Observables');
 
   numberRecords
     .formatNumber(numRecordsFormat)
@@ -413,11 +415,12 @@ function showGraphs(data, var_x) {
     })
     .render();
 
-  $('#variable-charts').empty();
-  yVarsGroup.top(10).forEach(function (d, i) {
-    var varY = d.key;
-    plotVariable(ndx, data, var_x, varY, minX, maxX, yVars)
-  })
+  //$('#variable-charts').empty();
+  //yVarsGroup.top(1).forEach(function (d, i) {
+  //  var varY = d.key;
+  //  plotVariable(ndx, data, var_x, varY, minX, maxX, yVars)
+  //})
+  var yVars = null;
 
   return {
     yVarsDimension: yVars
