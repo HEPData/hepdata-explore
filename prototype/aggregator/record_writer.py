@@ -28,7 +28,7 @@ class RecordWriter(object):
         self.closed = False
 
     def close(self):
-        assert(not self.closed)
+        assert (not self.closed)
         t = get_current_transaction()
         t.close(self.fp_records)
         self.string_dict.close()
@@ -53,8 +53,8 @@ class RecordWriter(object):
 
     def write_record(self, record):
         assert isinstance(record, Record)
-        self.fp_records.write(struct.pack('<fff',
-                                          record.x_low, record.x_high, record.y))
+        t = get_current_transaction()
+        t.write(self.fp_records, struct.pack('<fff', record.x_low, record.x_high, record.y))
         self.write_errors(record.y, record.errors)
 
     def write_errors(self, value, errors):
@@ -73,7 +73,8 @@ class RecordWriter(object):
         }
         """
 
-        self.fp_records.write(varint_format(len(errors)))
+        t = get_current_transaction()
+        t.write(self.fp_records, varint_format(len(errors)))
         for error in errors:
             error_label_str = error.get('label', '')
 
@@ -84,9 +85,9 @@ class RecordWriter(object):
                 error_minus = error_plus = error_to_float(value, error['symerror'])
 
             error_label = self.string_dict.id_for_str(error_label_str)
-            self.fp_records.write(varint_format(error_label))
-            self.fp_records.write(struct.pack('<ff',
-                                              error_minus, error_plus))
+            t.write(self.fp_records, varint_format(error_label))
+            t.write(self.fp_records, struct.pack('<ff',
+                                                 error_minus, error_plus))
 
 
 record_writers = {}
