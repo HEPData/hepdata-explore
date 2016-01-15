@@ -1,5 +1,7 @@
 import contextlib
 
+from aggregator.uninterruptible import uninterruptible_section
+
 current_transaction = None
 
 
@@ -26,11 +28,12 @@ class Transaction(object):
 
     def commit(self):
         assert(not self.committed)
-        self.committed = True
-        for (fp, data) in self._data_to_be_written.items():
-            fp.write(data)
-        for fp in self._files_to_close:
-            fp.close()
+        with uninterruptible_section():
+            self.committed = True
+            for (fp, data) in self._data_to_be_written.items():
+                fp.write(data)
+            for fp in self._files_to_close:
+                fp.close()
 
 
 @contextlib.contextmanager
