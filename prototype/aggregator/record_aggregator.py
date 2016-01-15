@@ -26,15 +26,18 @@ def clean_cmenergies(cmenergies):
     if isinstance(cmenergies, float):
         return [cmenergies, cmenergies] # only one data point
     elif isinstance(cmenergies, str):
+        cmenergies = cmenergies.strip()
+
         if cmenergies.endswith(' GeV'):
             cmenergies = cmenergies.replace(' GeV', '')
 
-        if '-' in cmenergies:
+        if '-' in cmenergies[1:]: # '-' appears in any position except the first (it would be a minus symbol then)
             # cmenergies is a range
             cmenergies = [
                 float(n)
-                for n in cmenergies.split('-')
+                for n in cmenergies.rsplit('-', 1)
             ]
+            assert(len(cmenergies) == 2)
             return cmenergies
         else:
             # cmenergies is just a data point
