@@ -5,6 +5,7 @@ import yaml
 
 from aggregator.harmonizing import coerce_list, find_keyword, find_qualifier, \
     coerce_float, NotNumeric, find_inspire_record
+from aggregator.lru_cache import LRUCache
 from aggregator.record_types import TableGroupMetadata, Record
 from aggregator.record_writer import RecordWriter
 from aggregator.variable_index import VariableIndex
@@ -19,9 +20,16 @@ except ImportError:
 
 class RecordAggregator(object):
     def __init__(self, root_path):
-        self.record_writers = {}  # RecordWriter's by dependent variable name
         self.root_path = root_path
+
+        # Index RecordWriter's by dependent variable name
+        self.record_writers_cache = LRUCache(self.construct_record_writer, capacity=100)
         self.var_index = VariableIndex(root_path, 'variables.json')
+
+    def construct_record_writer(self, dependent_variable):
+        directory = self.var_index.get_var_directory(dependent_variable)
+        record_writer = RecordWriter(directory)
+        return record_writer
 
     def process_submission(self, path):
         with open(os.path.join(path, 'submission.yaml')) as f:
@@ -139,10 +147,4 @@ class RecordAggregator(object):
 
     def get_record_writer(self, dependent_variable):
         assert(isinstance(dependent_variable, str))
-        if dependent_variable in self.record_writers.keys():
-            return self.record_writers[dependent_variable]
-        else:
-            directory = self.var_index.get_var_directory(dependent_variable)
-            record_writer = RecordWriter(directory)
-            self.record_writers[dependent_variable] = record_writer
-            return record_writer
+        return self.record_writers_cache.get(dependent_variable)

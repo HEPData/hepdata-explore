@@ -22,6 +22,9 @@ class StringDictionary(object):
         self.counter = 1
         self.load_existing_strings()
 
+    def close(self):
+        self.fp.close()
+
     def load_existing_strings(self):
         dcontext.reading_file = self.path
         for string in self.fp.read().split('\n'):

@@ -24,6 +24,13 @@ class RecordWriter(object):
         self.path = dependent_variable_dir
         self.fp_records = open(os.path.join(self.path, 'records.bin'), 'a+b')
         self.string_dict = StringDictionary(os.path.join(self.path, 'strings.txt'))
+        self.closed = False
+
+    def close(self):
+        assert(not self.closed)
+        self.fp_records.close()
+        self.string_dict.close()
+        self.closed = True
 
     def write_table_group(self, metadata, records):
         self.write_group_header(metadata, len(records))
