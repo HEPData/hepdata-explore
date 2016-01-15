@@ -4,6 +4,8 @@ import os
 
 import binascii
 
+from aggregator.uninterruptible import uninterruptible_section
+
 
 def short_hash(a_string):
     m = hashlib.sha1()
@@ -23,8 +25,9 @@ class VariableIndex(object):
             self.index = {}  # dict<var_name, dict>
 
     def update_index(self):
-        with open(self.path, 'w') as f:
-            f.write(json.dumps(self.index))
+        with uninterruptible_section():
+            with open(self.path, 'w') as f:
+                f.write(json.dumps(self.index))
 
     def _dir_full_path(self, directory_name):
         return os.path.join(self.root_dir, directory_name)
