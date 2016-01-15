@@ -82,7 +82,8 @@ class RecordAggregator(object):
 
             # Exiting the with block commits the transaction
         else:
-            print('Warning: Skipping already existing submission %s (%s)' % (submission_id, path))
+            #print('Warning: Skipping already existing submission %s (%s)' % (submission_id, path))
+            pass
 
     def process_table(self, submission_path, submission_header, table):
         """
