@@ -345,12 +345,18 @@ function showGraphs(data, var_x) {
     return {n: 0};
   });
 
-  //var minX = _.min(data, function (d, i) {
-  //  return d.x_low;
-  //}).x_low;
-  //var maxX = _.max(data, function (d, i) {
-  //  return d.x_high;
-  //}).x_high;
+  var minX = Infinity;
+  var maxX = -Infinity;
+
+  for (var i = 0; i < data.length; i++) {
+    var obj = data[i];
+    if (obj.x_low < minX) {
+      minX = obj.x_low;
+    }
+    if (obj.x_high > maxX) {
+      maxX = obj.x_high;
+    }
+  }
 
   //allVarsChart
   //  .width(900)
