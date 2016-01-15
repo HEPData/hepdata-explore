@@ -86,6 +86,11 @@ class RecordAggregator(object):
                         # Last resort...
                         cmenergies = 0
 
+                    if isinstance(cmenergies, str):
+                        print("Warning: Invalid cmenergies: (%s, %s) %s" %
+                              (dcontext.submission, dcontext.table, cmenergies))
+                        cmenergies = 0
+
                 try:
                     reaction = find_qualifier(dep_var, 'RE', allow_many=True)[0]
                 except KeyError:
