@@ -55,8 +55,10 @@ Error {
 }
 """
 
+
 class Label(Widget):
     """Displays an updatable label."""
+
     def __init__(self, min_length=0, starting_text=''):
         self.min_length = min_length
         self.change_text(starting_text)
@@ -67,9 +69,11 @@ class Label(Widget):
     def update(self, pbar):
         return ' ' + self.text + ' '
 
+
 class AlwaysUpdatingProgressBar(ProgressBar):
     def _need_update(self):
         return True
+
 
 def to_binary(output_path, *submission_directories):
     from aggregator.record_aggregator import RecordAggregator
@@ -79,15 +83,15 @@ def to_binary(output_path, *submission_directories):
         directory for directory
         in submission_directories
         if '.zip' not in directory
-    ]
+        ]
 
     submission_label = Label(min_length=10)
     pbar = AlwaysUpdatingProgressBar(maxval=len(submission_directories),
-                       widgets=[
-                           Percentage(),
-                           submission_label,
-                           Bar(marker='#', left='[', right=']')
-                       ]).start()
+                                     widgets=[
+                                         Percentage(),
+                                         submission_label,
+                                         Bar(marker='#', left='[', right=']')
+                                     ]).start()
     for i, directory in enumerate(submission_directories):
         dcontext.submission = directory
         submission_label.change_text(os.path.basename(directory))
