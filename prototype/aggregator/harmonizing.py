@@ -1,3 +1,6 @@
+from math import isinf, isnan
+
+
 class NotNumeric(Exception):
     pass
 
@@ -12,7 +15,16 @@ class TooManyResults(Exception):
 
 def coerce_float(value):
     if type(value) == float:
-        return value
+        if isinf(value):
+            # JSON does not accept Infinity :(
+            if value > 0:
+                return 1.7e308
+            else:
+                return -1.7e308
+        elif isnan(value):
+            raise NotNumeric(value)
+        else:
+            return value
     elif 'exp' in value:
         base = value.split(' ')[0]
         exp = value.split('exp')[-1]

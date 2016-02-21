@@ -5,13 +5,8 @@ import yaml
 
 from aggregator.harmonizing import coerce_list, find_keyword, find_qualifier, \
     coerce_float, NotNumeric, find_inspire_record
-from aggregator.lru_cache import LRUCache
-from aggregator.record_types import TableGroupMetadata, Record
-from aggregator.record_writer import RecordWriter
-from aggregator.string_set_store import StringSetStore
-from aggregator.transactions import Transaction, in_transaction
-from aggregator.variable_index import VariableIndex
 from aggregator.shared_dcontext import dcontext
+from elasticsearch import Elasticsearch
 
 try:
     from yaml import CSafeLoader as SafeLoader
@@ -24,20 +19,20 @@ def clean_cmenergies(cmenergies):
     if isinstance(cmenergies, int):
         cmenergies = float(cmenergies)
     if isinstance(cmenergies, float):
-        return [cmenergies, cmenergies] # only one data point
+        return [cmenergies, cmenergies]  # only one data point
     elif isinstance(cmenergies, str):
         cmenergies = cmenergies.strip()
 
         if cmenergies.endswith(' GeV'):
             cmenergies = cmenergies.replace(' GeV', '')
 
-        if '-' in cmenergies[1:]: # '-' appears in any position except the first (it would be a minus symbol then)
+        if '-' in cmenergies[1:]:  # '-' appears in any position except the first (it would be a minus symbol then)
             # cmenergies is a range
             cmenergies = [
                 float(n)
                 for n in cmenergies.rsplit('-', 1)
-            ]
-            assert(len(cmenergies) == 2)
+                ]
+            assert (len(cmenergies) == 2)
             return cmenergies
         else:
             # cmenergies is just a data point
@@ -47,43 +42,67 @@ def clean_cmenergies(cmenergies):
         raise RuntimeError('Invalid type for cmenergies: %s' % type(cmenergies))
 
 
+def clean_error_value(y, value):
+    if isinstance(value, (int, float)):
+        return value
+    elif isinstance(value, str):
+        if value.endswith('%'):
+            percentage = float(value[:-1])
+            return y * percentage
+        elif 'e' in value.lower():
+            return float(value)  # scientific notation
+        else:
+            raise RuntimeError('Invalid format for error value string: %s' % value)
+    else:
+        raise RuntimeError('Invalid type for error value: %s' % type(value))
+
+
+def clean_errors(y, errors):
+    ret = []
+    for error in errors:
+        label = error.get('label') or 'main'
+
+        if 'asymerror' in error:
+            plus = clean_error_value(y, error['asymerror']['plus'])
+            minus = clean_error_value(y, error['asymerror']['minus'])
+        elif 'symerror' in error:
+            plus = clean_error_value(y, error['symerror'])
+            minus = -plus
+
+        ret.append({
+            'label': label,
+            'plus': plus,
+            'minus': minus,
+        })
+    return ret
+
+
 class RecordAggregator(object):
-    def __init__(self, root_path):
-        self.root_path = root_path
-
-        # Index RecordWriter's by dependent variable name
-        self.record_writers_cache = LRUCache(self.construct_record_writer, capacity=100)
-        self.var_index = VariableIndex(root_path, 'variables.json')
-        self.existing_submissions = StringSetStore(os.path.join(root_path, 'submissions.txt'))
-
-    def construct_record_writer(self, dependent_variable):
-        directory = self.var_index.get_var_directory(dependent_variable)
-        record_writer = RecordWriter(directory)
-        return record_writer
+    def __init__(self, **elastic_args):
+        self.elastic = Elasticsearch(**elastic_args)
+        self.index = 'hepdata-demo'
+        self.init_mapping()
 
     def process_submission(self, path):
         with open(os.path.join(path, 'submission.yaml')) as f:
             submission = list(yaml.load_all(f, Loader=SafeLoader))
 
         header = submission[0]
-        submission_id = 'ins%d' % find_inspire_record(header)
         tables = submission[1:]
 
-        if submission_id not in self.existing_submissions:
-            # We use a transaction so all writes are only performed when the block with exits.
-            # This way a submission is entirely stored or not stored at all, but never is stored partially in case a
-            # format error occurs meanwhile (e.g. in Table2 after Table1 has been written).
-            with in_transaction():
-                for table in tables:
-                    self.process_table(path, header, table)
+        inspire_record = find_inspire_record(header)
+        publication = dict(
+                inspire_record=inspire_record,
+                comment=header['comment'],
+        )
 
-                # Add the submission to existing_submissions so it is not processed next time
-                self.existing_submissions.add_string(submission_id)
+        processed_tables = []
+        for table in tables:
+            new_table = self.process_table(path, header, table)
+            processed_tables.append(new_table)
 
-            # Exiting the with block commits the transaction
-        else:
-            #print('Warning: Skipping already existing submission %s (%s)' % (submission_id, path))
-            pass
+        publication['tables'] = processed_tables
+        self.write_publication(publication)
 
     def process_table(self, submission_path, submission_header, table):
         """
@@ -111,7 +130,12 @@ class RecordAggregator(object):
         except KeyError:
             default_reaction = ''
 
-        inspire_record = find_inspire_record(submission_header)
+        table = dict(
+                table_num=table_num,
+                observables=observables,
+                description=table['description'],
+        )
+        table_groups = []
 
         for indep_var in doc['independent_variables']:
             header = indep_var['header']
@@ -146,17 +170,13 @@ class RecordAggregator(object):
                 except KeyError:
                     reaction = default_reaction
 
-                record_writer = self.get_record_writer(var_x)
-                table_group_metadata = TableGroupMetadata(
-                        inspire_record=inspire_record,
-                        table_num=table_num,
+                table_group = dict(
                         reaction=reaction,
                         cmenergies=cmenergies,
-                        observables=observables,
                         var_x=var_x,
                         var_y=var_y,
                 )
-                records = []
+                data_points = []
 
                 for i, val in enumerate(dep_var['values']):
                     if val['value'] != '-':
@@ -175,18 +195,131 @@ class RecordAggregator(object):
                         except NotNumeric:
                             continue
 
-                        records.append(Record(
+                        data_points.append(dict(
                                 x_low=x_low,
                                 x_high=x_high,
                                 y=y,
-                                errors=val.get('errors', [])
+                                errors=clean_errors(y, val.get('errors', []))
                         ))
 
-                record_writer.write_table_group(table_group_metadata, records)
-                self.var_index.update_record_count(var_x, len(records))
+                if len(data_points) > 0:
+                    table_group['data_points'] = data_points
+                    table_groups.append(table_group)
 
+        table['groups'] = table_groups
         dcontext.table = None
+        return table
 
-    def get_record_writer(self, dependent_variable):
-        assert (isinstance(dependent_variable, str))
-        return self.record_writers_cache.get(dependent_variable)
+    def write_publication(self, publication):
+        self.elastic.update(self.index, 'publication', publication['inspire_record'], {
+            'doc': publication,
+            'doc_as_upsert': True,
+        })
+
+    def load_mini_demo(self):
+        self.write_publication({
+            "comment": "Publication A",
+            "inspire_record": 1,
+            "tables": [{
+                "table_num": 1,
+                "description": "Speed",
+                "groups": [{
+                    "var_x": "time",
+                    "var_y": "speed",
+                    "data_points": [
+                        {"x_low": 1, "y": 10},
+                        {"x_low": 2, "y": 11},
+                    ]
+                }]
+            }, {
+                "table_num": 2,
+                "description": "Acceleration",
+                "groups": [{
+                    "var_x": "time",
+                    "var_y": "acceleration",
+                    "data_points": [
+                        {"x_low": 1, "y": 5},
+                        {"x_low": 2, "y": 5},
+                        {"x_low": 3, "y": 5},
+                        {"x_low": 4, "y": 4},
+                    ]
+                }]
+            }]
+        })
+
+        self.write_publication({
+            "comment": "Publication B",
+            "inspire_record": 2,
+            "tables": [{
+                "table_num": 1,
+                "description": "Speed",
+                "groups": [{
+                    "var_x": "time",
+                    "var_y": "distance",
+                    "data_points": [
+                        {"x_low": 1, "y": 100},
+                        {"x_low": 2, "y": 110},
+                    ]
+                }]
+            }, {
+                "table_num": 2,
+                "description": "Acceleration",
+                "groups": [{
+                    "var_x": "time",
+                    "var_y": "speed",
+                    "data_points": [
+                        {"x_low": 1, "y": 50},
+                        {"x_low": 2, "y": 40},
+                        {"x_low": 3, "y": 50},
+                        {"x_low": 4, "y": 40},
+                    ]
+                }]
+            }]
+        })
+
+    def init_mapping(self):
+        if self.elastic.indices.exists(self.index):
+            return
+
+        self.elastic.indices.create(self.index, {
+            "mappings": {
+                "publication": {
+                    "properties": {
+                        "comment": {"type": "string"},
+                        "inspire_record": {"type": "long"},
+                        "tables": {
+                            "type": "nested",
+                            "properties": {
+                                "description": {"type": "string"},
+                                "groups": {
+                                    "type": "nested",
+                                    "properties": {
+                                        "cmenergies": {"type": "double"},
+                                        "reaction": {"type": "string", "index": "not_analyzed"},
+                                        "data_points": {
+                                            "type": "nested",
+                                            "properties": {
+                                                "errors": {
+                                                    "properties": {
+                                                        "label": {"type": "string", "index": "not_analyzed"},
+                                                        "minus": {"type": "double"},
+                                                        "plus": {"type": "double"}
+                                                    }
+                                                },
+                                                "x_high": {"type": "double"},
+                                                "x_low": {"type": "double"},
+                                                "y": {"type": "double"}
+                                            }
+                                        },
+                                        "var_x": {"type": "string", "index": "not_analyzed"},
+                                        "var_y": {"type": "string", "index": "not_analyzed"}
+                                    }
+                                },
+                                "observables": {"type": "string"},
+                                "table_num": {"type": "long"}
+                            }
+                        }
+                    }
+                }
+            }
+        })

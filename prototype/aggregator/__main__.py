@@ -102,7 +102,37 @@ def to_binary(output_path, *submission_directories):
     print('Done', file=sys.stderr)
 
 
-if __name__ == "__main__":
+def add(*submission_paths):
+    from aggregator.record_aggregator import RecordAggregator
+    record_aggregator = RecordAggregator()
+    record_aggregator.load_mini_demo()
+    return
+
+
+    submission_label = Label(min_length=10)
+    pbar = AlwaysUpdatingProgressBar(maxval=len(submission_paths),
+                                     widgets=[
+                                         Percentage(),
+                                         submission_label,
+                                         Bar(marker='#', left='[', right=']')
+                                     ]).start()
+
+    for i, submission_path in enumerate(submission_paths):
+        shared_dcontext.dcontext.submission = os.path.basename(submission_path)
+        submission_label.change_text(shared_dcontext.dcontext.submission)
+        pbar.update(i)
+
+        record_aggregator.process_submission(submission_path)
+
+    pbar.finish()
+    print('Done', file=sys.stderr)
+
+
+def main():
     with contextualized_tracebacks(['submission', 'table', 'reading_file']) as dcontext:
         shared_dcontext.dcontext = dcontext
-        argh.dispatch_commands([to_binary])
+        argh.dispatch_commands([to_binary, add])
+
+
+if __name__ == "__main__":
+    main()
