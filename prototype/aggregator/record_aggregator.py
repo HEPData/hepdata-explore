@@ -78,9 +78,9 @@ def clean_errors(y, errors):
 
 
 class RecordAggregator(object):
-    def __init__(self, **elastic_args):
+    def __init__(self, index, **elastic_args):
         self.elastic = Elasticsearch(**elastic_args)
-        self.index = 'hepdata-demo'
+        self.index = index
         self.init_mapping()
 
     def process_submission(self, path):

@@ -102,12 +102,9 @@ def to_binary(output_path, *submission_directories):
     print('Done', file=sys.stderr)
 
 
-def add(*submission_paths):
+def _add(index, submission_paths, only_these=None):
     from aggregator.record_aggregator import RecordAggregator
-    record_aggregator = RecordAggregator()
-    record_aggregator.load_mini_demo()
-    return
-
+    record_aggregator = RecordAggregator(index)
 
     submission_label = Label(min_length=10)
     pbar = AlwaysUpdatingProgressBar(maxval=len(submission_paths),
@@ -122,16 +119,39 @@ def add(*submission_paths):
         submission_label.change_text(shared_dcontext.dcontext.submission)
         pbar.update(i)
 
+        if only_these is not None:
+            inspire_id = int(shared_dcontext.dcontext.submission.replace('ins', ''))
+            if inspire_id not in only_these:
+                continue
+
         record_aggregator.process_submission(submission_path)
 
     pbar.finish()
     print('Done', file=sys.stderr)
 
 
+def add(*submission_paths):
+    _add('hepdata', submission_paths)
+
+
+def add_demo_subset(*submission_paths):
+    # Add just a few publications, useful for testing the UI
+    _add('hepdata-demo', submission_paths,
+         only_these=[1116150, 1296861, 1334140, 1345354, 1383884,
+                     1386475, 1373912, 1343107])
+
+
+def load_mini_demo():
+    # Add a couple of fake publications, useful to test ElasticSearch queries
+    from aggregator.record_aggregator import RecordAggregator
+    record_aggregator = RecordAggregator('hepdata-mini-demo')
+    record_aggregator.load_mini_demo()
+
+
 def main():
     with contextualized_tracebacks(['submission', 'table', 'reading_file']) as dcontext:
         shared_dcontext.dcontext = dcontext
-        argh.dispatch_commands([to_binary, add])
+        argh.dispatch_commands([to_binary, add, add_demo_subset, load_mini_demo])
 
 
 if __name__ == "__main__":
