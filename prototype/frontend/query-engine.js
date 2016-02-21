@@ -52,7 +52,6 @@ function customScatterPlot(parent, chartGroup) {
   });
 
   _chart.plotData = function () {
-    return;
     var symbols = _chart.chartBodyG().selectAll('path.symbol')
       .data(_chart.data());
 
@@ -116,7 +115,7 @@ var numRecordsFormat = function () {
   };
 }();
 
-function asyncFetch(xhr) {
+function asyncFetch(xhr, data) {
   return new Promise(function (resolve, reject, onCancel) {
     xhr.onload = function () {
       if (xhr.status >= 200 && xhr.status < 300) {
@@ -126,7 +125,7 @@ function asyncFetch(xhr) {
       }
     };
     xhr.onerror = reject;
-    xhr.send(null);
+    xhr.send(data || null);
 
     onCancel(function () {
       xhr.abort();
@@ -159,6 +158,110 @@ function asyncFetchBinary(path) {
   return asyncFetch(xhr)
     .then(function () {
       return xhr.response;
+    })
+}
+
+var elasticUrl = 'http://localhost:9200/hepdata/publication/_search';
+
+function asyncFetchElastic(varX) {
+  var xhr = new XMLHttpRequest()
+  xhr.open('POST', elasticUrl, true)
+  return asyncFetch(xhr, JSON.stringify({
+    "query": {
+      "nested": {
+        "path": "tables.groups",
+        "query": {
+          "match": {
+            "tables.groups.var_x": varX
+          }
+        },
+        "inner_hits": {
+          "name": "matching_groups"
+        }
+      }
+    }
+  }))
+    .then(function () {
+      var results = JSON.parse(xhr.responseText);
+      var dataPoints = [];
+
+      _.each(results.hits.hits, function (hit) {
+        var publication = hit._source
+        _.each(publication.tables, function (table) {
+          _.each(table.groups, function (group) {
+            if (!(group.var_x == varX)) {
+              return false;
+            }
+            _.each(group.data_points, function (dataPoint) {
+              var flatDataPoint = {
+                inspire_record: publication.inspire_record,
+                table_num: table.table_num,
+                cmenergies1: group.cmenergies[0],
+                cmenergies2: group.cmenergies[1],
+                reaction: group.reaction,
+                observables: table.observables,
+                var_y: group.var_y,
+                var_x: group.var_x,
+                x_low: dataPoint.x_low,
+                x_high: dataPoint.x_high,
+                x_center: (dataPoint.x_low + dataPoint.x_high) / 2,
+                y: dataPoint.y,
+                errors: dataPoint.errors
+              }
+              dataPoints.push(flatDataPoint)
+            })
+          })
+        })
+      })
+
+      return dataPoints
+    })
+}
+
+function asyncFetchIndependentVariables() {
+  var xhr = new XMLHttpRequest()
+  xhr.open('POST', elasticUrl, true)
+  return asyncFetch(xhr, JSON.stringify({
+    "size": 0,
+    "aggs": {
+      "tables": {
+        "nested": {
+          "path": "tables.groups"
+        },
+        "aggs": {
+          "variables": {
+            "terms": {
+              "field": "tables.groups.var_x",
+              "size": 10000
+            },
+            "aggs": {
+              "data_point_count": {
+                "nested": {
+                  "path": "tables.groups.data_points"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }))
+    .then(function () {
+      var results = JSON.parse(xhr.responseText);
+
+      var variables = _(results.aggregations.tables.variables.buckets)
+        .map(function (bucket) {
+          return {
+            name: bucket.key,
+            recordCount: bucket.data_point_count.doc_count
+          }
+        })
+        // Hack: I'm sorting variables client side because I don't know how to
+        // do it in ElasticSearch.
+        .sortBy(function(d) { return -d.recordCount })
+        .value()
+
+      return variables
     })
 }
 
@@ -330,18 +433,18 @@ function showGraphs(data, var_x) {
   var reactionsChart = dc.rowChart('#reactions-chart');
   var observablesChart = dc.rowChart('#observables-chart');
 
-  //var xValues = ndx.dimension(function (d, i) {
-  //  return d.x_center;
-  //});
-  //var yVars = ndx.dimension(function (d, i) {
-  //  return d.var_y;
-  //});
-  //var reactions = ndx.dimension(function (d, i) {
-  //  return d.reaction;
-  //});
-  //var observables = ndx.dimension(function (d, i) {
-  //  return d.observables;
-  //});
+  var xValues = ndx.dimension(function (d, i) {
+    return d.x_center;
+  });
+  var yVars = ndx.dimension(function (d, i) {
+    return d.var_y;
+  });
+  var reactions = ndx.dimension(function (d, i) {
+    return d.reaction;
+  });
+  var observables = ndx.dimension(function (d, i) {
+    return d.observables;
+  });
   var allCount = ndx.groupAll().reduce(function (p, v) {
     p.n++;
     return p;
@@ -365,60 +468,60 @@ function showGraphs(data, var_x) {
     }
   }
 
-  //allVarsChart
-  //  .width(900)
-  //  .height(130)
-  //  .margins({top: 10, right: 50, bottom: 30, left: 40})
-  //  .x(d3.scale.pow().exponent(.5).domain([minX, maxX]))
-  //  //     .x(d3.scale.linear().domain([minX, maxX]))
-  //  .dimension(xValues)
-  //  .group(xValues.group().reduceCount())
-  //  .gap(1)
-  //  .xAxisLabel(var_x)
-  //  .yAxisLabel('# of records')
-  //  //.render();
-  //
-  //var plainColor = "#6BAED6";
-  //
-  //var yVarsGroup = yVars.group().reduceCount();
-  //varDistributionChart
-  //  .width(300)
-  //  .height(300)
-  //  .elasticX(true)
-  //  .dimension(yVars)
-  //  .group(yVarsGroup)
-  //  .ordering(function (d) {
-  //    return -d.value;
-  //  })
-  //  .ordinalColors([plainColor])
-  //  //.render();
-  //
-  //reactionsChart
-  //  .width(300)
-  //  .height(200)
-  //  .elasticX(true)
-  //  .dimension(reactions)
-  //  .group(reactions.group().reduceCount())
-  //  .ordering(function (d) {
-  //    return -d.value;
-  //  })
-  //  .ordinalColors([plainColor])
-  //  //.render();
-  //
-  //observablesChart// TODO: remove? is it useful or not?
-  //  .width(300)
-  //  .height(400)
-  //  .elasticX(true)
-  //  .dimension(observables)
-  //  .group(observables.group().reduceCount())
-  //  .ordering(function (d) {
-  //    return -d.value;
-  //  })
-  //  //.render();
+  allVarsChart
+    .width(900)
+    .height(130)
+    .margins({top: 10, right: 50, bottom: 30, left: 40})
+    .x(d3.scale.pow().exponent(.5).domain([minX, maxX]))
+    //     .x(d3.scale.linear().domain([minX, maxX]))
+    .dimension(xValues)
+    .group(xValues.group().reduceCount())
+    .gap(1)
+    .xAxisLabel(var_x)
+    .yAxisLabel('# of records')
+    .render();
 
-  //rowChartLabels(reactionsChart, '# of records', 'Reactions');
-  //rowChartLabels(varDistributionChart, '# of records', 'Dependent variables');
-  //rowChartLabels(observablesChart, '# of records', 'Observables');
+  var plainColor = "#6BAED6";
+
+  var yVarsGroup = yVars.group().reduceCount();
+  varDistributionChart
+    .width(300)
+    .height(300)
+    .elasticX(true)
+    .dimension(yVars)
+    .group(yVarsGroup)
+    .ordering(function (d) {
+      return -d.value;
+    })
+    .ordinalColors([plainColor])
+    .render();
+
+  reactionsChart
+    .width(300)
+    .height(200)
+    .elasticX(true)
+    .dimension(reactions)
+    .group(reactions.group().reduceCount())
+    .ordering(function (d) {
+      return -d.value;
+    })
+    .ordinalColors([plainColor])
+    .render();
+
+  observablesChart// TODO: remove? is it useful or not?
+    .width(300)
+    .height(400)
+    .elasticX(true)
+    .dimension(observables)
+    .group(observables.group().reduceCount())
+    .ordering(function (d) {
+      return -d.value;
+    })
+    .render();
+
+  rowChartLabels(reactionsChart, '# of records', 'Reactions');
+  rowChartLabels(varDistributionChart, '# of records', 'Dependent variables');
+  rowChartLabels(observablesChart, '# of records', 'Observables');
 
   numberRecords
     .formatNumber(numRecordsFormat)
@@ -428,11 +531,11 @@ function showGraphs(data, var_x) {
     })
     .render();
 
-  //$('#variable-charts').empty();
-  //yVarsGroup.top(1).forEach(function (d, i) {
-  //  var varY = d.key;
-  //  plotVariable(ndx, data, var_x, varY, minX, maxX, yVars)
-  //})
+  $('#variable-charts').empty();
+  yVarsGroup.top(10).forEach(function (d, i) {
+    var varY = d.key;
+    plotVariable(ndx, data, var_x, varY, minX, maxX, yVars)
+  })
   var yVars = null;
 
   return {
@@ -441,10 +544,11 @@ function showGraphs(data, var_x) {
 }
 
 function screenUpdated() {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     window.requestAnimationFrame(resolve)
   });
 }
+
 
 function HepdataExplore(dataUrlPrefix) {
   var obj = {};
@@ -453,17 +557,9 @@ function HepdataExplore(dataUrlPrefix) {
   obj.yVarsDimension = null;
 
   function run() {
-    return asyncFetchJSON(dataUrlPrefix + '/variables.json')
-      .then(function (doc) {
-        obj.indepVars = _(doc)
-          .map(function (value, key) {
-            value.name = key;
-            return value;
-          })
-          .sortBy(function (d) {
-            return -d.recordCount;
-          })
-          .value()
+    return asyncFetchIndependentVariables()
+      .then(function (indepVars) {
+        obj.indepVars = indepVars
 
         $('#indepVarSelect')
           .html(
@@ -480,7 +576,7 @@ function HepdataExplore(dataUrlPrefix) {
           })
           .trigger('change');
 
-        $('#download-yaml').on('click', function(ev) {
+        $('#download-yaml').on('click', function (ev) {
           ev.preventDefault();
           if (obj.yVarsDimension) {
             downloadSelectionAsYaml(obj.yVarsDimension);
@@ -501,35 +597,26 @@ function HepdataExplore(dataUrlPrefix) {
     $('#loading-processing').css({visibility: 'hidden'});
 
     var dir = dataUrlPrefix + '/' + xVar.dirName;
-    obj.loadVariablePromise = Promise.all([
-      asyncFetchLineDelimited(dir + '/strings.txt'),
-      asyncFetchBinary(dir + '/records.bin')
-    ]).then(function (result) {
-      // Update the UI before proceeding with heavy computation
-      $('#loading-downloading').css({visibility: 'hidden'});
-      $('#loading-processing').css({visibility: 'visible'});
-      return screenUpdated().then(function() {
-        return result;
-      });
-    }).then(function (result) {
-      var strings = result[0];
-      var buffer = result[1];
+    obj.loadVariablePromise = asyncFetchElastic(xVar.name)
+      .then(function (result) {
+        // Update the UI before proceeding with heavy computation
+        $('#loading-downloading').css({visibility: 'hidden'});
+        $('#loading-processing').css({visibility: 'visible'});
+        return screenUpdated().then(function () {
+          return result;
+        });
+      }).then(function (result) {
+        obj.dataPoints = result;
+        var t1 = performance.now();
+        var ret = showGraphs(result, xVar.name);
+        var t2 = performance.now();
+        console.log("Data indexed in %.2f ms.", t2 - t1);
 
-      var t0 = performance.now();
-      obj.records = decodeRecords(buffer, strings);
-      var t1 = performance.now();
+        obj.yVarsDimension = ret.yVarsDimension;
 
-      var ret = showGraphs(obj.records, xVar.name);
-      var t2 = performance.now();
-      console.log("Data decoded in %.2f ms.", t1 - t0);
-
-      console.log("Data indexed in %.2f ms.", t2 - t1);
-
-      obj.yVarsDimension = ret.yVarsDimension;
-
-      $('#visualization').show()
-      $('#visualization-loading').hide()
-    })
+        $('#visualization').show()
+        $('#visualization-loading').hide()
+      })
   }
 
   function downloadSelectionAsYaml(dimension) {
@@ -539,12 +626,13 @@ function HepdataExplore(dataUrlPrefix) {
   }
 
   return {
-    run: run
+    run: run,
+    private: obj
   }
 }
 
 setTimeout(function () {
-  new HepdataExplore('data')
-    .run();
+  window.hepdata = new HepdataExplore('data');
+  window.hepdata.run();
 }, 0);
 
