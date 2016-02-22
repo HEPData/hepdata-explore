@@ -1,5 +1,37 @@
 'use strict';
 
+var array2dComparisonOperators = {
+  name: '2d',
+  lt: function _lt(a,b) {
+    if (a[0] !== b[0]) {
+      return a[0] < b[0];
+    } else {
+      return a[1] < b[1];
+    }
+  },
+  lte: function _lte(a,b) {
+    if (a[0] !== b[0]) {
+      return a[0] <= b[0];
+    } else {
+      return a[1] <= b[1];
+    }
+  },
+  gt: function _gt(a,b) {
+    if (a[0] !== b[0]) {
+      return a[0] > b[0];
+    } else {
+      return a[1] > b[1];
+    }
+  },
+  gte: function _gte(a,b) {
+    if (a[0] !== b[0]) {
+      return a[0] >= b[0];
+    } else {
+      return a[1] >= b[1];
+    }
+  }
+};
+
 Promise.config({
   cancellation: true
 });
@@ -161,7 +193,7 @@ function asyncFetchBinary(path) {
     })
 }
 
-var elasticUrl = 'http://localhost:9200/hepdata/publication/_search';
+var elasticUrl = 'http://localhost:9200/hepdata-demo/publication/_search';
 
 function asyncFetchElastic(varX) {
   var xhr = new XMLHttpRequest()
@@ -399,7 +431,7 @@ function plotVariable(ndx, data, var_x, var_y, minX, maxX, yVars) {
     ret.inspire_record = d.inspire_record;
     ret.table_num = d.table_num;
     return ret;
-  });
+  }, array2dComparisonOperators);
 
   var newDiv = $('<div/>');
   var chart = customScatterPlot(newDiv[0]);
