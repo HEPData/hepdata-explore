@@ -185,28 +185,35 @@ function asyncFetchElastic(varX) {
       var results = JSON.parse(xhr.responseText);
       var dataPoints = [];
 
+      function nu(val) {
+        if (val === undefined) {
+          throw new Error("Undefined");
+        }
+        return val;
+      }
+
       _.each(results.hits.hits, function (hit) {
         var publication = hit._source
         _.each(publication.tables, function (table) {
           _.each(table.groups, function (group) {
             if (!(group.var_x == varX)) {
-              return false;
+              return;
             }
             _.each(group.data_points, function (dataPoint) {
               var flatDataPoint = {
-                inspire_record: publication.inspire_record,
-                table_num: table.table_num,
-                cmenergies1: group.cmenergies[0],
-                cmenergies2: group.cmenergies[1],
-                reaction: group.reaction,
-                observables: table.observables,
-                var_y: group.var_y,
-                var_x: group.var_x,
-                x_low: dataPoint.x_low,
-                x_high: dataPoint.x_high,
-                x_center: (dataPoint.x_low + dataPoint.x_high) / 2,
-                y: dataPoint.y,
-                errors: dataPoint.errors
+                inspire_record: nu(publication.inspire_record),
+                table_num: nu(table.table_num),
+                cmenergies1: nu(group.cmenergies[0]),
+                cmenergies2: nu(group.cmenergies[1]),
+                reaction: nu(group.reaction),
+                observables: nu(table.observables),
+                var_y: nu(group.var_y),
+                var_x: nu(group.var_x),
+                x_low: nu(dataPoint.x_low),
+                x_high: nu(dataPoint.x_high),
+                x_center: nu((dataPoint.x_low + dataPoint.x_high) / 2),
+                y: nu(dataPoint.y),
+                errors: nu(dataPoint.errors),
               }
               dataPoints.push(flatDataPoint)
             })
