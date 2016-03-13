@@ -39,4 +39,8 @@ abstract class Filter {
     }
 
     abstract getComponent(): ComponentRef;
+
+    get removeAllowed() {
+        return true;
+    }
 }

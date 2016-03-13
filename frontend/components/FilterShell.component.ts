@@ -23,6 +23,10 @@ class FilterShellComponent {
     removeFilter() {
         this.parentFilter.children.remove(this.filter);
     }
+
+    get removeAllowed() {
+        return !this.isRoot && this.filter.removeAllowed;
+    }
 }
 
 ko.components.register('filter-shell', {

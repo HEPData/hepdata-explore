@@ -1,6 +1,6 @@
 <div>
     <span data-bind="text: filter.getLongName()"></span>
-    <!-- ko ifnot: isRoot -->
+    <!-- ko if: removeAllowed -->
     <button data-bind="click: removeFilter">Delete</button>
     <!-- /ko -->
 </div>

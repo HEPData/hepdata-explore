@@ -12,4 +12,8 @@ abstract class CompoundFilter extends Filter {
     getDslItems() {
         return this.children;
     }
+
+    get removeAllowed() {
+        return this.children.length == 0;
+    }
 }
