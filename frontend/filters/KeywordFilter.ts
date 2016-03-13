@@ -9,7 +9,7 @@ class KeywordFilter extends Filter {
         ko.track(this);
     }
 
-    getLongName() {
+    static getLongName() {
         return 'Keyword filter';
     }
 

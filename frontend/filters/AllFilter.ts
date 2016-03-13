@@ -1,7 +1,7 @@
 ///<reference path="CompoundFilter.ts"/>
 
 class AllFilter extends CompoundFilter {
-    getLongName() {
+    static getLongName() {
         return 'All matching';
     }
     getDslName() {

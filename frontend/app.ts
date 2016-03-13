@@ -4,7 +4,7 @@
 ///<reference path="filters/Filter.ts"/>
 ///<reference path="filters/KeywordFilter.ts"/>
 ///<reference path="filters/AllFilter.ts"/>
-
+///<reference path="services/FilterIndex.ts"/>
 
 class AppViewModel {
     rootFilter: Filter;

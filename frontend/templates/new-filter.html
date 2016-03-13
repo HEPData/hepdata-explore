@@ -1,0 +1,9 @@
+<form data-bind="submit: addSelectedFilter">
+    <input data-bind="textInput: query">
+</form>
+<ul class="matches" data-bind="foreach: search()">
+    <li><a data-bind="click: $parent.addThisFilter">
+        <b data-bind="text: match.name"></b>
+        <p data-bind="html: match.description"></p>
+    </a></li>
+</ul>

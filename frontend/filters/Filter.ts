@@ -6,7 +6,15 @@ interface DslParam {
 }
 
 abstract class Filter {
-    abstract getLongName(): string;
+    // Can't be defined in TypeScript... so there you are.
+    //abstract static getLongName(): string;
+    static getLongName(): string {
+        throw new Error('Invoked abstract method');
+    }
+
+    getLongName(): string {
+        return (<typeof Filter>this.constructor).getLongName();
+    }
 
     abstract getDslName(): string;
     getDslParams(): DslParam[] {
