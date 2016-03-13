@@ -1,0 +1,8 @@
+{
+  "version": false,
+  "dependencies": {},
+  "ambientDependencies": {
+    "jquery": "registry:dt/jquery#1.10.0+20160303223636",
+    "knockout": "registry:dt/knockout#3.2.0+20150312193415"
+  }
+}

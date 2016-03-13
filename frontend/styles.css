@@ -1,0 +1,61 @@
+filter-shell {
+    border: 1px solid lightgray;
+    padding: 10px;
+    display: block;
+}
+
+filter-shell .body {
+    border: 1px solid lightgray;
+    min-height: 100px;
+    position: relative;
+}
+
+.compound-filter {
+    /* border: 1px solid #FF4D2F; */
+    display: block;
+}
+
+.compound-filter .flag.all {
+    background: #0F4CBA;
+}
+.compound-filter .flag.none {
+    background: red;
+}
+
+.compound-filter .flag {
+    color: #FFF;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 25px;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+.compound-filter .flag span {
+    transform: rotate(90deg) translate(0px, -17px);
+    transform-origin: top left;
+    display: block;
+    width: 70px;
+    /* height:100px; */
+    color: #FFFFFF;
+    /* border: 1px solid #B6B6EA; */
+    text-align: left;
+    /* margin-top: 0px; */
+    text-transform: uppercase;
+    box-sizing: border-box;
+    font-weight: bold;
+    font-size: 17px;
+}
+
+.compound-filter .content {
+    margin-left: 25px;
+}
+body {
+    font-family: Lato, sans-serif;
+}
+
+he-app > filter-shell {
+    width: 360px;
+}
