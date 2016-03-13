@@ -13,7 +13,7 @@ abstract class CompoundFilter extends Filter {
         return this.children;
     }
 
-    get removeAllowed() {
+    isRemoveAllowed() {
         return this.children.length == 0;
     }
 }

@@ -40,7 +40,7 @@ abstract class Filter {
 
     abstract getComponent(): ComponentRef;
 
-    get removeAllowed() {
+    isRemoveAllowed() {
         return true;
     }
 }

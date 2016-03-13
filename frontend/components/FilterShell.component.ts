@@ -16,7 +16,7 @@ class FilterShellComponent {
         return this.filter.getComponent();
     }
 
-    get isRoot() {
+    isRoot() {
         return this.parentFilter == null;
     }
 
@@ -24,8 +24,8 @@ class FilterShellComponent {
         this.parentFilter.children.remove(this.filter);
     }
 
-    get removeAllowed() {
-        return !this.isRoot && this.filter.removeAllowed;
+    isRemoveAllowed() {
+        return !this.isRoot() && this.filter.isRemoveAllowed();
     }
 }
 
