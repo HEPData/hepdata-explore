@@ -3,4 +3,4 @@ ko.components.register('filter-shell', {
     },
     template: { require: 'text!templates/filter-shell.html' }
 });
-//# sourceMappingURL=FilterShell.component.js.map
+//# sourceMappingURL=FilterShellComponent.js.map

@@ -1,4 +1,4 @@
-///<reference path="../filters/CompoundFilter.ts"/>
+import CompoundFilter = require("../filters/CompoundFilter");
 
 class CompoundFilterComponent {
     filter: CompoundFilter;
@@ -20,3 +20,5 @@ ko.components.register('compound-filter', {
     viewModel: CompoundFilterComponent,
     template: { fromUrl: 'compound-filter.html' },
 });
+
+export = CompoundFilterComponent;

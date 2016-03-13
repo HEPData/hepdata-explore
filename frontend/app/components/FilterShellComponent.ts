@@ -1,4 +1,5 @@
-///<reference path="../filters/Filter.ts"/>
+import CompoundFilter = require("../filters/CompoundFilter");
+import Filter = require("../filters/Filter");
 
 class FilterShellComponent {
     parentFilter: CompoundFilter;
@@ -33,3 +34,4 @@ ko.components.register('filter-shell', {
     viewModel: FilterShellComponent,
     template: { fromUrl: 'filter-shell.html' },
 });
+export = FilterShellComponent;

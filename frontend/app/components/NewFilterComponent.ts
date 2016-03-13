@@ -1,6 +1,8 @@
-///<reference path="../services/FilterIndex.ts"/>
-///<reference path="../filters/Filter.ts"/>
-///<reference path="../utils/assert.ts"/>
+import CompoundFilter = require("../filters/CompoundFilter");
+import Filter = require("../filters/Filter");
+import {assertHas} from "../utils/assert";
+import {FilterIndexSearchResult} from "../services/FilterIndex";
+import {filterIndex} from "../services/FilterIndex";
 
 class NewFilterComponent {
     parentFilter: CompoundFilter;
@@ -26,7 +28,7 @@ class NewFilterComponent {
     }
 
     search() {
-        const matches = FilterIndexInstance.search(this.query)
+        const matches = filterIndex.search(this.query)
         this.matches = matches;
         return matches;
     }
@@ -36,3 +38,5 @@ ko.components.register('new-filter', {
     viewModel: NewFilterComponent,
     template: { fromUrl: 'new-filter.html' },
 });
+
+export = NewFilterComponent;

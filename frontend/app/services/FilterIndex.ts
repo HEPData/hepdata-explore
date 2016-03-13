@@ -1,16 +1,18 @@
-///<reference path="../filters/all-filters.ts"/>
+import Filter = require("../filters/Filter");
+import KeywordFilter = require("../filters/KeywordFilter");
+import AllFilter = require("../filters/AllFilter");
 
 interface FilterIndexRecordDefinition {
     filterClass: typeof Filter
     description: string
 }
 
-interface FilterIndexRecord extends FilterIndexRecordDefinition{
+export interface FilterIndexRecord extends FilterIndexRecordDefinition{
     id: number // automatically assigned
     name: string // extracted from getLongName()
 }
 
-interface FilterIndexSearchResult {
+export interface FilterIndexSearchResult {
     match: FilterIndexRecord
     score: number
 }
@@ -58,9 +60,9 @@ class FilterIndex {
         return el.textContent;
     }
 }
-const FilterIndexInstance = new FilterIndex();
+export const filterIndex = new FilterIndex();
 
-FilterIndexInstance.populate([
+filterIndex.populate([
     {
         filterClass: KeywordFilter,
         description: `Each HEPData table has a series of keywords. This filter allows you to filter by one of these.`

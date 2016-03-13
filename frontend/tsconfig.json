@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "amd",
     "target": "es5",
     "sourceMap": true,
-    "out": "app.js"
+    "outDir": "build/"
   },
   "exclude": [
     "node_modules"
   ],
   "files": [
-    "app.ts"
+    "app/app.ts"
   ]
 }

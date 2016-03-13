@@ -1,17 +1,21 @@
-///<reference path="isInstance.ts"/>
-function AssertionError(message) {
+import isInstance = require('./isInstance');
+import typeOf = require('./typeOf');
+
+export function AssertionError(message) {
     this.name = 'AssertionError';
     this.message = message;
     this.stack = (<any>new Error()).stack;
 }
 AssertionError.prototype = new Error();
 
-interface PropertyDeclaration {
+export interface PropertyDeclaration {
     name: string;
     type: typeof String | typeof Object | typeof Number | typeof Boolean;
 }
 
-function assertHas(object: Object, properties: (PropertyDeclaration|string)[]) {
+export function assertHas(object: Object,
+                          properties: (PropertyDeclaration|string)[])
+{
     if (object === undefined) {
         throw new AssertionError('object is undefined');
     }
@@ -32,12 +36,9 @@ function assertHas(object: Object, properties: (PropertyDeclaration|string)[]) {
                     '" in object.');
         }
         if (property.type !== null && !isInstance(value, property.type)) {
-            const type = (typeof value != 'object' ?
-                typeof value :
-                value.constructor.name);
-
             throw new AssertionError('Property "' + property.name + '" has' +
-                ' type "' + type + '"')
+                ' type "' + typeOf(value).name + '" but should be instance of' +
+                ' "' + (<any>property.type).name);
         }
     }
 }

@@ -1,10 +1,14 @@
-///<reference path="typings/browser.d.ts"/>
-///<reference path="template-loader.ts"/>
-///<reference path="components/all-components.ts"/>
-///<reference path="filters/Filter.ts"/>
-///<reference path="filters/KeywordFilter.ts"/>
-///<reference path="filters/AllFilter.ts"/>
-///<reference path="services/FilterIndex.ts"/>
+///<reference path="../typings/browser.d.ts"/>
+
+import Filter = require("filters/Filter");
+import AllFilter = require("filters/AllFilter");
+import KeywordFilter = require("filters/KeywordFilter");
+
+// Ensure template loading works
+import 'base/templateFromUrlLoader';
+
+// Ensure components are pulled as a dependencies
+import 'components/all-components';
 
 class AppViewModel {
     rootFilter: Filter;
@@ -32,10 +36,12 @@ class AppViewModel {
     }
 }
 
-window.onhashchange = function() {
+window.onhashchange = function () {
     console.log('User changed hash:');
     console.log(location.hash);
-}
+};
 
 const app = new AppViewModel();
+export = app;
+
 ko.applyBindings(app);

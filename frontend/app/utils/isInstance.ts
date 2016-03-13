@@ -7,9 +7,4 @@ function isInstance(object: any, classType: any) {
         return object instanceof classType;
     }
 }
-
-function typeOf(value: any) {
-    return (typeof value != 'object' ?
-        typeof value :
-        value.constructor);
-}
+export = isInstance;

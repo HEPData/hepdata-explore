@@ -1,4 +1,4 @@
-///<reference path="filters/Filter.ts"/>
+import Filter = require("../filters/Filter");
 
 interface ComponentRef {
     name: string;
@@ -6,3 +6,4 @@ interface ComponentRef {
         filter: Filter
     };
 }
+export = ComponentRef

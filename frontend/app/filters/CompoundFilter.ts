@@ -1,4 +1,4 @@
-///<reference path="Filter.ts"/>
+import Filter = require("./Filter");
 
 abstract class CompoundFilter extends Filter {
     children: Filter[];
@@ -17,3 +17,4 @@ abstract class CompoundFilter extends Filter {
         return this.children.length == 0;
     }
 }
+export = CompoundFilter;

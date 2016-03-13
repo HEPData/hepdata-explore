@@ -1,9 +1,5 @@
-///<reference path="../ComponentRef.ts"/>
-
-interface DslParam {
-    key: string;
-    value: string;
-}
+import DslParam = require("../app/base/DslParam");
+import ComponentRef = require("../app/base/ComponentRef");
 
 abstract class Filter {
     // Can't be defined in TypeScript... so there you are.
@@ -52,3 +48,5 @@ abstract class Filter {
         return true;
     }
 }
+
+export = Filter;

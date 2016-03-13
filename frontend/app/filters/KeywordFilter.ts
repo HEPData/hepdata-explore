@@ -1,4 +1,4 @@
-///<reference path="Filter.ts"/>
+import Filter = require("./Filter");
 
 class KeywordFilter extends Filter {
     keyword: string;
@@ -30,3 +30,4 @@ class KeywordFilter extends Filter {
         }
     }
 }
+export = KeywordFilter;

@@ -1,6 +1,3 @@
-/**
- * Created by ntrrgc on 13/03/16.
- */
 var templateFromUrlLoader = {
     loadTemplate: function(name, templateConfig, callback) {
         if (templateConfig.fromUrl) {
@@ -21,3 +18,5 @@ var templateFromUrlLoader = {
 
 // Register it
 ko.components.loaders.unshift(templateFromUrlLoader);
+
+export = templateFromUrlLoader;

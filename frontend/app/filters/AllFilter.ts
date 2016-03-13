@@ -1,4 +1,4 @@
-///<reference path="CompoundFilter.ts"/>
+import CompoundFilter = require("./CompoundFilter");
 
 class AllFilter extends CompoundFilter {
     static getLongName() {
@@ -19,3 +19,4 @@ class AllFilter extends CompoundFilter {
         }
     }
 }
+export = AllFilter;
