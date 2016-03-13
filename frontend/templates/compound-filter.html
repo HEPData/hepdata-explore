@@ -1,9 +1,9 @@
 <div data-bind="attr: {class: flagClasses}">
     <span data-bind="text: flagText"></span>
 </div>
-<div class="content" data-bind="foreach: filter().children">
+<div class="content" data-bind="foreach: filter.children">
     <filter-shell params="{
         filter: $data,
-        parentFilter: $parent.filter()
+        parentFilter: $parent.filter
     }"></filter-shell>
 </div>

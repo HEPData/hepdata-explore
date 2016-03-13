@@ -1,8 +1,9 @@
 class KeywordFilterComponent {
-    filter: KnockoutObservable<KeywordFilter>;
+    filter: KeywordFilter;
 
     constructor(params:any) {
-        this.filter = ko.observable(params.filter);
+        this.filter = params.filter;
+        ko.track(this);
     }
 }
 

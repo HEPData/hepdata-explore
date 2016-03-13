@@ -1,14 +1,15 @@
 ///<reference path="Filter.ts"/>
 
 abstract class CompoundFilter extends Filter {
-    children: KnockoutObservableArray<Filter>;
+    children: Filter[];
 
     constructor(children: Filter[] = null) {
         super();
-        this.children = ko.observableArray(children || []);
+        this.children = children || [];
+        ko.track(this);
     }
 
     getDslItems() {
-        return this.children();
+        return this.children;
     }
 }

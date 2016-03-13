@@ -3,6 +3,7 @@
   "dependencies": {},
   "ambientDependencies": {
     "jquery": "registry:dt/jquery#1.10.0+20160303223636",
-    "knockout": "registry:dt/knockout#3.2.0+20150312193415"
+    "knockout": "registry:dt/knockout#3.2.0+20150312193415",
+    "knockout.es5": "registry:dt/knockout.es5#0.0.0+20141027175319"
   }
 }

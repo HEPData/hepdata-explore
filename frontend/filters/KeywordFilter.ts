@@ -1,11 +1,12 @@
 ///<reference path="Filter.ts"/>
 
 class KeywordFilter extends Filter {
-    keyword: KnockoutObservable<string>;
+    keyword: string;
 
     constructor(keyword: string = '') {
         super();
-        this.keyword = ko.observable(keyword);
+        this.keyword = keyword;
+        ko.track(this);
     }
 
     getLongName() {
@@ -18,7 +19,7 @@ class KeywordFilter extends Filter {
 
     getDslParams() {
         return [
-            {key: 'keyword', value: this.keyword()},
+            {key: 'keyword', value: this.keyword},
         ];
     }
 
