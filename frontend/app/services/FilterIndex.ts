@@ -74,6 +74,13 @@ class FilterIndex {
         })
     }
 
+    public returnAll(): FilterIndexSearchResult[] {
+        return this.database.map(record => ({
+            match: record,
+            score: null,
+        }));
+    }
+
     private static stripHtmlTags(html) {
         const el = document.createElement('div');
         el.innerHTML = html;

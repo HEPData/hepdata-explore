@@ -1,7 +1,8 @@
 <form data-bind="submit: addSelectedFilter">
-    <input data-bind="textInput: query">
+    <input data-bind="textInput: query, hasFocus: queryFocused"
+           placeholder="Add new filter...">
 </form>
-<ul class="matches" data-bind="foreach: search()">
+<ul class="matches" data-bind="foreach: getMatches()">
     <li><a data-bind="click: $parent.addThisFilter">
         <b data-bind="text: match.name"></b>
         <p data-bind="html: match.description"></p>

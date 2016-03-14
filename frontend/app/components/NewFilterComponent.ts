@@ -6,8 +6,9 @@ import {filterIndex} from "../services/FilterIndex";
 
 class NewFilterComponent {
     parentFilter: CompoundFilter;
-    query = 'logical';
-    matches: FilterIndexSearchResult[] = [];
+    query = '';
+    queryFocused: KnockoutObservable<boolean>;
+    private _searchMatches: FilterIndexSearchResult[] = [];
 
     constructor(params:any) {
         assertHas(params, ['parentFilter']);
@@ -18,24 +19,35 @@ class NewFilterComponent {
         this.addThisFilter = this.addThisFilter.bind(this);
 
         ko.track(this);
+        this.queryFocused = ko.observable(false);
     }
 
     addSelectedFilter() {
-        if (this.matches.length > 0) {
-            this.addThisFilter(this.matches[0]);
+        if (this._searchMatches.length > 0) {
+            this.addThisFilter(this._searchMatches[0]);
         }
     }
 
     addThisFilter(searchResult: FilterIndexSearchResult) {
         const filterClass = <any>searchResult.match.filterClass;
-        console.log(this);
         this.parentFilter.children.push(<Filter>new filterClass());
     }
 
     search() {
-        const matches = filterIndex.search(this.query)
-        this.matches = matches;
+        const matches = filterIndex.search(this.query);
+        this._searchMatches = matches;
         return matches;
+    }
+
+    getMatches(): FilterIndexSearchResult[] {
+        console.log('miau');
+        if (this.query != '') {
+            return this.search();
+        } else if (this.queryFocused()) {
+            return filterIndex.returnAll();
+        } else {
+            return [];
+        }
     }
 }
 
