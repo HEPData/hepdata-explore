@@ -59,3 +59,9 @@ body {
 he-app > filter-shell {
     width: 360px;
 }
+
+new-filter .matches a {
+    display: block;
+    cursor: pointer;
+    background-color: #D9FFB7;
+}
