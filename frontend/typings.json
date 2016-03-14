@@ -6,7 +6,7 @@
     "jquery": "registry:dt/jquery#1.10.0+20160303223636",
     "knockout": "registry:dt/knockout#3.2.0+20150312193415",
     "knockout.es5": "registry:dt/knockout.es5#0.0.0+20141027175319",
-    "lodash": "registry:dt/lodash#3.10.0+20160308151359",
+    "lodash": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/lodash/lodash.d.ts",
     "lunr": "registry:dt/lunr#0.5.4+20140720101328"
   }
 }
