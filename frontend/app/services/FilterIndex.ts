@@ -5,6 +5,7 @@ import AllFilter = require("../filters/AllFilter");
 interface FilterIndexRecordDefinition {
     filterClass: typeof Filter
     description: string
+    tags: string[]
 }
 
 export interface FilterIndexRecord extends FilterIndexRecordDefinition{
@@ -18,15 +19,25 @@ export interface FilterIndexSearchResult {
 }
 
 class FilterIndex {
-    private index: lunr.Index;
+    private indexText: lunr.Index;
+    private indexTags: lunr.Index;
     private database: FilterIndexRecord[] = [];
 
     constructor() {
-        this.index = lunr(function() {
+        // Searches for text, ignoring a defined set of stopwords
+        this.indexText = lunr(function() {
             this.field('name', {boost: 10});
             this.field('description');
             this.ref('id');
         });
+
+        // Index by manually chosen tags which are thought to be usual when
+        // searching for filters but could be in the stopwords set.
+        this.indexTags = lunr(function() {
+            this.field('tags');
+            this.ref('id');
+        });
+        this.indexTags.pipeline.remove(lunr.stopWordFilter);
     }
 
     public populate(records: FilterIndexRecordDefinition[]) {
@@ -37,16 +48,25 @@ class FilterIndex {
             record.name = record.filterClass.getLongName();
 
             this.database.push(record);
-            this.index.add(_.defaults({
+            this.indexText.add(_.defaults({
                 // Strip HTML tags in the index
                 description: FilterIndex.stripHtmlTags(record.description),
             }, record));
+            this.indexTags.add({
+                id: record.id,
+                tags: record.tags,
+            });
         }
     }
 
     public search(query: string): FilterIndexSearchResult[] {
-        const results = this.index.search(query);
-        return results.map((result) => {
+        const resultsTags = this.indexTags.search(query);
+        const resultsText = this.indexText.search(query);
+
+        // Merge the results. Tags matches take priority.
+        const resultsMerged = _.uniqBy(resultsTags.concat(resultsText),
+            'ref');
+        return resultsMerged.map((result) => {
             return {
                 match: this.database[result.ref],
                 score: result.score,
@@ -65,10 +85,12 @@ export const filterIndex = new FilterIndex();
 filterIndex.populate([
     {
         filterClass: KeywordFilter,
-        description: `Each HEPData table has a series of keywords. This filter allows you to filter by one of these.`
+        description: `Each HEPData table has a series of keywords. This filter allows you to filter by one of these.`,
+        tags: ['keyword'],
     },
     {
         filterClass: AllFilter,
-        description: `Performs a logical <code>AND</code>. This compound filter matches a result if it matches <b>all</b> the filters inside it.`
+        description: `Performs a logical <code>AND</code>. This compound filter matches a result if it matches <b>all</b> the filters inside it.`,
+        tags: ['all', 'and'],
     },
 ]);
