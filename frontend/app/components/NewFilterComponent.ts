@@ -12,7 +12,6 @@ class NewFilterComponent {
     constructor(params:any) {
         assertHas(params, ['parentFilter']);
         this.parentFilter = params.parentFilter;
-        console.log(this.parentFilter);
         ko.track(this);
     }
 
