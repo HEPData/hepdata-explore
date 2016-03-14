@@ -12,6 +12,11 @@ class NewFilterComponent {
     constructor(params:any) {
         assertHas(params, ['parentFilter']);
         this.parentFilter = params.parentFilter;
+
+        // Knockout loses the this binding when invoking click callbacks
+        this.addSelectedFilter = this.addSelectedFilter.bind(this);
+        this.addThisFilter = this.addThisFilter.bind(this);
+
         ko.track(this);
     }
 
@@ -23,6 +28,7 @@ class NewFilterComponent {
 
     addThisFilter(searchResult: FilterIndexSearchResult) {
         const filterClass = <any>searchResult.match.filterClass;
+        console.log(this);
         this.parentFilter.children.push(<Filter>new filterClass());
     }
 
