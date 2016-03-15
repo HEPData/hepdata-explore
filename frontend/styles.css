@@ -352,3 +352,7 @@ input {
 new-filter {
     display: block;
 }
+
+filter-shell.gu-mirror > .head {
+    background: #cfced5;
+}
