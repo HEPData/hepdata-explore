@@ -31,7 +31,7 @@ text {
     width: 340px;
     /* padding: 15px; */
     box-sizing: border-box;
-    /* overflow-y: scroll; */
+    overflow-y: auto;
 }
 
 body {
