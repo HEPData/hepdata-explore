@@ -3,7 +3,7 @@
            placeholder="Add new filter...">
 </form>
 <ul class="matches" data-bind="foreach: getMatches()">
-    <li><a data-bind="click: $parent.addThisFilter" tabindex="0">
+    <li><a data-bind="event: {mousedown: $parent.addThisFilter}" tabindex="0">
         <b data-bind="text: match.name"></b>
         <p data-bind="html: match.description"></p>
     </a></li>

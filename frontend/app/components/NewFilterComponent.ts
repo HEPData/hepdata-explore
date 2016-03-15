@@ -8,7 +8,6 @@ class NewFilterComponent {
     parentFilter: CompoundFilter;
     query = '';
     queryFocused: KnockoutObservable<boolean>;
-    queryFocusedLagged: boolean = false;
     private _searchMatches: FilterIndexSearchResult[] = [];
 
     constructor(params:any) {
@@ -20,11 +19,7 @@ class NewFilterComponent {
         this.addThisFilter = this.addThisFilter.bind(this);
 
         ko.track(this);
-        this.queryFocused = ko.observable(false);
-        this.queryFocused.subscribe((value) => {
-            // TODO: Use something more reliable
-            setTimeout(() => { this.queryFocusedLagged = value}, 200);
-        });
+        this.queryFocused = ko.observable(true);
     }
 
     addSelectedFilter() {
@@ -48,7 +43,7 @@ class NewFilterComponent {
     getMatches(): FilterIndexSearchResult[] {
         if (this.query != '') {
             return this.search();
-        } else if (this.queryFocusedLagged) {
+        } else if (this.queryFocused()) {
             return filterIndex.returnAll();
         } else {
             return [];
