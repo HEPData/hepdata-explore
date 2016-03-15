@@ -343,7 +343,7 @@ filter-shell filter-shell filter-shell .head {
     background: #DEE0E0;
 }
 
-new-filter input {
+input {
     width: 100%;
     border: 1px solid lightgray;
 }
