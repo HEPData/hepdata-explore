@@ -10,13 +10,38 @@
     <script src="lib/lodash.js"></script>
     <script src="lib/dragula.js"></script>
     <script src="lib/knockout-dragula.js"></script>
+    <link rel="stylesheet" href="invenio.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<filter-shell params="{filter: rootFilter}"></filter-shell>
 
-<div style="border: 1px solid lightgray"
-     data-bind="text: currentFilterUri"></div>
+<div id="fake-header">
+    <img src="img/hepdata_logo.svg" alt="" height="54">
+</div>
+
+<div class="hep_breadcrumbs">
+    <ul>
+        <li id="topbar-title">Data Query Engine</li>
+        <li id="number-records-box">
+            <span id="number-records">0</span> records found.
+        </li>
+        <li class="pull-right">
+            <a id="download-yaml" class="btn btn-primary" href="#">Download selection (YAML)</a>
+        </li>
+    </ul>
+</div>
+
+<div class="explore-body">
+
+    <div class="sidebar">
+
+        <filter-shell params="{filter: rootFilter}"></filter-shell>
+
+    </div>
+
+</div>
+
+<div id="fake-footer">HEPData Explore</div>
 
 <script src="lib/require.js" data-main="build/app"></script>
 </body>
