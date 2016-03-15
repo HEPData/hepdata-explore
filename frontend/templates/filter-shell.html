@@ -1,7 +1,9 @@
 <div>
     <span data-bind="text: filter.getLongName()"></span>
     <!-- ko if: isRemoveAllowed() -->
-    <button data-bind="click: removeFilter">Delete</button>
+    <button data-bind="click: removeFilter">
+        <i class="fa fa-trash-o"></i>
+    </button>
     <!-- /ko -->
 </div>
 <div class="body" data-bind="
