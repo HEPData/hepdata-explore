@@ -321,7 +321,7 @@ new-filter .matches a:hover {
     color: white;
 }
 
-button.remove-filter:hover {
+button.remove-filter:hover, button.remove-filter:focus {
     background: #F8F8F8;
     /* color: white; */
 }
