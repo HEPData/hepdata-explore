@@ -243,7 +243,7 @@ new-filter .matches a {
     cursor: pointer;
     background-color: #E3E8DF;
     margin: 0;
-    padding: 4px;
+    padding: 4px 4px;
 }
 
 .gu-mirror {
@@ -346,4 +346,9 @@ filter-shell filter-shell filter-shell .head {
 input {
     width: 100%;
     border: 1px solid lightgray;
+    padding: 1px 3px;
+}
+
+new-filter {
+    display: block;
 }
