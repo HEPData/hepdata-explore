@@ -22,8 +22,8 @@ class NewFilterComponent {
         ko.track(this);
         this.queryFocused = ko.observable(false);
         this.queryFocused.subscribe((value) => {
-            console.log(value);
-            setTimeout(() => { this.queryFocusedLagged = value}, 151);
+            // TODO: Use something more reliable
+            setTimeout(() => { this.queryFocusedLagged = value}, 200);
         });
     }
 
@@ -36,6 +36,7 @@ class NewFilterComponent {
     addThisFilter(searchResult: FilterIndexSearchResult) {
         const filterClass = <any>searchResult.match.filterClass;
         this.parentFilter.children.push(<Filter>new filterClass());
+        this.query = '';
     }
 
     search() {
