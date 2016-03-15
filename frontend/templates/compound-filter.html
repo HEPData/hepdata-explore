@@ -2,12 +2,16 @@
     <span data-bind="text: flagText"></span>
 </div>
 <div class="content">
-    <div class="children-filter" data-bind="foreach: filter.children">
+    <div class="children-filter" data-bind="dragula: {
+        data: filter.children,
+        group: 'filters'
+    }" style="min-height: 100px;">
         <filter-shell params="{
             filter: $data,
             parentFilter: $parent.filter
         }"></filter-shell>
     </div>
+
 
     <new-filter params="{
         parentFilter: filter
