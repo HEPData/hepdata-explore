@@ -212,7 +212,7 @@ filter-shell .body {
 
 .compound-filter .flag span {
     transform: rotate(90deg) translate(0px, -17px);
-    transform-origin: top left;
+    transform-origin: 0 0px;
     display: block;
     width: 70px;
     /* height:100px; */
@@ -224,6 +224,7 @@ filter-shell .body {
     box-sizing: border-box;
     font-weight: bold;
     font-size: 17px;
+    line-height: 20px;
 }
 
 .compound-filter .content {
