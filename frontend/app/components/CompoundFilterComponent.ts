@@ -7,6 +7,15 @@ function htmlContains(a: HTMLElement, b: HTMLElement){
         !!(a.compareDocumentPosition(b) & 16);
 }
 
+function insideElementOfClass(element: HTMLElement, className: string) {
+    if (element !== null) {
+        return element.classList.contains('drag-handle')
+            || insideElementOfClass(element.parentElement, className);
+    } else {
+        return false;
+    }
+}
+
 class CompoundFilterComponent {
     filter: CompoundFilter;
     flagText: String;
@@ -23,11 +32,18 @@ class CompoundFilterComponent {
     }
 
     // tip from http://jsfiddle.net/cfenzo/7chaomnz/
-    dragulaAccept(el: HTMLElement, target: HTMLElement, source: HTMLElement,
-                  sibling: HTMLElement)
+    dragulaAccepts(el: HTMLElement, target: HTMLElement, source: HTMLElement,
+                   sibling: HTMLElement)
     {
         // prevent dragged containers from trying to drop inside itself
         return !htmlContains(el,target);
+    }
+
+    dragulaMoves(el: HTMLElement, source: HTMLElement, handle: HTMLElement,
+                 sibling: HTMLElement)
+    {
+        // Only allow to move filters dragging their drag handles
+        return insideElementOfClass(handle, 'drag-handle');
     }
 }
 
