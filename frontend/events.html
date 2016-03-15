@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event test</title>
+
+    <script src="lib/jquery-1.12.1.js"></script>
+
+</head>
+<body>
+<form>
+    <input type="text">
+    <ul>
+        <li>
+            <a tabindex="0">Link text</a>
+        </li>
+    </ul>
+</form>
+
+<script>
+    function focused(ev) {
+        console.log('Focused:');
+        console.log(this);
+    }
+    function blurred(ev) {
+        console.log('Blurred:');
+        console.log(this);
+    }
+    function clicked(ev) {
+        console.log('Clicked:');
+        console.log(this);
+    }
+    $('input,a')
+        .on('focus', focused)
+        .on('blur', blurred)
+        .on('mousedown', clicked)
+</script>
+</body>
+</html>
