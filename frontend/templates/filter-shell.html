@@ -1,8 +1,15 @@
-<div>
-    <span class="drag-handle"><i class="fa fa-ellipsis-v"></i></span>
-    <span data-bind="text: filter.getLongName()"></span>
+<div class="head">
+    <!-- ko if: !isRoot() -->
+    <span class="drag-handle">
+        <img src="img/drag-handle.svg">
+    </span>
+    <!-- /ko -->
+    <span class="filter-name" data-bind="
+        text: filter.getLongName(),
+        css: {'root-filter': isRoot()}
+    "></span>
     <!-- ko if: isRemoveAllowed() -->
-    <button data-bind="click: removeFilter">
+    <button data-bind="click: removeFilter" class="remove-filter">
         <i class="fa fa-trash-o"></i>
     </button>
     <!-- /ko -->

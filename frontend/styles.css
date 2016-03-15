@@ -29,9 +29,9 @@ text {
     top: 0;
     bottom: 0;
     width: 340px;
-    padding: 15px;
+    /* padding: 15px; */
     box-sizing: border-box;
-    overflow-y: scroll;
+    /* overflow-y: scroll; */
 }
 
 body {
@@ -176,13 +176,13 @@ svg {
 
 
 filter-shell {
-    border: 1px solid lightgray;
-    padding: 10px;
+    /* border: 1px solid lightgray; */
+    /* padding: 10px; */
     display: block;
 }
 
 filter-shell .body {
-    border: 1px solid lightgray;
+    /* border: 1px solid lightgray; */
     min-height: 100px;
     position: relative;
 }
@@ -240,7 +240,9 @@ he-app > filter-shell {
 new-filter .matches a {
     display: block;
     cursor: pointer;
-    background-color: #D9FFB7;
+    background-color: #E3E8DF;
+    margin: 0;
+    padding: 4px;
 }
 
 .gu-mirror {
@@ -264,4 +266,83 @@ new-filter .matches a {
     opacity: 0.2;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
     filter: alpha(opacity=20);
+}
+filter-shell > .head {
+    padding: 5px 5px 5px 0px;
+    background: #2C3E50;
+}
+
+.drag-handle {
+    width: 20px;
+    display: inline-block;
+    text-align: center;
+    /* background: white; */
+    color: #7F4995;
+    cursor: move;
+    top: -1px;
+    position: relative;
+    margin: 0;
+}
+
+span.filter-name {
+    font-size: 15px;
+    font-weight: bold;
+    color: #7F4995;
+    margin-left: 0;
+    display: inline-block;
+    margin-left: -4px;
+}
+
+button.remove-filter {
+    float: right;
+    border: none;
+    background: none;
+    color: #7F4995;
+}
+
+ul.matches {
+    list-style: none;
+    margin: 0;
+}
+
+ul.matches > li {
+    margin: 0;
+    padding: 0;
+}
+
+.matches p {
+    margin: 0;
+}
+
+new-filter .matches a:hover {
+    text-decoration: none;
+    background: #4980D3;
+    color: white;
+}
+
+button.remove-filter:hover {
+    background: #F8F8F8;
+    /* color: white; */
+}
+
+.body.keyword-filter-body {
+    padding: 5px;
+}
+
+span.filter-name.root-filter {
+    margin-left: 6px;
+    color: white;
+}
+
+filter-shell filter-shell .head {
+    background: #D0D3D3;
+}
+
+filter-shell filter-shell filter-shell .head {
+    background: #DEE0E0;
+}
+
+new-filter input {
+    width: 100%;
+    border: 1px solid lightgray;
 }
