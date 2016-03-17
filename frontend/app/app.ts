@@ -11,6 +11,9 @@ import 'base/templateFromUrlLoader';
 import 'components/all-components';
 import {IndepVarFilter} from "./filters/filter-factories";
 
+// Ensure template utility functions are pulled too
+import 'utils/recordCountFormat';
+
 class AppViewModel {
     rootFilter: Filter;
 
@@ -26,7 +29,6 @@ class AppViewModel {
         ]);
         this.currentFilterUri = ko.computed(this.calcCurrentFilterUri, this);
         this.currentFilterUri.subscribe((newFilterUri: string) => {
-            console.log('Changed URL');
             history.replaceState(null, null, '#' + newFilterUri)
         })
     }

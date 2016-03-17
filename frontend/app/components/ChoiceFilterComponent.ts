@@ -3,7 +3,7 @@ import {elastic} from "../services/Elastic";
 
 interface Suggestion {
     suggestedValue: string;
-    relativeFrequencyFullDB: number;
+    freqDividedByModeFullDB: number;
     absoluteFrequencyFullDB: number;
 }
 
@@ -16,10 +16,10 @@ class ChoiceFilterComponent {
     getAllPossibleValues(): Promise<Suggestion[]> {
         return elastic.fetchAllIndepVars()
             .then((buckets) => {
-                const totalRecords = _.sum(_.map(buckets, b => b.count));
+                const maxCount = _.maxBy(buckets, b => b.count).count;
                 return buckets.map((bucket) => ({
                     suggestedValue: bucket.name,
-                    relativeFrequencyFullDB: bucket.count / totalRecords,
+                    freqDividedByModeFullDB: bucket.count / maxCount,
                     absoluteFrequencyFullDB: bucket.count,
                 }));
             });

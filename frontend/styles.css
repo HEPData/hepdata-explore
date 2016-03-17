@@ -356,3 +356,34 @@ new-filter {
 filter-shell.gu-mirror > .head {
     background: #cfced5;
 }
+
+.suggestions .bar {
+    display: block;
+    height: 2px;
+    background: #7F4995;
+}
+
+ul.suggestions {
+    padding-left: 0;
+    list-style: none;
+}
+
+.suggestion {
+    padding: 5px;
+    cursor: pointer;
+}
+
+.absolute-freq {
+    float: right;
+    font-size: 12px;
+}
+
+.suggested-value {
+    float: left;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.suggestion:focus, .suggestion:hover {
+    background: white;
+}
