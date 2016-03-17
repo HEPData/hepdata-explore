@@ -1,6 +1,8 @@
 import Filter = require("../filters/Filter");
 import KeywordFilter = require("../filters/KeywordFilter");
 import AllFilter = require("../filters/AllFilter");
+import {IndepVarFilter} from "../filters/filter-factories";
+
 
 interface FilterIndexRecordDefinition {
     filterClass: typeof Filter
@@ -100,4 +102,9 @@ filterIndex.populate([
         description: `Performs a logical <code>AND</code>. This compound filter matches a result if it matches <b>all</b> the filters inside it.`,
         tags: ['all', 'and'],
     },
+    {
+        filterClass: IndepVarFilter,
+        description: `Returns data points with for a certain independent variable.`,
+        tags: ['x', 'indep', 'independent', 'variable'],
+    }
 ]);

@@ -9,6 +9,7 @@ import 'base/templateFromUrlLoader';
 
 // Ensure components are pulled as a dependencies
 import 'components/all-components';
+import {IndepVarFilter} from "./filters/filter-factories";
 
 class AppViewModel {
     rootFilter: Filter;
@@ -21,12 +22,7 @@ class AppViewModel {
 
     constructor() {
         this.rootFilter = new AllFilter([
-            new KeywordFilter('miau'),
-            new KeywordFilter('guau'),
-            new AllFilter([
-                new KeywordFilter('miau'),
-                new KeywordFilter('guau'),
-            ]),
+            new IndepVarFilter(),
         ]);
         this.currentFilterUri = ko.computed(this.calcCurrentFilterUri, this);
         this.currentFilterUri.subscribe((newFilterUri: string) => {

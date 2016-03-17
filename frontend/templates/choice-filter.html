@@ -1,0 +1,14 @@
+<form>
+    <input data-bind="typedValue">
+    <ul class="suggestions" data-bind="foreach: suggestions">
+        <li>
+            <div class="bar total" data-bind="style: {
+                width: relativeFrequencyFullDB * 100 + '%'
+            }"></div>
+            <div class="suggested-value"
+                 data-bind="text: suggestedValue"></div>
+            <div class="absolute-freq"
+                 data-bind="text: absoluteFrequencyFullDB"></div>
+        </li>
+    </ul>
+</form>

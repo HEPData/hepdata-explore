@@ -6,9 +6,7 @@
     "outDir": "build/"
   },
   "exclude": [
-    "node_modules"
-  ],
-  "files": [
-    "app/app.ts"
+    "node_modules",
+    "typings"
   ]
 }
