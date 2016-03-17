@@ -32,7 +32,6 @@ class ChoiceFilterComponent {
         this.getAllPossibleValues()
             .then((values) => {
                 this.suggestions = values;
-                console.log(values);
             });
     }
 }
