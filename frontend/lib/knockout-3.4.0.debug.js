@@ -1247,7 +1247,26 @@ function applyExtenders(requestedExtenders) {
 
 ko.exportSymbol('extenders', ko.extenders);
 
+ko.subscriptionCount = 0;
+
+ko._recordingSubscriptions = false;
+ko._recordedSubscriptions = [];
+
+ko.startRecordingSubscriptions = function startRecordingSubscriptions() {
+    ko._recordingSubscriptions = true;
+    ko._recordedSubscriptions = [];
+}
+
+ko.stopRecordingSubscriptions = function stopRecordingSubscriptions() {
+    ko._recordingSubscriptions = false;
+    return ko._recordedSubscriptions;
+}
+
 ko.subscription = function (target, callback, disposeCallback) {
+    ko.subscriptionCount += 1;
+    if (ko._recordingSubscriptions) {
+        ko._recordedSubscriptions.push(this);
+    }
     this._target = target;
     this.callback = callback;
     this.disposeCallback = disposeCallback;
@@ -1255,6 +1274,19 @@ ko.subscription = function (target, callback, disposeCallback) {
     ko.exportProperty(this, 'dispose', this.dispose);
 };
 ko.subscription.prototype.dispose = function () {
+    if (!this.isDisposed) {
+        ko.subscriptionCount -= 1;
+
+        if (ko._recordingSubscriptions) {
+            var i = ko._recordedSubscriptions.indexOf(this);
+            if (i != -1) {
+                ko._recordedSubscriptions.splice(i, 1);
+            } else {
+                console.warn('Removed a subscription that was created before' +
+                  ' recording.');
+            }
+        }
+    }
     this.isDisposed = true;
     this.disposeCallback();
 };
