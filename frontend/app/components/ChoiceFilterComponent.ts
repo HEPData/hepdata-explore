@@ -10,7 +10,7 @@ interface Suggestion {
 class ChoiceFilterComponent {
     filter: ChoiceFilter;
 
-    valueTyped: string;
+    valueTyped: string = '';
     suggestions: Suggestion[] = [];
 
     getAllPossibleValues(): Promise<Suggestion[]> {
