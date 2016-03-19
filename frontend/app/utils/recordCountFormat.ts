@@ -10,4 +10,4 @@ export const recordCountFormat = function () {
 }();
 
 // Make it global so it can be used in templates
-window.recordCountFormat = recordCountFormat;
+(<any>window).recordCountFormat = recordCountFormat;
