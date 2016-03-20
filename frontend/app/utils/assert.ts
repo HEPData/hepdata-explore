@@ -42,3 +42,17 @@ export function assertHas(object: Object,
         }
     }
 }
+
+export function assertInstance(value: any, type: any) {
+    if (!isInstance(value, type)) {
+        throw new AssertionError('Value has' +
+            ' type "' + typeOf(value).name + '" but should be instance of' +
+            ' "' + type.name + '"');
+    }
+}
+
+export function assertDefined(value: any) {
+    if (value === undefined) {
+        throw new AssertionError('Value is undefined');
+    }
+}

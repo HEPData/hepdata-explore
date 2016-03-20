@@ -1,3 +1,4 @@
+import {assertInstance, assertDefined} from "../utils/assert";
 const KEY_ARROW_DOWN = 40;
 const KEY_ARROW_UP = 38;
 const KEY_TAB = 9;
@@ -20,6 +21,9 @@ export class AutocompleteService<SuggestionType> {
         public searchFn: (query: string) => Promise<SuggestionType[]>
         // public suggestionEqualsFn: SuggestionEquals<T>
     ) {
+        assertDefined(this.koQuery);
+        assertDefined(this.searchFn);
+        
         this.koQuery.subscribe((query: string) => {
             this.search(query);
         });

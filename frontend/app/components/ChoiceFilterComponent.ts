@@ -13,24 +13,51 @@ class ChoiceFilterComponent {
     autocomplete: AutocompleteService<ChoiceSuggestion>;
 
     valueTyped: string = '';
-    // suggestions: ChoiceSuggestion[] = [];
+    allPossibleValuesPromise: Promise<ChoiceSuggestion[]>;
+    possibleValuesIndex: lunr.Index;
 
     constructor(params: any) {
         this.filter = params.filter;
-        ko.track(this);
+        ko.track(this, ['filter', 'valueTyped']);
 
-        this.autocomplete = new AutocompleteService(
+        this.possibleValuesIndex = lunr(function() {
+            this.field('value');
+            this.ref('index');
+        });
+        this.possibleValuesIndex.pipeline.remove(lunr.stopWordFilter);
+
+        this.allPossibleValuesPromise = this.getAllPossibleValues()
+            .then((values) => {
+                values.forEach((value, index) => {
+                    this.possibleValuesIndex.add({
+                        'value': value.suggestedValue,
+                        'index': index,
+                    });
+                });
+                return values;
+            });
+
+        this.autocomplete = new AutocompleteService<ChoiceSuggestion>(
             ko.getObservable(this, 'valueTyped'),
-            (query: string) => {
-                return this.getAllPossibleValues();
-            }
+            this.search.bind(this)
         );
+    }
+
+    search(query: string): Promise<ChoiceSuggestion[]> {
+        return this.allPossibleValuesPromise
+            .then((allPossibleValues) => {
+                if (query != '') {
+                    return this.possibleValuesIndex.search(query)
+                        .map((result) => allPossibleValues[result.ref]);
+                } else {
+                    return allPossibleValues;
+                }
+            })
     }
 
     getAllPossibleValues(): Promise<ChoiceSuggestion[]> {
         return elastic.fetchAllIndepVars()
             .then((buckets) => {
-                console.log('Fetched indep vars');
                 const maxCount = _.maxBy(buckets, b => b.count).count;
                 return buckets.map((bucket) => ({
                     suggestedValue: bucket.name,
@@ -41,7 +68,7 @@ class ChoiceFilterComponent {
     }
 
     useSelectedValue() {
-        
+
     }
 
     dispose() {
