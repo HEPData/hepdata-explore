@@ -1262,6 +1262,12 @@ ko.stopRecordingSubscriptions = function stopRecordingSubscriptions() {
     return ko._recordedSubscriptions;
 }
 
+ko.getRecordedSubscriptionsWithES5Context = function() {
+   return ko._recordedSubscriptions.filter(function (it) {
+       return it._target._es5context != null;
+   });
+};
+
 ko.subscription = function (target, callback, disposeCallback) {
     ko.subscriptionCount += 1;
     if (ko._recordingSubscriptions) {
@@ -1271,6 +1277,8 @@ ko.subscription = function (target, callback, disposeCallback) {
     this.callback = callback;
     this.disposeCallback = disposeCallback;
     this.isDisposed = false;
+    this._creationTraceback = (new Error()).stack.split('\n').slice(1).join('\n');
+    this._es5context = ko._es5context;
     ko.exportProperty(this, 'dispose', this.dispose);
 };
 ko.subscription.prototype.dispose = function () {
@@ -1313,6 +1321,8 @@ var ko_subscribable_fn = {
     init: function(instance) {
         instance._subscriptions = {};
         instance._versionNumber = 1;
+        instance._creationTraceback = (new Error()).stack.split('\n').slice(1).join('\n');
+        instance._es5context = ko._es5context;
     },
 
     subscribe: function (callback, callbackTarget, event) {

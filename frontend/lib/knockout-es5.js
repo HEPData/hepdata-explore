@@ -156,8 +156,16 @@
       }
 
       var originalValue = obj[prop];
-      descriptors[prop] = (options.lazy ? createLazyPropertyDescriptor : createPropertyDescriptor)
+      try {
+        ko._es5context = {
+          obj: obj,
+          prop: prop,
+        };
+        descriptors[prop] = (options.lazy ? createLazyPropertyDescriptor : createPropertyDescriptor)
         (originalValue, prop, allObservablesForObject);
+      } finally {
+        ko._es5context = null;
+      }
 
       if (options.deep && canTrack(originalValue)) {
         wrap(originalValue, Object.keys(originalValue), options);
