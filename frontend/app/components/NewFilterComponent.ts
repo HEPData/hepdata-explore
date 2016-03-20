@@ -57,6 +57,10 @@ class NewFilterComponent {
             return [];
         }
     }
+
+    dispose() {
+        ko.untrack(this);
+    }
 }
 
 ko.components.register('new-filter', {

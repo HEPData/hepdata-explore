@@ -34,6 +34,10 @@ class ChoiceFilterComponent {
                 this.suggestions = values;
             });
     }
+
+    dispose() {
+        ko.untrack(this);
+    }
 }
 
 ko.components.register('choice-filter', {

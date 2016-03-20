@@ -7,6 +7,10 @@ class KeywordFilterComponent {
         this.filter = params.filter;
         ko.track(this);
     }
+
+    dispose() {
+        ko.untrack(this);
+    }
 }
 
 ko.components.register('keyword-filter-body', {
