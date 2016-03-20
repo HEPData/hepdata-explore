@@ -1,19 +1,23 @@
-<form>
+<form data-bind="event: {submit: useSelectedValue}">
     <input data-bind="
         textInput: valueTyped,
+        event: {keydown: autocomplete.keyPressed},
         attr: {
             placeholder: 'Filter by ' + filter.getLongName().toLowerCase() + '...'
         }">
-    <ul class="suggestions" data-bind="foreach: suggestions">
-        <li class="suggestion">
-            <div class="bar total" data-bind="style: {
-                width: freqDividedByModeFullDB * 100 + '%'
-            }"></div>
-            <div class="suggested-value"
-                 data-bind="text: suggestedValue"></div>
-            <div class="absolute-freq"
-                 data-bind="text: recordCountFormat(absoluteFrequencyFullDB)"></div>
-            <div style="clear: both"></div>
-        </li>
-    </ul>
+    <!-- ko component: {
+        name: "suggestions-box",
+        params: {
+            autocomplete: autocomplete
+        }
+    } -->
+        <div class="bar total" data-bind="style: {
+            width: freqDividedByModeFullDB * 100 + '%'
+        }"></div>
+        <div class="suggested-value"
+             data-bind="text: suggestedValue"></div>
+        <div class="absolute-freq"
+             data-bind="text: recordCountFormat(absoluteFrequencyFullDB)"></div>
+        <div style="clear: both"></div>
+    <!-- /ko -->
 </form>

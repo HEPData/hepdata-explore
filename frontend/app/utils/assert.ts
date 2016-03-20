@@ -10,7 +10,7 @@ AssertionError.prototype = new Error();
 
 export interface PropertyDeclaration {
     name: string;
-    type: typeof String | typeof Object | typeof Number | typeof Boolean;
+    type: any;
 }
 
 export function assertHas(object: Object,

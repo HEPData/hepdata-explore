@@ -1,7 +1,8 @@
 import ChoiceFilter = require("../filters/ChoiceFilter");
 import {elastic} from "../services/Elastic";
+import {AutocompleteService} from "../services/AutocompleteService";
 
-interface Suggestion {
+interface ChoiceSuggestion {
     suggestedValue: string;
     freqDividedByModeFullDB: number;
     absoluteFrequencyFullDB: number;
@@ -9,13 +10,27 @@ interface Suggestion {
 
 class ChoiceFilterComponent {
     filter: ChoiceFilter;
+    autocomplete: AutocompleteService<ChoiceSuggestion>;
 
     valueTyped: string = '';
-    suggestions: Suggestion[] = [];
+    // suggestions: ChoiceSuggestion[] = [];
 
-    getAllPossibleValues(): Promise<Suggestion[]> {
+    constructor(params: any) {
+        this.filter = params.filter;
+        ko.track(this);
+
+        this.autocomplete = new AutocompleteService(
+            ko.getObservable(this, 'valueTyped'),
+            (query: string) => {
+                return this.getAllPossibleValues();
+            }
+        );
+    }
+
+    getAllPossibleValues(): Promise<ChoiceSuggestion[]> {
         return elastic.fetchAllIndepVars()
             .then((buckets) => {
+                console.log('Fetched indep vars');
                 const maxCount = _.maxBy(buckets, b => b.count).count;
                 return buckets.map((bucket) => ({
                     suggestedValue: bucket.name,
@@ -25,14 +40,8 @@ class ChoiceFilterComponent {
             });
     }
 
-    constructor(params: any) {
-        this.filter = params.filter;
-        ko.track(this);
-
-        this.getAllPossibleValues()
-            .then((values) => {
-                this.suggestions = values;
-            });
+    useSelectedValue() {
+        
     }
 
     dispose() {

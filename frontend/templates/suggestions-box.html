@@ -1,0 +1,10 @@
+<ul class="suggestions" data-bind="foreach: autocomplete.suggestions">
+    <li class="suggestion" data-bind="css: {
+        selected: $index() === $parent.autocomplete.selectedSuggestionIx
+    }">
+        <!-- ko template: {
+            nodes: $componentTemplateNodes,
+            data: $data
+        } --><!-- /ko -->
+    </li>
+</ul>

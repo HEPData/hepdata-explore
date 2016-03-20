@@ -387,3 +387,12 @@ ul.suggestions {
 .suggestion:focus, .suggestion:hover {
     background: white;
 }
+
+.suggestion.selected {
+    background: #4980D3;
+    color: white;
+}
+
+.selected .bar.total {
+    background: #F9F9F9;
+}
