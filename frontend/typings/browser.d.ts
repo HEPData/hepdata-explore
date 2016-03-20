@@ -6,3 +6,6 @@
 /// <reference path="browser/ambient/knockout/index.d.ts" />
 /// <reference path="browser/ambient/lodash/index.d.ts" />
 /// <reference path="browser/ambient/lunr/index.d.ts" />
+/// <reference path="browser/ambient/rx-lite/index.d.ts" />
+/// <reference path="browser/ambient/rx.async/index.d.ts" />
+/// <reference path="browser/ambient/rx/index.d.ts" />
