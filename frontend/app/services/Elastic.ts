@@ -62,6 +62,7 @@ function asyncFetchElastic(varX) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', elasticUrl, true)
     return asyncFetch(xhr, JSON.stringify({
+        "size": 0,
         "query": {
             "nested": {
                 "path": "tables.groups",
@@ -197,7 +198,8 @@ export class Elastic {
                     "aggs": {
                         "variables": {
                             "terms": {
-                                "field": "tables.groups.var_x"
+                                "field": "tables.groups.var_x",
+                                "size": 10000,
                             },
                             "aggs": {
                                 "data_point_count": {

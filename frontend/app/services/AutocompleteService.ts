@@ -35,13 +35,14 @@ export class AutocompleteService<SuggestionType> {
 
     public suggestions: SuggestionType[] = [];
     public selectedSuggestionIx = 0;
+    public maxSuggestions = 20;
 
     private search(query: string): Promise<SuggestionType[]> {
         // Execute the domain specific search function
         return this.searchFn(query)
             .then((results: SuggestionType[]) => {
-                this.suggestions = results;
-                return results;
+                this.suggestions = results.slice(0, 20);
+                return this.suggestions
             })
     }
 
