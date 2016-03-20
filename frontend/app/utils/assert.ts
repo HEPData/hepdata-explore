@@ -38,7 +38,7 @@ export function assertHas(object: Object,
         if (property.type !== null && !isInstance(value, property.type)) {
             throw new AssertionError('Property "' + property.name + '" has' +
                 ' type "' + typeOf(value).name + '" but should be instance of' +
-                ' "' + (<any>property.type).name);
+                ' "' + (<any>property.type).name) + '"';
         }
     }
 }
