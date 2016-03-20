@@ -1,0 +1,16 @@
+{
+  "name": "hepdata-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "browsersync.js",
+  "scripts": {
+    "run": "node ./browsersync.js",
+    "reload": "curl http://localhost:10000/reload"
+  },
+  "author": "",
+  "license": "GPL-2.0",
+  "dependencies": {
+    "browser-sync": "^2.11.1",
+    "express": "^4.13.4"
+  }
+}
