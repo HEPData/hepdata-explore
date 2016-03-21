@@ -8,6 +8,19 @@ interface ChoiceSuggestion {
     absoluteFrequencyFullDB: number;
 }
 
+const variableSeparator = /\W+/;
+function variableTokenizer(obj: any) {
+    if (!arguments.length || obj == null || obj == undefined) {
+        return [];
+    } 
+    if (Array.isArray(obj)) {
+        return obj.map(t => lunr.utils.asString(t).toLowerCase())
+    }
+
+    return obj.toString().trim().toLowerCase().split(variableSeparator)
+}
+lunr.tokenizer.registerFunction(variableTokenizer, 'variableTokenizer');
+
 class ChoiceFilterComponent {
     filter: ChoiceFilter;
     autocomplete: AutocompleteService<ChoiceSuggestion>;
@@ -23,6 +36,7 @@ class ChoiceFilterComponent {
         this.possibleValuesIndex = lunr(function() {
             this.field('value');
             this.ref('index');
+            this.tokenizer(variableTokenizer);
         });
         this.possibleValuesIndex.pipeline.remove(lunr.stopWordFilter);
 
