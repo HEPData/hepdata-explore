@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>templ</title>
+    <script src="lib/lodash.js"></script>
+    <script src="lib/knockout-3.4.0.debug.js"></script>
+
+</head>
+<body>
+<h1>People</h1>
+<ul data-bind="template: { name: 'peopleList' }"></ul>
+
+lista
+<ul data-bind="foreach: people">
+    <li><input data-bind="value: name"></li>
+</ul>
+
+<script type="text/html" id="peopleList">
+    <% _.each(people(), function(person) { %>
+    <li>
+        <b data-bind="text: person.name"></b> is <%= person.age %> years old
+    </li>
+    <% }) %>
+</script>
+
+<p>This shows that you can use both Underscore-style evaluation (&gt;%= ... %>) <em>and</em> data-bind attributes in the same templates.</p>
+
+<script>
+    /* ---- Begin integration of Underscore template engine with Knockout. Could go in a separate file of course. ---- */
+    ko.underscoreTemplateEngine = function () { }
+    ko.underscoreTemplateEngine.prototype = ko.utils.extend(new ko.templateEngine(), {
+        renderTemplateSource: function (templateSource, bindingContext, options) {
+            // Precompile and cache the templates for efficiency
+            var precompiled = templateSource['data']('precompiled');
+            if (!precompiled) {
+                precompiled = _.template("<% with($data) { %> " + templateSource.text() + " <% } %>");
+                templateSource['data']('precompiled', precompiled);
+            }
+            // Run the template and parse its output into an array of DOM elements
+            var renderedMarkup = precompiled(bindingContext).replace(/\s+/g, " ");
+            return ko.utils.parseHtmlFragment(renderedMarkup);
+        },
+        createJavaScriptEvaluatorBlock: function(script) {
+            return "<%= " + script + " %>";
+        }
+    });
+    ko.setTemplateEngine(new ko.underscoreTemplateEngine());
+    /* ---- End integration of Underscore template engine with Knockout ---- */
+
+    var viewModel = {
+        people: ko.observableArray([
+            { name: ko.observable('Rod'), age: 123 },
+            { name: ko.observable('Jane'), age: 125 },
+        ])
+    };
+
+    ko.applyBindings(viewModel);
+</script>
+
+</body>
+</html>

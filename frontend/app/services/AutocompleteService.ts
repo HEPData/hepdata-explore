@@ -71,7 +71,7 @@ export class AutocompleteService<SuggestionType> {
                             return suggestion;
                         }
                     });
-                console.log('hit %d miss %d', hit, miss);
+                // console.log('hit %d miss %d', hit, miss);
                 return this.suggestions
             })
     }

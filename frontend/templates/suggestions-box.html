@@ -1,10 +1,12 @@
-<ul class="suggestions" data-bind="fastForEach: ko.getObservable(autocomplete, 'suggestions')">
-    <li class="suggestion" data-bind="css: {
-        selected: $index() === $parent.autocomplete.selectedSuggestionIx
-    }">
-        <!-- ko template: {
-            nodes: $componentTemplateNodes,
-            data: $data
-        } --><!-- /ko -->
-    </li>
-</ul>
+<!-- ko template: { name: 'suggestionsBox' } --><!-- /ko -->
+
+<!--<ul class="suggestions" data-bind="fastForEach: ko.getObservable(autocomplete, 'suggestions')">-->
+    <!--<li class="suggestion" data-bind="css: {-->
+        <!--selected: $index() === $parent.autocomplete.selectedSuggestionIx-->
+    <!--}">-->
+        <!--&lt;!&ndash; ko template: {-->
+            <!--nodes: $componentTemplateNodes,-->
+            <!--data: $data-->
+        <!--} &ndash;&gt;&lt;!&ndash; /ko &ndash;&gt;-->
+    <!--</li>-->
+<!--</ul>-->
