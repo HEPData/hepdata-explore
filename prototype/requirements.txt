@@ -2,3 +2,5 @@ progressbar33==2.4
 contextualized==1.1
 argh==0.26.1
 PyYAML==3.11
+elasticsearch==2.3.0
+six==1.10.0
