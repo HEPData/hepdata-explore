@@ -19,6 +19,7 @@ interface AutocompleteOptions<SuggestionType> {
     koQuery: KnockoutObservable<string>;
     searchFn: (query: string) => Promise<SuggestionType[]>;
     rankingFn: (suggestion: SuggestionType) => number;
+    keyFn: (suggestion: SuggestionType) => any;
     maxSuggestions: number;
 }
 
@@ -26,12 +27,14 @@ export class AutocompleteService<SuggestionType> {
     public koQuery: KnockoutObservable<string>;
     public searchFn: (query: string) => Promise<SuggestionType[]>;
     public rankingFn: (suggestion: SuggestionType) => number;
+    public keyFn: (suggestion: SuggestionType) => any;
     public maxSuggestions: number;
 
     constructor(options: AutocompleteOptions<SuggestionType>) {
         this.koQuery = options.koQuery;
         this.searchFn = options.searchFn;
         this.rankingFn = options.rankingFn;
+        this.keyFn = options.keyFn;
         this.maxSuggestions = options.maxSuggestions;
 
         this.koQuery.subscribe((query: string) => {
@@ -50,8 +53,25 @@ export class AutocompleteService<SuggestionType> {
         // Execute the domain specific search function
         return this.searchFn(query)
             .then((results: SuggestionType[]) => {
+                var oldSuggestionsByKey = new Map<any, SuggestionType>();
+                this.suggestions.forEach((suggestion) => {
+                    oldSuggestionsByKey.set(this.keyFn(suggestion), suggestion);
+                });
+                var hit = 0, miss = 0;
+
                 this.suggestions = _.orderBy(results, this.rankingFn, ['desc'])
-                    .slice(0, this.maxSuggestions);
+                    .slice(0, this.maxSuggestions)
+                    .map((suggestion) => {
+                        const sameOldSuggestion = oldSuggestionsByKey.get(this.keyFn(suggestion));
+                        if (sameOldSuggestion) {
+                            hit ++;
+                            return sameOldSuggestion;
+                        } else {
+                            miss++;
+                            return suggestion;
+                        }
+                    });
+                console.log('hit %d miss %d', hit, miss);
                 return this.suggestions
             })
     }

@@ -1,4 +1,4 @@
-<ul class="suggestions" data-bind="foreach: autocomplete.suggestions">
+<ul class="suggestions" data-bind="fastForEach: ko.getObservable(autocomplete, 'suggestions')">
     <li class="suggestion" data-bind="css: {
         selected: $index() === $parent.autocomplete.selectedSuggestionIx
     }">

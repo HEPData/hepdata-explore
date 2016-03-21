@@ -55,6 +55,7 @@ class ChoiceFilterComponent {
             koQuery: ko.getObservable(this, 'valueTyped'),
             searchFn: this.search.bind(this),
             rankingFn: (s: ChoiceSuggestion) => s.absoluteFrequencyFullDB,
+            keyFn: (s: ChoiceSuggestion) => s.suggestedValue,
             maxSuggestions: 20,
         });
     }
