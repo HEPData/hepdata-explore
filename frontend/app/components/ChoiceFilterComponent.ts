@@ -51,10 +51,12 @@ class ChoiceFilterComponent {
                 return values;
             });
 
-        this.autocomplete = new AutocompleteService<ChoiceSuggestion>(
-            ko.getObservable(this, 'valueTyped'),
-            this.search.bind(this)
-        );
+        this.autocomplete = new AutocompleteService<ChoiceSuggestion>({
+            koQuery: ko.getObservable(this, 'valueTyped'),
+            searchFn: this.search.bind(this),
+            rankingFn: (s: ChoiceSuggestion) => s.absoluteFrequencyFullDB,
+            maxSuggestions: 20,
+        });
     }
 
     search(query: string): Promise<ChoiceSuggestion[]> {

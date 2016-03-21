@@ -15,15 +15,25 @@ function mod(dividend: number, divisor: number) {
     return dividend % divisor;
 }
 
+interface AutocompleteOptions<SuggestionType> {
+    koQuery: KnockoutObservable<string>;
+    searchFn: (query: string) => Promise<SuggestionType[]>;
+    rankingFn: (suggestion: SuggestionType) => number;
+    maxSuggestions: number;
+}
+
 export class AutocompleteService<SuggestionType> {
-    constructor(
-        public koQuery: KnockoutObservable<string>,
-        public searchFn: (query: string) => Promise<SuggestionType[]>
-        // public suggestionEqualsFn: SuggestionEquals<T>
-    ) {
-        assertDefined(this.koQuery);
-        assertDefined(this.searchFn);
-        
+    public koQuery: KnockoutObservable<string>;
+    public searchFn: (query: string) => Promise<SuggestionType[]>;
+    public rankingFn: (suggestion: SuggestionType) => number;
+    public maxSuggestions: number;
+
+    constructor(options: AutocompleteOptions<SuggestionType>) {
+        this.koQuery = options.koQuery;
+        this.searchFn = options.searchFn;
+        this.rankingFn = options.rankingFn;
+        this.maxSuggestions = options.maxSuggestions;
+
         this.koQuery.subscribe((query: string) => {
             this.search(query);
         });
@@ -35,13 +45,13 @@ export class AutocompleteService<SuggestionType> {
 
     public suggestions: SuggestionType[] = [];
     public selectedSuggestionIx = 0;
-    public maxSuggestions = 20;
 
     private search(query: string): Promise<SuggestionType[]> {
         // Execute the domain specific search function
         return this.searchFn(query)
             .then((results: SuggestionType[]) => {
-                this.suggestions = results.slice(0, 20);
+                this.suggestions = _.orderBy(results, this.rankingFn, ['desc'])
+                    .slice(0, this.maxSuggestions);
                 return this.suggestions
             })
     }
