@@ -176,7 +176,11 @@ export interface CountAggregationBucket {
 }
 
 export class Elastic {
-    elasticUrl = 'http://localhost:9200/hepdata';
+    elasticUrl: string;
+
+    constructor() {
+        this.elasticUrl = 'http://' + location.hostname + ':9200/hepdata';
+    }
 
     jsonQuery(path: string, data: {}): Promise<any> {
         const xhr = new XMLHttpRequest();
