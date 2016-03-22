@@ -20,6 +20,14 @@ class ChoiceFilter extends Filter {
         ];
     }
 
+    toElasticQuery(): any {
+        return {
+            "match": {
+                ["tables.groups." + this.field]: this.value,
+            }
+        }
+    }
+
     getComponent() {
         return {
             name: 'choice-filter',

@@ -17,6 +17,10 @@ class KeywordFilter extends Filter {
         return 'Keyword';
     }
 
+    toElasticQuery(): any {
+        throw new Error('Not implemented');
+    }
+
     getDslParams() {
         return [
             {key: 'keyword', value: this.keyword},

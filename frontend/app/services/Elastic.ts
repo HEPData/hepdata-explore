@@ -1,3 +1,4 @@
+import Filter = require("../filters/Filter");
 export function ServerError(message: string = null) {
     this.name = 'ServerError';
     this.message = message || 'The server returned an invalid response';
@@ -189,6 +190,20 @@ export class Elastic {
             .then(() => {
                 return JSON.parse(xhr.responseText);
             })
+    }
+
+    fetchFilteredData(rootFilter: Filter) {
+        this.jsonQuery('/publication/_search', JSON.stringify({
+            "query": {
+                "nested": {
+                    "path": "tables.groups",
+                    "query": rootFilter.toElasticQuery(),
+                    "inner_hits": {
+                        "name": "matching_groups"
+                    }
+                }
+            }
+        }));
     }
 
     fetchAllIndepVars(): Promise<CountAggregationBucket[]> {

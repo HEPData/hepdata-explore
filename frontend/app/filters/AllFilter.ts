@@ -1,4 +1,5 @@
 import CompoundFilter = require("./CompoundFilter");
+import Filter = require("./Filter");
 
 class AllFilter extends CompoundFilter {
     static getLongName() {
@@ -6,6 +7,13 @@ class AllFilter extends CompoundFilter {
     }
     getDslName() {
         return 'All';
+    }
+    toElasticQuery(): any {
+        return {
+            "bool": {
+                "must": _.map(this.children, (child: Filter) => child.toElasticQuery()),
+            }
+        }
     }
 
     getComponent() {

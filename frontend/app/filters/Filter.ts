@@ -41,6 +41,7 @@ abstract class Filter {
 
         return ret;
     }
+    abstract toElasticQuery(): any;
 
     abstract getComponent(): ComponentRef;
 
