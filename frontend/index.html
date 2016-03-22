@@ -52,7 +52,10 @@
 <script id="suggestionsBox" type="text/html">
     <ul class="suggestions">
         <% _.each(autocomplete.suggestions, function(suggestion, $index) { %>
-            <li class="suggestion <%= ($index == autocomplete.selectedSuggestionIx) ? 'selected' : '' %>">
+            <li class="suggestion <%= ($index == autocomplete.selectedSuggestionIx) ? 'selected' : '' %>"
+                data-bind="event: {
+                    mousedown: autocomplete.suggestionClickedFn.bind($data, suggestion)
+                }">
                 <div class="bar total" style="width: <%= (suggestion.freqDividedByModeFullDB * 100 + '%') %>"></div>
                 <div class="suggested-value"><%= suggestion.suggestedValue %></div>
                 <div class="absolute-freq"><%= recordCountFormat(suggestion.absoluteFrequencyFullDB) %></div>

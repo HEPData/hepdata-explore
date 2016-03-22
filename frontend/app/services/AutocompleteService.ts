@@ -20,6 +20,7 @@ interface AutocompleteOptions<SuggestionType> {
     searchFn: (query: string) => Promise<SuggestionType[]>;
     rankingFn: (suggestion: SuggestionType) => number;
     keyFn: (suggestion: SuggestionType) => any;
+    suggestionClickedFn: (suggestion: SuggestionType) => void;
     maxSuggestions: number;
 }
 
@@ -28,6 +29,7 @@ export class AutocompleteService<SuggestionType> {
     public searchFn: (query: string) => Promise<SuggestionType[]>;
     public rankingFn: (suggestion: SuggestionType) => number;
     public keyFn: (suggestion: SuggestionType) => any;
+    public suggestionClickedFn: (suggestion: SuggestionType) => void;
     public maxSuggestions: number;
 
     constructor(options: AutocompleteOptions<SuggestionType>) {
@@ -35,6 +37,7 @@ export class AutocompleteService<SuggestionType> {
         this.searchFn = options.searchFn;
         this.rankingFn = options.rankingFn;
         this.keyFn = options.keyFn;
+        this.suggestionClickedFn = options.suggestionClickedFn;
         this.maxSuggestions = options.maxSuggestions;
 
         this.koQuery.subscribe((query: string) => {
@@ -84,6 +87,14 @@ export class AutocompleteService<SuggestionType> {
     private prevSuggestion() {
         this.selectedSuggestionIx = mod(this.selectedSuggestionIx - 1,
             this.suggestions.length);
+    }
+
+    public getSelectedSuggestion() {
+        if (this.selectedSuggestionIx != null) {
+            return this.suggestions[this.selectedSuggestionIx];
+        } else {
+            return null;
+        }
     }
 
     public keyPressed(component: any, event: KeyboardEvent) {

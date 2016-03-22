@@ -57,6 +57,7 @@ class ChoiceFilterComponent {
             rankingFn: (s: ChoiceSuggestion) => s.absoluteFrequencyFullDB,
             keyFn: (s: ChoiceSuggestion) => s.suggestedValue,
             maxSuggestions: 20,
+            suggestionClickedFn: this.useSuggestion.bind(this),
         });
     }
 
@@ -85,7 +86,16 @@ class ChoiceFilterComponent {
     }
 
     useSelectedValue() {
+        const selection = this.autocomplete.getSelectedSuggestion();
+        if (selection) {
+            this.useSuggestion(selection);
+        }
+    }
 
+    useSuggestion(suggestion: ChoiceSuggestion) {
+        console.log(arguments);
+        this.filter.value = suggestion.suggestedValue;
+        this.valueTyped = suggestion.suggestedValue;
     }
 
     dispose() {
