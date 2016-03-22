@@ -1,5 +1,7 @@
 /// <reference path="browser/ambient/bluebird/index.d.ts" />
+/// <reference path="browser/ambient/crossfilter/index.d.ts" />
 /// <reference path="browser/ambient/d3/index.d.ts" />
+/// <reference path="browser/ambient/dc/index.d.ts" />
 /// <reference path="browser/ambient/es6-collections/index.d.ts" />
 /// <reference path="browser/ambient/jasmine/index.d.ts" />
 /// <reference path="browser/ambient/jquery/index.d.ts" />
