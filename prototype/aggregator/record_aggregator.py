@@ -79,7 +79,7 @@ def clean_errors(y, errors):
 
 class RecordAggregator(object):
     def __init__(self, index, **elastic_args):
-        self.elastic = Elasticsearch(**elastic_args)
+        self.elastic = Elasticsearch(**elastic_args, timeout=60)
         self.index = index
         self.init_mapping()
 
