@@ -93,7 +93,6 @@ class ChoiceFilterComponent {
     }
 
     useSuggestion(suggestion: ChoiceSuggestion) {
-        console.log(arguments);
         this.filter.value = suggestion.suggestedValue;
         this.valueTyped = suggestion.suggestedValue;
     }

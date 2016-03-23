@@ -20,8 +20,3 @@ export class IndepVarFilter extends ChoiceFilter {
         return 'Independent variable'
     }
 }
-
-
-
-function a(arg:typeof Filter) {}
-a(ChoiceFilter);
