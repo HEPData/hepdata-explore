@@ -14,7 +14,10 @@
     <script src="lib/knockout-error-context.js"></script>
     <script src="lib/bluebird.js"></script>
     <script src="lib/d3.js"></script>
+    <script src="lib/d3-transform.js"></script>
     <script src="lib/knockout-template.js"></script>
+    <script src="lib/crossfilter-ntrrgc.js"></script>
+    <script src="lib/dc.js"></script>
     <link rel="stylesheet" href="invenio.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="styles.css">
@@ -43,6 +46,38 @@
 
         <filter-shell params="{filter: rootFilter}"></filter-shell>
 
+    </div>
+
+
+    <div class="visualization-box">
+        <div id="visualization" data-bind="visible: !isLoading()">
+
+
+            <div id="all-vars-chart"></div>
+
+            <div id="cmenergies-chart"></div>
+
+
+            <div id="variable-charts">
+
+            </div>
+        </div>
+        <div id="visualization-loading" data-bind="visible: isLoading()">
+            <div class="loading-box">
+                <h2>Please wait...</h2>
+                <div>
+                    <i id="loading-downloading"
+                       class="fa fa-arrow-right loading-arrow"></i>
+                    Downloading data
+                </div>
+                <div>
+                    <i id="loading-processing"
+                       class="fa fa-arrow-right loading-arrow"
+                       data-bind="style: {visibility: isRendering() ? 'visible' : 'hidden'}"></i>
+                    Rendering data
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>

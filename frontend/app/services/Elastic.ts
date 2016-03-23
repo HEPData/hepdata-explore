@@ -1,4 +1,5 @@
 import Filter = require("../filters/Filter");
+import {DataPoint} from "../base/DataPoint";
 export function ServerError(message: string = null) {
     this.name = 'ServerError';
     this.message = message || 'The server returned an invalid response';
@@ -205,11 +206,11 @@ export class Elastic {
                 }
             }
         };
-        this.jsonQuery('/publication/_search', requestData)
+        return this.jsonQuery('/publication/_search', requestData)
             .then((results: any) => {
-                const dataPoints = [];
+                const dataPoints: DataPoint[] = [];
 
-                function nu(val: any) {
+                function nu<T>(val: T): T {
                     if (val === undefined) {
                         throw new Error("Undefined");
                     }
@@ -225,7 +226,7 @@ export class Elastic {
                             //     return;
                             // }
                             _.each(group.data_points, function (dataPoint) {
-                                const flatDataPoint = {
+                                const flatDataPoint: DataPoint = {
                                     inspire_record: nu(publication.inspire_record),
                                     table_num: nu(table.table_num),
                                     cmenergies1: nu(group.cmenergies[0]),

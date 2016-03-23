@@ -31,6 +31,7 @@ class ChoiceFilterComponent {
 
     constructor(params: any) {
         this.filter = params.filter;
+        this.valueTyped = this.filter.value;
         ko.track(this, ['filter', 'valueTyped']);
 
         this.possibleValuesIndex = lunr(function() {
@@ -95,6 +96,9 @@ class ChoiceFilterComponent {
     useSuggestion(suggestion: ChoiceSuggestion) {
         this.filter.value = suggestion.suggestedValue;
         this.valueTyped = suggestion.suggestedValue;
+
+        // This is cheating and it's wrong... but meanwhile I need a way to aggregate the graphs by something
+        (<any>window).x_var = this.filter.value;
     }
 
     dispose() {

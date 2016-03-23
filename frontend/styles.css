@@ -396,3 +396,7 @@ ul.suggestions {
 .selected .bar.total {
     background: #F9F9F9;
 }
+
+.dc-chart {
+    float: left;
+}
