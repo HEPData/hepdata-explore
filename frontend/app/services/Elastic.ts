@@ -205,7 +205,49 @@ export class Elastic {
                 }
             }
         };
-        this.jsonQuery('/publication/_search', requestData);
+        this.jsonQuery('/publication/_search', requestData)
+            .then((results: any) => {
+                const dataPoints = [];
+
+                function nu(val: any) {
+                    if (val === undefined) {
+                        throw new Error("Undefined");
+                    }
+                    return val;
+                }
+
+                _.each(results.hits.hits, function (hit) {
+                    const publication = hit._source;
+                    _.each(publication.tables, function (table) {
+                        _.each(table.groups, function (group) {
+                            // TODO: may invalid values be returned?
+                            // if (!(group.var_x == varX)) {
+                            //     return;
+                            // }
+                            _.each(group.data_points, function (dataPoint) {
+                                const flatDataPoint = {
+                                    inspire_record: nu(publication.inspire_record),
+                                    table_num: nu(table.table_num),
+                                    cmenergies1: nu(group.cmenergies[0]),
+                                    cmenergies2: nu(group.cmenergies[1]),
+                                    reaction: nu(group.reaction),
+                                    observables: nu(table.observables),
+                                    var_y: nu(group.var_y),
+                                    var_x: nu(group.var_x),
+                                    x_low: nu(dataPoint.x_low),
+                                    x_high: nu(dataPoint.x_high),
+                                    x_center: nu((dataPoint.x_low + dataPoint.x_high) / 2),
+                                    y: nu(dataPoint.y),
+                                    errors: nu(dataPoint.errors),
+                                };
+                                dataPoints.push(flatDataPoint);
+                            })
+                        })
+                    })
+                });
+
+                return dataPoints;
+            })
     }
 
     fetchAllIndepVars(): Promise<CountAggregationBucket[]> {
