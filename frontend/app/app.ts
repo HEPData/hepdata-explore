@@ -13,6 +13,7 @@ import {IndepVarFilter} from "./filters/filter-factories";
 
 // Ensure template utility functions are pulled too
 import 'utils/recordCountFormat';
+import {elastic} from "./services/Elastic";
 
 class AppViewModel {
     rootFilter: Filter;
@@ -30,6 +31,7 @@ class AppViewModel {
         this.currentFilterUri = ko.computed(this.calcCurrentFilterUri, this);
         this.currentFilterUri.subscribe((newFilterUri: string) => {
             history.replaceState(null, null, '#' + newFilterUri)
+            elastic.fetchFilteredData(this.rootFilter);
         })
     }
 }

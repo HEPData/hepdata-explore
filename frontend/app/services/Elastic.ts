@@ -186,6 +186,7 @@ export class Elastic {
     jsonQuery(path: string, data: {}): Promise<any> {
         const xhr = new XMLHttpRequest();
         xhr.open('POST', this.elasticUrl + path, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
         return asyncFetch(xhr, JSON.stringify(data))
             .then(() => {
                 return JSON.parse(xhr.responseText);
@@ -193,7 +194,7 @@ export class Elastic {
     }
 
     fetchFilteredData(rootFilter: Filter) {
-        this.jsonQuery('/publication/_search', JSON.stringify({
+        const requestData = {
             "query": {
                 "nested": {
                     "path": "tables.groups",
@@ -203,7 +204,8 @@ export class Elastic {
                     }
                 }
             }
-        }));
+        };
+        this.jsonQuery('/publication/_search', requestData);
     }
 
     fetchAllIndepVars(): Promise<CountAggregationBucket[]> {

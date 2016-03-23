@@ -13,7 +13,7 @@ export class DepVarFilter extends ChoiceFilter {
 
 export class IndepVarFilter extends ChoiceFilter {
     constructor(value: string = '') {
-        super('x_var', value);
+        super('var_x', value);
     }
 
     static getLongName() {
