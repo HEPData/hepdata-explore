@@ -195,6 +195,9 @@ filter-shell .body {
 .compound-filter .flag.all {
     background: #0F4CBA;
 }
+.compound-filter .flag.some {
+    background: #37B166;
+}
 .compound-filter .flag.none {
     background: red;
 }
