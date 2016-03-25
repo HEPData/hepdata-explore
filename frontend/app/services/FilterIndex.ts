@@ -1,7 +1,7 @@
 import Filter = require("../filters/Filter");
 import KeywordFilter = require("../filters/KeywordFilter");
 import AllFilter = require("../filters/AllFilter");
-import {IndepVarFilter} from "../filters/filter-factories";
+import {IndepVarFilter, DepVarFilter} from "../filters/filter-factories";
 import SomeFilter = require("../filters/SomeFilter");
 
 
@@ -112,5 +112,10 @@ filterIndex.populate([
         filterClass: IndepVarFilter,
         description: `Returns data points with for a certain independent variable.`,
         tags: ['x', 'indep', 'independent', 'variable'],
-    }
+    },
+    {
+        filterClass: DepVarFilter,
+        description: `Returns data points with for a certain dependent variable.`,
+        tags: ['y', 'dep', 'dependent', 'variable'],
+    },
 ]);

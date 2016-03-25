@@ -3,7 +3,7 @@ import Filter = require("./Filter");
 
 export class DepVarFilter extends ChoiceFilter {
     constructor(value: string) {
-        super('y_var', value);
+        super('var_y', value);
     }
 
     static getLongName() {

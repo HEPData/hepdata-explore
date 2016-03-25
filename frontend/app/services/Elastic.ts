@@ -251,7 +251,7 @@ export class Elastic {
             })
     }
 
-    fetchAllIndepVars(): Promise<CountAggregationBucket[]> {
+    fetchAllByField(field: string): Promise<CountAggregationBucket[]> {
         return this.jsonQuery('/publication/_search', {
             "size": 0,
             "aggs": {
@@ -262,7 +262,7 @@ export class Elastic {
                     "aggs": {
                         "variables": {
                             "terms": {
-                                "field": "tables.groups.var_x",
+                                "field": "tables.groups." + field,
                                 "size": 10000,
                             },
                             "aggs": {

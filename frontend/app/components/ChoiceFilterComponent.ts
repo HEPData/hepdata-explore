@@ -75,7 +75,7 @@ class ChoiceFilterComponent {
     }
 
     getAllPossibleValues(): Promise<ChoiceSuggestion[]> {
-        return elastic.fetchAllIndepVars()
+        return elastic.fetchAllByField(this.filter.field)
             .then((buckets) => {
                 const maxCount = _.maxBy(buckets, b => b.count).count;
                 return buckets.map((bucket) => ({
@@ -98,7 +98,9 @@ class ChoiceFilterComponent {
         this.valueTyped = suggestion.suggestedValue;
 
         // This is cheating and it's wrong... but meanwhile I need a way to aggregate the graphs by something
-        (<any>window).x_var = this.filter.value;
+        if (this.filter.field == 'x_var') {
+            (<any>window).x_var = this.filter.value;
+        }
     }
 
     dispose() {
