@@ -63,6 +63,7 @@ export class Elastic {
 
     fetchFilteredData(rootFilter: Filter) {
         const requestData = {
+            "size": 10000,
             "query": {
                 "nested": {
                     "path": "tables.groups",
@@ -115,13 +116,6 @@ export class Elastic {
                 // many non-matching data points in those publications.
                 // We proceed now to filter those at client side.
                 dataPoints = _.filter(dataPoints, rootFilter.filterDataPoint.bind(rootFilter));
-
-
-                const maxDataPoints = 200000;
-                if (dataPoints.length > maxDataPoints) {
-                    console.warn('Too many data points... Using a random sample.')
-                    dataPoints = _.sampleSize(dataPoints, maxDataPoints);
-                }
 
                 return dataPoints;
             })

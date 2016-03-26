@@ -2,8 +2,13 @@ import {DataPoint} from "../base/dataFormat";
 import numRecordsFormat = require('./numRecordsFormat');
 
 declare var d3Transform: any; // SVG transform generator for D3.js
-declare var Map2: any; // https://github.com/josephg/map2
 type provisional = any;
+
+declare class Map2<K1, K2, V> {
+    get(a:K1, b:K2): V;
+    set(a:K1, b:K2, value:V): void;
+    keys(): Iterable<[K1, K2]>;
+}
 
 var array2dComparisonOperators = {
     name: '2d',
@@ -174,7 +179,9 @@ function plotVariable(ndx: CrossFilter.CrossFilter<DataPoint>, data: DataPoint[]
 }
 
 export function groupDataByVariablePairs(data: DataPoint[]) {
-    const grouped = new Map2;
+    // Group data points by their X-Y variable pair.
+    const grouped = new Map2<string, string, DataPoint[]>();
+
     for (let i = 0; i < data.length; i++) {
         const datum = data[i];
         let matchingPoints = grouped.get(datum.var_x, datum.var_y);
@@ -194,7 +201,32 @@ interface TaggedXY {
     var_y: string;
 }
 
-export function showGraphs(data: DataPoint[], dataGroups: provisional) {
+export function sampleData(dataGroups: Map2<string,string,DataPoint[]>)
+    : [DataPoint[], Map2<string,string,DataPoint[]>]
+{
+    // In order to not hog the interface, there is a limit on how many data points will be
+    // represented for each variable pair.
+    const maxValuesPerKey = 1000;
+
+    const keys = Array.from(dataGroups.keys());
+    // We've removed the unlucky data points from the groups, but they are still in the full
+    // data set. We will reconstruct a new data set without those filtered out.
+    let filteredData: DataPoint[] = [];
+    let filteredDataGroups = new Map2<string,string,DataPoint[]>();
+
+    for (let [varX, varY] of keys) {
+        const values = dataGroups.get(varX, varY);
+        const filteredValues = _.sampleSize(values, maxValuesPerKey);
+
+        filteredDataGroups.set(varX, varY, filteredValues);
+        // Add to the global data set
+        filteredData = filteredData.concat.apply(filteredData, filteredValues)
+    }
+
+    return [filteredData, filteredDataGroups];
+}
+
+export function showGraphs(data: DataPoint[], dataGroups: Map2<string,string,DataPoint[]>) {
     const ndx = crossfilter<DataPoint>(data);
 
     const xyDimension = (<provisional>ndx).dimension((d: DataPoint) => {
@@ -206,9 +238,13 @@ export function showGraphs(data: DataPoint[], dataGroups: provisional) {
     }, array2dComparisonOperators);
 
     // Sort variable pairs (i.e. keys) by datum count
-    const keys: string[][] = Array.from(<Iterable<string[]>>dataGroups.keys());
-    const sortedKeys = _.sortBy(keys, ([varX, varY]) =>
-        -dataGroups.get(varX, varY).length);
+    const keys = Array.from(dataGroups.keys());
+    let sortedKeys = _.sortBy(keys, ([varX, varY]) => {
+        return -dataGroups.get(varX, varY).length
+    });
+
+    // Plot at most 7 variable pairs
+    sortedKeys = sortedKeys.slice(0, 7);
 
     // Delete previous charts and generate new ones, one for each variable pair
     $('#variable-charts').empty();
@@ -236,6 +272,8 @@ function plotVariablePair(ndx: CrossFilter.CrossFilter<DataPoint>,
         }
     }
 
+    // console.log(minX);
+    // console.log(maxX);
 
     const chartElement = document.createElement('div');
     const chart = customScatterPlot(chartElement);

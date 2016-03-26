@@ -15,7 +15,10 @@ import {IndepVarFilter} from "./filters/filter-factories";
 import 'utils/recordCountFormat';
 import {elastic} from "./services/Elastic";
 import {DataPoint} from "./base/dataFormat";
-import {showGraphsVariables, groupDataByVariablePairs, showGraphs} from "./visualization/visualization";
+import {
+    showGraphsVariables, groupDataByVariablePairs, showGraphs,
+    sampleData
+} from "./visualization/visualization";
 
 function screenUpdated() {
     return new Promise(function (resolve, reject) {
@@ -62,8 +65,11 @@ class AppViewModel {
             })
             .then((dataPoints: DataPoint[]) => {
                 var t1 = performance.now();
-                var grouped = groupDataByVariablePairs(dataPoints);
-                var ret = showGraphs(dataPoints, grouped);
+                const dataGroups = groupDataByVariablePairs(dataPoints);
+                var [filteredDataPoints, filteredGroups] = sampleData(dataGroups);
+                // var ret = showGraphs(filteredDataPoints, filteredGroups);
+                console.log(filteredDataPoints.length);
+                var ret = showGraphs(filteredDataPoints, filteredGroups);
                 var t2 = performance.now();
                 console.log("Data indexed in %.2f ms.", t2 - t1);
 
