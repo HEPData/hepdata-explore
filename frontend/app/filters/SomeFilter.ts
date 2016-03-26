@@ -1,5 +1,6 @@
 import CompoundFilter = require("./CompoundFilter");
 import Filter = require("./Filter");
+import {DataPoint} from "../base/dataFormat";
 
 class SomeFilter extends CompoundFilter {
     static getLongName() {
@@ -15,6 +16,19 @@ class SomeFilter extends CompoundFilter {
                 "minimum_should_match": 1,
             }
         }
+    }
+
+    filterDataPoint(dataPoint: DataPoint): boolean {
+        // Accept the data point if any children filter matches of there are no children
+        if (this.children.length == 0) {
+            return true;
+        }
+        for (let childFilter of this.children) {
+            if (childFilter.filterDataPoint(dataPoint) == true) {
+                return true;
+            }
+        }
+        return false;
     }
 
     getComponent() {

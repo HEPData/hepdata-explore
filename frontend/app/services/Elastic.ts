@@ -217,7 +217,7 @@ export class Elastic {
         };
         return this.jsonQuery('/publication/_search', requestData)
             .then((results: ElasticQueryResult) => {
-                const dataPoints: DataPoint[] = [];
+                let dataPoints: DataPoint[] = [];
 
                 function nu<T>(val: T): T {
                     if (val === undefined) {
@@ -230,10 +230,6 @@ export class Elastic {
                     const publication = hit._source;
                     _.each(publication.tables, function (table) {
                         _.each(table.groups, function (group) {
-                            // TODO: may invalid values be returned?
-                            // if (!(group.var_x == varX)) {
-                            //     return;
-                            // }
                             _.each(group.data_points, function (dataPoint) {
                                 const flatDataPoint: DataPoint = {
                                     inspire_record: nu(publication.inspire_record),
@@ -255,6 +251,19 @@ export class Elastic {
                         })
                     })
                 });
+
+                // ElasticSearch filters on document (i.e. publication) level. It will return
+                // publications that have at least one matching data point, but there may be
+                // many non-matching data points in those publications.
+                // We proceed now to filter those at client side.
+                dataPoints = _.filter(dataPoints, rootFilter.filterDataPoint.bind(rootFilter));
+
+
+                const maxDataPoints = 200000;
+                if (dataPoints.length > maxDataPoints) {
+                    console.warn('Too many data points... Using a random sample.')
+                    dataPoints = _.sampleSize(dataPoints, maxDataPoints);
+                }
 
                 return dataPoints;
             })

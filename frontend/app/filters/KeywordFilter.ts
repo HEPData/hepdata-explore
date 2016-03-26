@@ -1,4 +1,5 @@
 import Filter = require("./Filter");
+import {DataPoint} from "../base/dataFormat";
 
 class KeywordFilter extends Filter {
     keyword: string;
@@ -18,6 +19,10 @@ class KeywordFilter extends Filter {
     }
 
     toElasticQuery(): any {
+        throw new Error('Not implemented');
+    }
+
+    filterDataPoint(dataPoint: DataPoint): boolean {
         throw new Error('Not implemented');
     }
 

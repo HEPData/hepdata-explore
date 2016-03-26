@@ -1,4 +1,5 @@
 import Filter = require("./Filter");
+import {DataPoint} from "../base/dataFormat";
 
 class ChoiceFilter extends Filter {
     constructor(public field: string = '', public value = '') {
@@ -26,6 +27,10 @@ class ChoiceFilter extends Filter {
                 ["tables.groups." + this.field]: this.value,
             }
         }
+    }
+
+    filterDataPoint(dataPoint: DataPoint): boolean {
+        return dataPoint[this.field] == this.value;
     }
 
     getComponent() {
