@@ -210,6 +210,9 @@ export function showGraphs(data: DataPoint[], dataGroups: provisional) {
     const sortedKeys = _.sortBy(keys, ([varX, varY]) =>
         -dataGroups.get(varX, varY).length);
 
+    // Delete previous charts and generate new ones, one for each variable pair
+    $('#variable-charts').empty();
+
     sortedKeys.forEach(([varX, varY]) => {
         const filteredData = dataGroups.get(varX, varY);
         plotVariablePair(ndx, xyDimension,
