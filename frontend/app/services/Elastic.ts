@@ -1,5 +1,5 @@
 import Filter = require("../filters/Filter");
-import {DataPoint} from "../base/DataPoint";
+import {DataPoint} from "../base/dataFormat";
 export function ServerError(message: string = null) {
     this.name = 'ServerError';
     this.message = message || 'The server returned an invalid response';

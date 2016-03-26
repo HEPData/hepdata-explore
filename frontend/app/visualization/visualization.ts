@@ -1,4 +1,4 @@
-import {DataPoint} from "../base/DataPoint";
+import {DataPoint} from "../base/dataFormat";
 import numRecordsFormat = require('./numRecordsFormat');
 
 declare var d3Transform: any; // SVG transform generator for D3.js
@@ -206,7 +206,7 @@ export function showGraphs(data: DataPoint[], dataGroups: provisional) {
     }, array2dComparisonOperators);
 
     // Sort variable pairs (i.e. keys) by datum count
-    const keys = Array.from(dataGroups.keys());
+    const keys: string[][] = Array.from(dataGroups.keys());
     const sortedKeys = _.sortBy(keys, ([varX, varY]) =>
         -dataGroups.get(varX, varY).length);
 

@@ -14,7 +14,7 @@ import {IndepVarFilter} from "./filters/filter-factories";
 // Ensure template utility functions are pulled too
 import 'utils/recordCountFormat';
 import {elastic} from "./services/Elastic";
-import {DataPoint} from "./base/DataPoint";
+import {DataPoint} from "./base/dataFormat";
 import {showGraphsVariables, groupDataByVariablePairs, showGraphs} from "./visualization/visualization";
 
 function screenUpdated() {
