@@ -1,5 +1,5 @@
 import Filter = require("../filters/Filter");
-import {DataPoint} from "../base/dataFormat";
+import {DataPoint, Publication} from "../base/dataFormat";
 export function ServerError(message: string = null) {
     this.name = 'ServerError';
     this.message = message || 'The server returned an invalid response';
@@ -177,6 +177,15 @@ export interface CountAggregationBucket {
     count: number;
 }
 
+interface ElasticQueryResult {
+    // Subset of the fields we use from the response of ElasticSearch
+
+    // Matched publications
+    hits: {
+        hits: {_source:Publication}[]
+    };
+}
+
 export class Elastic {
     elasticUrl: string;
 
@@ -207,7 +216,7 @@ export class Elastic {
             }
         };
         return this.jsonQuery('/publication/_search', requestData)
-            .then((results: any) => {
+            .then((results: ElasticQueryResult) => {
                 const dataPoints: DataPoint[] = [];
 
                 function nu<T>(val: T): T {
