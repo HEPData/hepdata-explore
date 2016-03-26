@@ -206,7 +206,7 @@ export function showGraphs(data: DataPoint[], dataGroups: provisional) {
     }, array2dComparisonOperators);
 
     // Sort variable pairs (i.e. keys) by datum count
-    const keys: string[][] = Array.from(dataGroups.keys());
+    const keys: string[][] = Array.from(<Iterable<string[]>>dataGroups.keys());
     const sortedKeys = _.sortBy(keys, ([varX, varY]) =>
         -dataGroups.get(varX, varY).length);
 

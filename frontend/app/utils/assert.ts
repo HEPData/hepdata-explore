@@ -19,7 +19,7 @@ export function assertHas(object: Object,
     if (object === undefined) {
         throw new AssertionError('object is undefined');
     }
-    for (const _property of properties) {
+    for (let _property of properties) {
         let property: PropertyDeclaration;
         if (typeof _property == 'string') {
             property = {

@@ -44,7 +44,7 @@ class FilterIndex {
     }
 
     public populate(records: FilterIndexRecordDefinition[]) {
-        for (const recordDef of records) {
+        for (let recordDef of records) {
             // Cast and add missing properties
             const record = <FilterIndexRecord>recordDef;
             record.id = this.database.length;
