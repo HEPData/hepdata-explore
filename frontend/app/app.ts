@@ -15,7 +15,7 @@ import {IndepVarFilter} from "./filters/filter-factories";
 import 'utils/recordCountFormat';
 import {elastic} from "./services/Elastic";
 import {DataPoint} from "./base/DataPoint";
-import {showGraphs} from "./visualization/visualization";
+import {showGraphsVariables, groupDataByVariablePairs, showGraphs} from "./visualization/visualization";
 
 function screenUpdated() {
     return new Promise(function (resolve, reject) {
@@ -62,7 +62,8 @@ class AppViewModel {
             })
             .then((dataPoints: DataPoint[]) => {
                 var t1 = performance.now();
-                var ret = showGraphs(dataPoints, (<any>window).x_var);
+                var grouped = groupDataByVariablePairs(dataPoints);
+                var ret = showGraphs(dataPoints, grouped);
                 var t2 = performance.now();
                 console.log("Data indexed in %.2f ms.", t2 - t1);
 

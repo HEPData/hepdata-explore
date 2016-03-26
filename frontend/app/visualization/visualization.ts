@@ -2,6 +2,7 @@ import {DataPoint} from "../base/DataPoint";
 import numRecordsFormat = require('./numRecordsFormat');
 
 declare var d3Transform: any; // SVG transform generator for D3.js
+declare var Map2: any; // https://github.com/josephg/map2
 type provisional = any;
 
 var array2dComparisonOperators = {
@@ -172,8 +173,95 @@ function plotVariable(ndx: CrossFilter.CrossFilter<DataPoint>, data: DataPoint[]
     (<any>window).chart = chart
 }
 
+export function groupDataByVariablePairs(data: DataPoint[]) {
+    const grouped = new Map2;
+    for (let i = 0; i < data.length; i++) {
+        const datum = data[i];
+        let matchingPoints = grouped.get(datum.var_x, datum.var_y);
+        if (!matchingPoints) {
+            matchingPoints = [];
+            grouped.set(datum.var_x, datum.var_y, matchingPoints);
+        }
+        matchingPoints.push(datum);
+    }
+    return grouped;
+}
 
-export function showGraphs(data, var_x) {
+interface TaggedXY {
+    [0]: number;
+    [1]: number;
+    var_x: string;
+    var_y: string;
+}
+
+export function showGraphs(data: DataPoint[], dataGroups: provisional) {
+    const ndx = crossfilter<DataPoint>(data);
+
+    const xyDimension = (<provisional>ndx).dimension((d: DataPoint) => {
+        let ret: provisional = [d.x_center, d.y];
+        // Tag each data point of this dimension with information useful for filtering.
+        ret.var_x = d.var_x;
+        ret.var_y = d.var_y;
+        return ret;
+    }, array2dComparisonOperators);
+
+    // Sort variable pairs (i.e. keys) by datum count
+    const keys = Array.from(dataGroups.keys());
+    const sortedKeys = _.sortBy(keys, ([varX, varY]) =>
+        -dataGroups.get(varX, varY).length);
+
+    sortedKeys.forEach(([varX, varY]) => {
+        const filteredData = dataGroups.get(varX, varY);
+        plotVariablePair(ndx, xyDimension,
+            varX, varY, filteredData);
+    });
+}
+
+function plotVariablePair(ndx: CrossFilter.CrossFilter<DataPoint>,
+                          xyDimension: CrossFilter.Dimension<DataPoint, TaggedXY>,
+                          varX: string, varY: string, filteredData: DataPoint[]) {
+    let minX = Infinity;
+    let maxX = -Infinity;
+
+    for (var i = 0; i < filteredData.length; i++) {
+        var obj = filteredData[i];
+        if (obj.x_low < minX) {
+            minX = obj.x_low;
+        }
+        if (obj.x_high > maxX) {
+            maxX = obj.x_high;
+        }
+    }
+
+
+    const chartElement = document.createElement('div');
+    const chart = customScatterPlot(chartElement);
+    $('#variable-charts').append(chartElement);
+    chart
+        .width(300)
+        .height(300)
+        .dimension(xyDimension)
+        .group(xyDimension.group())
+        .data((d) => {
+            const allDimensionDataPoints: provisional = d.all();
+            return _.filter(allDimensionDataPoints, (d: {key: TaggedXY}) => {
+                return d.key.var_x == varX && d.key.var_y == varY;
+            });
+        })
+        .elasticX(true)
+        .x(d3.scale.pow().exponent(.5).domain([minX, maxX]))
+        .margins({top: 10, right: 50, bottom: 30, left: 42})
+        .yAxisLabel(varY)
+        .xAxisLabel(varX)
+        .brushOn(true);
+
+    chart.yAxis()
+        .tickFormat(d3.format(''))
+
+    chart.render();
+}
+
+export function showGraphsVariables(data, var_x) {
     var ndx = crossfilter<DataPoint>(data);
     var all = ndx.groupAll();
 
