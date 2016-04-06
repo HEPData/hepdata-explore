@@ -229,6 +229,28 @@ export function sampleData(dataGroups: Map2<string,string,DataPoint[]>)
 export function showGraphs(data: DataPoint[], dataGroups: Map2<string,string,DataPoint[]>) {
     const ndx = crossfilter<DataPoint>(data);
 
+    // const allVarsChart = dc.barChart('#all-vars-chart');
+    const dataPointCountLabel = (<provisional>dc).numberDisplay('#data-point-count');
+
+    // This aggregation retains the count of the matched data points at a given time.
+    const dataPointCount = ndx.groupAll().reduce(function (p, v) {
+        p.n++;
+        return p;
+    }, function (p, v) {
+        p.n--;
+        return p;
+    }, function () {
+        return {n: 0};
+    });
+
+    dataPointCountLabel
+        .formatNumber(numRecordsFormat)
+        .group(dataPointCount)
+        .valueAccessor(function (d) {
+            return d.n;
+        })
+        .render();
+
     const xyDimension = (<provisional>ndx).dimension((d: DataPoint) => {
         let ret: provisional = [d.x_center, d.y];
         // Tag each data point of this dimension with information useful for filtering.
@@ -254,6 +276,8 @@ export function showGraphs(data: DataPoint[], dataGroups: Map2<string,string,Dat
         plotVariablePair(ndx, xyDimension,
             varX, varY, filteredData);
     });
+
+
 }
 
 function plotVariablePair(ndx: CrossFilter.CrossFilter<DataPoint>,
@@ -271,9 +295,6 @@ function plotVariablePair(ndx: CrossFilter.CrossFilter<DataPoint>,
             maxX = obj.x_high;
         }
     }
-
-    // console.log(minX);
-    // console.log(maxX);
 
     const chartElement = document.createElement('div');
     const chart = customScatterPlot(chartElement);
@@ -307,8 +328,8 @@ export function showGraphsVariables(data, var_x) {
     var all = ndx.groupAll();
 
     var allVarsChart = dc.barChart('#all-vars-chart');
-    var varDistributionChart = dc.rowChart('#variable-distribution-chart');
     var numberRecords = (<provisional>dc).numberDisplay('#number-records');
+    var varDistributionChart = dc.rowChart('#variable-distribution-chart');
     var reactionsChart = dc.rowChart('#reactions-chart');
     var observablesChart = dc.rowChart('#observables-chart');
 
