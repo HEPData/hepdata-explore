@@ -5,7 +5,7 @@
   "main": "browsersync.js",
   "scripts": {
     "run": "node ./browsersync.js",
-    "reload": "tsc && curl http://localhost:10000/reload"
+    "reload": "curl http://localhost:10000/reload"
   },
   "author": "",
   "license": "GPL-2.0",
