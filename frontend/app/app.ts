@@ -16,7 +16,7 @@ import 'utils/recordCountFormat';
 import {elastic} from "./services/Elastic";
 import {DataPoint} from "./base/dataFormat";
 import {
-    showGraphsVariables, groupDataByVariablePairs, showGraphs,
+    groupDataByVariablePairs, showGraphs,
     sampleData
 } from "./visualization/visualization";
 
