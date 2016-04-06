@@ -199,6 +199,8 @@ interface TaggedXY {
     [1]: number;
     var_x: string;
     var_y: string;
+    inspire_record: number;
+    table_num: number;
 }
 
 export function sampleData(dataGroups: Map2<string,string,DataPoint[]>)
@@ -226,10 +228,26 @@ export function sampleData(dataGroups: Map2<string,string,DataPoint[]>)
     return [filteredData, filteredDataGroups];
 }
 
+function searchMinMax(data: DataPoint[]) {
+    let minX = Infinity;
+    let maxX = -Infinity;
+
+    for (var i = 0; i < data.length; i++) {
+        let obj = data[i];
+        if (obj.x_low < minX) {
+            minX = obj.x_low;
+        }
+        if (obj.x_high > maxX) {
+            maxX = obj.x_high;
+        }
+    }
+
+    return [minX, maxX];
+}
+
 export function showGraphs(data: DataPoint[], dataGroups: Map2<string,string,DataPoint[]>) {
     const ndx = crossfilter<DataPoint>(data);
 
-    // const allVarsChart = dc.barChart('#all-vars-chart');
     const dataPointCountLabel = (<provisional>dc).numberDisplay('#data-point-count');
 
     // This aggregation retains the count of the matched data points at a given time.
@@ -256,8 +274,11 @@ export function showGraphs(data: DataPoint[], dataGroups: Map2<string,string,Dat
         // Tag each data point of this dimension with information useful for filtering.
         ret.var_x = d.var_x;
         ret.var_y = d.var_y;
+        ret.inspire_record = d.inspire_record;
+        ret.table_num = d.table_num;
         return ret;
     }, array2dComparisonOperators);
+    const xyDimensionGroup = xyDimension.group();
 
     // Sort variable pairs (i.e. keys) by datum count
     const keys = Array.from(dataGroups.keys());
@@ -273,29 +294,16 @@ export function showGraphs(data: DataPoint[], dataGroups: Map2<string,string,Dat
 
     sortedKeys.forEach(([varX, varY]) => {
         const filteredData = dataGroups.get(varX, varY);
-        plotVariablePair(ndx, xyDimension,
+        plotVariablePair(ndx, xyDimension, xyDimensionGroup,
             varX, varY, filteredData);
     });
-
 
 }
 
 function plotVariablePair(ndx: CrossFilter.CrossFilter<DataPoint>,
                           xyDimension: CrossFilter.Dimension<DataPoint, TaggedXY>,
+                          xyDimensionGroup: CrossFilter.Group<DataPoint, TaggedXY, any>,
                           varX: string, varY: string, filteredData: DataPoint[]) {
-    let minX = Infinity;
-    let maxX = -Infinity;
-
-    for (var i = 0; i < filteredData.length; i++) {
-        var obj = filteredData[i];
-        if (obj.x_low < minX) {
-            minX = obj.x_low;
-        }
-        if (obj.x_high > maxX) {
-            maxX = obj.x_high;
-        }
-    }
-
     const chartElement = document.createElement('div');
     const chart = customScatterPlot(chartElement);
     $('#variable-charts').append(chartElement);
@@ -303,7 +311,7 @@ function plotVariablePair(ndx: CrossFilter.CrossFilter<DataPoint>,
         .width(300)
         .height(300)
         .dimension(xyDimension)
-        .group(xyDimension.group())
+        .group(xyDimensionGroup)
         .data((d) => {
             const allDimensionDataPoints: provisional = d.all();
             return _.filter(allDimensionDataPoints, (d: {key: TaggedXY}) => {
@@ -311,11 +319,11 @@ function plotVariablePair(ndx: CrossFilter.CrossFilter<DataPoint>,
             });
         })
         .elasticX(true)
-        .x(d3.scale.pow().exponent(.5).domain([minX, maxX]))
+        .x(d3.scale.pow().exponent(.5).domain(searchMinMax(filteredData)))
         .margins({top: 10, right: 50, bottom: 30, left: 42})
         .yAxisLabel(varY)
         .xAxisLabel(varX)
-        .brushOn(true);
+        .brushOn(true)
 
     chart.yAxis()
         .tickFormat(d3.format(''))
@@ -324,6 +332,7 @@ function plotVariablePair(ndx: CrossFilter.CrossFilter<DataPoint>,
 }
 
 export function showGraphsVariables(data, var_x) {
+    // WIP: Remove this function
     var ndx = crossfilter<DataPoint>(data);
     var all = ndx.groupAll();
 
