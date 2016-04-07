@@ -1,5 +1,6 @@
 import {DataPoint} from "../base/dataFormat";
 import numRecordsFormat = require('./numRecordsFormat');
+import {GLScatter} from "./GLScatter";
 
 declare var d3Transform: any; // SVG transform generator for D3.js
 type provisional = any;
@@ -294,13 +295,22 @@ export function showGraphs(data: DataPoint[], dataGroups: Map2<string,string,Dat
 
     sortedKeys.forEach(([varX, varY]) => {
         const filteredData = dataGroups.get(varX, varY);
-        plotVariablePair(ndx, xyDimension, xyDimensionGroup,
+        plotVariablePairGL(ndx, xyDimension, xyDimensionGroup,
             varX, varY, filteredData);
     });
 
 }
 
-function plotVariablePair(ndx: CrossFilter.CrossFilter<DataPoint>,
+function plotVariablePairGL(ndx: CrossFilter.CrossFilter<DataPoint>,
+                            xyDimension: CrossFilter.Dimension<DataPoint, TaggedXY>,
+                            xyDimensionGroup: CrossFilter.Group<DataPoint, TaggedXY, any>,
+                            varX: string, varY: string, filteredData: DataPoint[]) {
+    const canvas = document.createElement('canvas');
+    $('#variable-charts').append(canvas);
+    const scatter = new GLScatter(canvas, filteredData, 300, 300);
+}
+
+function plotVariablePairDCjs(ndx: CrossFilter.CrossFilter<DataPoint>,
                           xyDimension: CrossFilter.Dimension<DataPoint, TaggedXY>,
                           xyDimensionGroup: CrossFilter.Group<DataPoint, TaggedXY, any>,
                           varX: string, varY: string, filteredData: DataPoint[]) {
