@@ -7,14 +7,31 @@ export function ShaderError(message) {
 }
 ShaderError.prototype = new Error();
 
-const dataPointVertexSource = `
+// Shader constants
+const dotRadiusPx = 1.5;
+const boxRadiusPx = dotRadiusPx;
+// const boxRadiusPx = dotRadiusPx + 2;
+const constants = `
+#define boxRadiusPx ${boxRadiusPx.toFixed(1)}
+#define dotRadiusPx ${dotRadiusPx.toFixed(1)}
+`;
+
+/* language=GLSL */
+const dataPointVertexSource = constants + `
+// Vertex shader
+precision mediump float;
+
+// a corner of the rectangle, e.g. (-1, -1) for the lower left corner
 attribute vec2 aRectPosition;
 attribute vec2 aDataPoint;
 
-varying highp vec2 vRectPosition;
+uniform vec2 uPlotSizePx;
+
+varying mediump vec2 vRectPosition;
 
 void main() {
-    const vec2 uRectSize = vec2(8.0 / 300.0, 8.0 / 300.0);
+    vec2 uRectSize = vec2(2.0 * boxRadiusPx / uPlotSizePx.x, 
+                          2.0 * boxRadiusPx / uPlotSizePx.y);
     
     // Normalize aDataPoint from [0, 1] to [-1, 1]
     vec2 aDataPointNorm = aDataPoint * vec2(2.0, 2.0) - vec2(1.0, 1.0);
@@ -24,24 +41,38 @@ void main() {
 }
 `;
 
-const dataPointFragSource = `
-precision highp float;
-
+/* language=GLSL */
+const dataPointFragSource = constants + `
 // Fragment shader
+precision mediump float;
+
+// Position of this fragment within the box, between (-1,-1) and (1,1)
 varying vec2 vRectPosition;
+
+uniform vec2 uPlotSizePx;
 
 void main() {
     const vec4 dotColor = vec4(1.0, 0.0, 0.0, 1.0);
+    // Size of the box, in pixels
     
-    float sqrDistanceFromCenter = dot(vRectPosition, vRectPosition);
+    // The distance of the fragment from the center of the box is the magnitude
+    // of the vRectPosition vector. 
+    float distanceFromCenter = length(vRectPosition);
+    // This magnitude is in the same units as vRectPosition, so a magnitude of 1
+    // would mean the half the height (or width) of the box. 
+    // Convert it to pixels:
+    float distanceFromCenterPx = distanceFromCenter * boxRadiusPx;
         
-    float circleRadius = 0.3;
+    // Here comes the smoothing: the amount of red this fragment gets depends on
+    // how far away it is from the center.
+    // If it's less than the dot radius - 1, it will be fully opaque.
+    // If it's more than the dot radius, it will be fully transparent.
+    // If it's between those two limits, the amount of color it be 
+    // semitransparent in proportion.
+    float opacity = clamp(dotRadiusPx - distanceFromCenterPx, 0.0, 1.0);
     
-    if (sqrDistanceFromCenter > circleRadius * circleRadius) {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
-    } else {
-        gl_FragColor = dotColor;
-    }
+    // Set the opacity, minding the output is in premultiplied alpha format
+    gl_FragColor = dotColor * opacity; 
 }
 `;
 
@@ -54,6 +85,7 @@ export class GLScatter {
     dataPointAttrs: {
         aRectPosition: number;
         aDataPoint: number;
+        uPlotSizePx: WebGLUniformLocation;
     };
 
     dataMinX: number;
@@ -100,6 +132,7 @@ export class GLScatter {
         this.dataPointAttrs = {
             aRectPosition: shaderAttribute(this.dataPointProgram, 'aRectPosition'),
             aDataPoint: shaderAttribute(this.dataPointProgram, 'aDataPoint'),
+            uPlotSizePx: gl.getUniformLocation(this.dataPointProgram, 'uPlotSizePx'),
         };
 
         // Load vertices from data
@@ -224,26 +257,6 @@ export class GLScatter {
         }
     }
 
-    draw() {
-        const gl = this.gl;
-
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-        gl.useProgram(this.dataPointProgram);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.dataPointVertexBuffer);
-
-        const floatsPerVertex = 4;
-        const floatSize = 4; // bytes
-        const stride = 4 * floatsPerVertex;
-        this.vertexAttribPointer(this.dataPointAttrs
-            .aRectPosition, 2, gl.FLOAT, false, stride, 0);
-        this.vertexAttribPointer(this.dataPointAttrs
-            .aDataPoint, 2, gl.FLOAT, false, stride, 2 * floatSize);
-
-        gl.drawArrays(gl.TRIANGLES, 0, this.data.length * 6);
-    }
-
     compileProgram(vertShaderSource: string, fragShaderSource): WebGLProgram {
         const gl = this.gl;
 
@@ -255,7 +268,8 @@ export class GLScatter {
         gl.linkProgram(program);
 
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            throw new ShaderError('Could not link the shaders');
+            throw new ShaderError('Could not link the shaders:\n' +
+                gl.getProgramInfoLog(program));
         }
 
         return program;
@@ -273,5 +287,32 @@ export class GLScatter {
         }
 
         return shader;
+    }
+
+
+    draw() {
+        const gl = this.gl;
+
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        gl.useProgram(this.dataPointProgram);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.dataPointVertexBuffer);
+
+        gl.uniform2f(this.dataPointAttrs.uPlotSizePx, this.width, this.height);
+
+        const floatsPerVertex = 4;
+        const floatSize = 4; // bytes
+        const stride = 4 * floatsPerVertex;
+        this.vertexAttribPointer(this.dataPointAttrs
+            .aRectPosition, 2, gl.FLOAT, false, stride, 0);
+        this.vertexAttribPointer(this.dataPointAttrs
+            .aDataPoint, 2, gl.FLOAT, false, stride, 2 * floatSize);
+
+        gl.drawArrays(gl.TRIANGLES, 0, this.data.length * 6);
+
+        requestAnimationFrame(() => {
+            this.draw();
+        });
     }
 }
