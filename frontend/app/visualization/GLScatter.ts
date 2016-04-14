@@ -403,22 +403,6 @@ export class GLScatter {
 
         ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
 
-        // ctx.save();
-        // ctx.scale(W / w, H / h);
-        ctx.translate(W / 2 - w / 2 - margin.right,
-                   H / 2 - h / 2 - margin.top);
-        //
-        // ctx.moveTo(0, 0);
-        // ctx.lineTo(1, 0);
-        // ctx.lineTo(1, 1);
-        // ctx.lineTo(0, 1);
-        // ctx.closePath();
-        // ctx.fillStyle = '#ff0000';
-        // ctx.fill();
-        // ctx.fillRect(0, 0, 1, 1);
-
-        // ctx.restore();
-
         // Adjust to pixel boundaries
         ctx.save();
         ctx.translate(-0.5, 0.5);
@@ -485,5 +469,8 @@ export class GLScatter {
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
 
         gl.deleteTexture(tex);
+        gl.deleteBuffer(vertexIndexBuffer);
+        gl.deleteBuffer(textureCoordsBuf);
+        gl.deleteBuffer(vertexBuf);
     }
 }
