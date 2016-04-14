@@ -76,8 +76,39 @@ void main() {
 }
 `;
 
+/* language=GLSL */
+const simpleTextureVertSource = `
+// vertex shader
+precision mediump float;
+
+attribute vec2 aVertexPosition;
+attribute vec2 aTextureCoord;
+
+varying vec2 vTextureCoord;
+
+void main() {
+    gl_Position = vec4(aVertexPosition, 0.0, 1.0);
+    vTextureCoord = aTextureCoord;
+}
+`;
+
+/* language=GLSL */
+const simpleTextureFragSource = `
+// fragment shader
+precision mediump float;
+
+varying vec2 vTextureCoord;
+
+uniform sampler2D uSampler;
+
+void main() {
+    gl_FragColor = texture2D(uSampler, vTextureCoord.st);
+}
+`;
+
 export class GLScatter {
     gl: WebGLRenderingContext;
+    private canvas2d: HTMLCanvasElement;
 
     dataPointProgram: WebGLProgram;
     dataPointVertexBuffer: WebGLBuffer;
@@ -88,10 +119,23 @@ export class GLScatter {
         uPlotSizePx: WebGLUniformLocation;
     };
 
+    simpleTextureProgram: WebGLProgram;
+    simpleTextureAttrs: {
+        aVertexPosition: number;
+        aTextureCoord: number;
+    };
+
     dataMinX: number;
     dataMaxX: number;
     dataMinY: number;
     dataMaxY: number;
+
+    margin: {
+        top: number;
+        right: number;
+        bottom: number;
+        left: number;
+    };
 
     constructor(public canvas: HTMLCanvasElement,
                 public data: DataPoint[],
@@ -105,6 +149,19 @@ export class GLScatter {
         this.canvas.width = this.width;
         this.canvas.height = this.height;
 
+        // Create another 2D canvas for text rendering (e.g. axes)
+        this.canvas2d = document.createElement('canvas');
+        this.canvas2d.width = this.width;
+        this.canvas2d.height = this.height;
+
+        // Set default margins to let space for the axes
+        this.margin = {
+            top: 10,
+            right: 50,
+            bottom: 30,
+            left: 42
+        };
+
         const gl = this.gl = <WebGLRenderingContext>
                 this.canvas.getContext("webgl") ||
             this.canvas.getContext("experimental-webgl");
@@ -114,6 +171,10 @@ export class GLScatter {
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
         gl.blendEquation(gl.FUNC_ADD);
+
+        // No depth testing for now. Z order is render order unless uncommented:
+        // gl.enable(gl.DEPTH_TEST);
+        // gl.depthFunc(gl.LEQUAL);
 
         // Load shaders
         function shaderAttribute(program: WebGLProgram, attributeName: string) {
@@ -133,6 +194,14 @@ export class GLScatter {
             aRectPosition: shaderAttribute(this.dataPointProgram, 'aRectPosition'),
             aDataPoint: shaderAttribute(this.dataPointProgram, 'aDataPoint'),
             uPlotSizePx: gl.getUniformLocation(this.dataPointProgram, 'uPlotSizePx'),
+        };
+
+        this.simpleTextureProgram = this.compileProgram(
+            simpleTextureVertSource, simpleTextureFragSource);
+        gl.useProgram(this.simpleTextureProgram);
+        this.simpleTextureAttrs = {
+            aVertexPosition: shaderAttribute(this.simpleTextureProgram, 'aVertexPosition'),
+            aTextureCoord: shaderAttribute(this.simpleTextureProgram, 'aTextureCoord')
         };
 
         // Load vertices from data
@@ -292,8 +361,18 @@ export class GLScatter {
 
     draw() {
         const gl = this.gl;
-
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        this.drawAxes();
+        this.drawDataDots();
+
+        // requestAnimationFrame(() => {
+        //     this.draw();
+        // });
+    }
+
+    drawDataDots() {
+        const gl = this.gl;
 
         gl.useProgram(this.dataPointProgram);
 
@@ -310,9 +389,101 @@ export class GLScatter {
             .aDataPoint, 2, gl.FLOAT, false, stride, 2 * floatSize);
 
         gl.drawArrays(gl.TRIANGLES, 0, this.data.length * 6);
+    }
 
-        requestAnimationFrame(() => {
-            this.draw();
-        });
+    drawAxes() {
+        const ctx = this.canvas2d.getContext('2d');
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'black';
+
+        const margin = this.margin;
+        const W = this.width, H = this.height;
+        const w = this.width - margin.left - margin.right;
+        const h = this.height - margin.top - margin.bottom;
+
+        ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
+
+        // ctx.save();
+        // ctx.scale(W / w, H / h);
+        ctx.translate(W / 2 - w / 2 - margin.right,
+                   H / 2 - h / 2 - margin.top);
+        //
+        // ctx.moveTo(0, 0);
+        // ctx.lineTo(1, 0);
+        // ctx.lineTo(1, 1);
+        // ctx.lineTo(0, 1);
+        // ctx.closePath();
+        // ctx.fillStyle = '#ff0000';
+        // ctx.fill();
+        // ctx.fillRect(0, 0, 1, 1);
+
+        // ctx.restore();
+
+        // Adjust to pixel boundaries
+        ctx.save();
+        ctx.translate(-0.5, 0.5);
+
+        ctx.strokeStyle = '#000000';
+        ctx.moveTo(margin.left, margin.top);
+        ctx.lineTo(margin.left, H - margin.bottom);
+        ctx.lineTo(W - margin.right, H - margin.bottom);
+        ctx.stroke();
+
+        ctx.restore();
+
+        const gl = this.gl;
+        gl.useProgram(this.simpleTextureProgram);
+
+        const tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.canvas2d);
+        // No mipmaps (NPOT texture)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.uniform1i(gl.getUniformLocation(this.simpleTextureProgram, 'uSampler'), 0);
+
+        const top = -1;
+        const bottom = 1;
+        const left = -1;
+        const right = 1;
+
+        const vertexBuf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            left, top,
+            right, top,
+            right, bottom,
+            left, bottom,
+        ]), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(this.simpleTextureAttrs.aVertexPosition,
+            2, gl.FLOAT, false, 0, 0);
+
+        const textureCoordsBuf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordsBuf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            // Texture mapping is upside down in WebGL
+            0, 1,
+            1, 1,
+            1, 0,
+            0, 0,
+        ]), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(this.simpleTextureAttrs.aTextureCoord,
+            2, gl.FLOAT, false, 0, 0);
+
+        const vertexIndexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([
+            // clockwise
+            0, 1, 2,    0, 2, 3,
+        ]), gl.STATIC_DRAW);
+
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+
+        gl.deleteTexture(tex);
     }
 }
