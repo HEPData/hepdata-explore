@@ -26,15 +26,20 @@ attribute vec2 aRectPosition;
 attribute vec2 aDataPoint;
 
 uniform vec2 uPlotSizePx;
+uniform mat4 uTransform;
 
 varying mediump vec2 vRectPosition;
 
 void main() {
+    // Size of the dot box in WebGL [-1, 1] coordinates
     vec2 uRectSize = vec2(2.0 * boxRadiusPx / uPlotSizePx.x, 
                           2.0 * boxRadiusPx / uPlotSizePx.y);
     
     // Normalize aDataPoint from [0, 1] to [-1, 1]
     vec2 aDataPointNorm = aDataPoint * vec2(2.0, 2.0) - vec2(1.0, 1.0);
+    
+    // Transform aDataPointNorm to fit in the plot area (e.g. inside the axes)
+    aDataPointNorm = vec4(uTransform * vec4(aDataPointNorm, 0.0, 1.0)).xy; 
     
     gl_Position = vec4(aDataPointNorm + (aRectPosition * uRectSize), 1.0, 1.0);
     vRectPosition = aRectPosition;
@@ -106,6 +111,13 @@ void main() {
 }
 `;
 
+export interface Margins {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+}
+
 export class GLScatter {
     gl: WebGLRenderingContext;
     private canvas2d: HTMLCanvasElement;
@@ -117,6 +129,7 @@ export class GLScatter {
         aRectPosition: number;
         aDataPoint: number;
         uPlotSizePx: WebGLUniformLocation;
+        uTransform: WebGLUniformLocation;
     };
 
     simpleTextureProgram: WebGLProgram;
@@ -130,12 +143,8 @@ export class GLScatter {
     dataMinY: number;
     dataMaxY: number;
 
-    margin: {
-        top: number;
-        right: number;
-        bottom: number;
-        left: number;
-    };
+    margin: Margins;
+    transformationMatrix: Float32Array;
 
     constructor(public canvas: HTMLCanvasElement,
                 public data: DataPoint[],
@@ -161,6 +170,9 @@ export class GLScatter {
             bottom: 30,
             left: 42
         };
+
+        this.transformationMatrix = GLScatter.getAxesTransformationMatrix(
+            this.width, this.height, this.margin);
 
         const gl = this.gl = <WebGLRenderingContext>
                 this.canvas.getContext("webgl") ||
@@ -194,6 +206,7 @@ export class GLScatter {
             aRectPosition: shaderAttribute(this.dataPointProgram, 'aRectPosition'),
             aDataPoint: shaderAttribute(this.dataPointProgram, 'aDataPoint'),
             uPlotSizePx: gl.getUniformLocation(this.dataPointProgram, 'uPlotSizePx'),
+            uTransform: gl.getUniformLocation(this.dataPointProgram, 'uTransform'),
         };
 
         this.simpleTextureProgram = this.compileProgram(
@@ -209,6 +222,21 @@ export class GLScatter {
 
         // Draw now!
         this.draw();
+    }
+
+    static getAxesTransformationMatrix(W: number, H: number, margins: Margins) {
+        const w = W - margins.left - margins.right;
+        const h = H - margins.top - margins.bottom;
+
+        const transform = new Float32Array(4 * 4);
+        mat4.identity(transform);
+        mat4.scale(transform, transform, [w / W, h / H, 1]);
+        mat4.translate(transform, transform, [
+            (margins.left - margins.right) / W,
+            (margins.bottom - margins.top) / H,
+            0]);
+
+        return transform;
     }
 
     computeMinMax() {
@@ -363,8 +391,8 @@ export class GLScatter {
         const gl = this.gl;
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        this.drawAxes();
         this.drawDataDots();
+        this.drawAxes();
 
         // requestAnimationFrame(() => {
         //     this.draw();
@@ -379,6 +407,8 @@ export class GLScatter {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.dataPointVertexBuffer);
 
         gl.uniform2f(this.dataPointAttrs.uPlotSizePx, this.width, this.height);
+        gl.uniformMatrix4fv(this.dataPointAttrs.uTransform, false,
+            this.transformationMatrix)
 
         const floatsPerVertex = 4;
         const floatSize = 4; // bytes

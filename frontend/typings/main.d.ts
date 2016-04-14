@@ -2,6 +2,7 @@
 /// <reference path="main/ambient/crossfilter/index.d.ts" />
 /// <reference path="main/ambient/d3/index.d.ts" />
 /// <reference path="main/ambient/dc/index.d.ts" />
+/// <reference path="main/ambient/gl-matrix/index.d.ts" />
 /// <reference path="main/ambient/jasmine/index.d.ts" />
 /// <reference path="main/ambient/jquery/index.d.ts" />
 /// <reference path="main/ambient/knockout.es5/index.d.ts" />
