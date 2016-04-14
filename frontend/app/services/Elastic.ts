@@ -63,7 +63,7 @@ export class Elastic {
 
     fetchFilteredData(rootFilter: Filter) {
         const requestData = {
-            "size": 10000,
+            "size": 100,
             "query": {
                 "nested": {
                     "path": "tables.groups",
