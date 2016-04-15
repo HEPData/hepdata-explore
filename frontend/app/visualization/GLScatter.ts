@@ -24,11 +24,13 @@ precision mediump float;
 // a corner of the rectangle, e.g. (-1, -1) for the lower left corner
 attribute vec2 aRectPosition;
 attribute vec2 aDataPoint;
+attribute vec3 aColor;
 
 uniform vec2 uPlotSizePx;
 uniform mat4 uTransform;
 
-varying mediump vec2 vRectPositionPx;
+varying vec2 vRectPositionPx;
+varying vec3 vColor;
 
 vec2 glCoordsToRelCoords(in vec2 glCoords) {
     return (glCoords + vec2(1.0, 1.0)) * vec2(0.5, 0.5);
@@ -77,16 +79,17 @@ void main() {
     // Turn the pixel coords back into GL coords
     gl_Position = vec4(pixelCoordsToGlCoords(vertexPx), 1.0, 1.0);
     vRectPositionPx = aRectPosition * dotRadiusPx;
+    vColor = aColor;
 }
 `;
 
 /* language=GLSL */
-const dataPointFragSource = constants + `
-// Fragment shader
+const dataPointFragSource = constants + `// Fragment shader
 precision mediump float;
 
 // Position of this fragment within the box, between (-1,-1) and (1,1)
 varying vec2 vRectPositionPx;
+varying vec3 vColor;
 
 uniform vec2 uPlotSizePx;
 
@@ -99,7 +102,7 @@ float getOpacityForPixelPosition(in vec2 positionPx) {
 }
 
 void main() {
-    const vec4 dotColor = vec4(1.0, 0.0, 0.0, 1.0);
+    vec4 dotColor = vec4(vColor, 1.0);
     
     // vRectPositionPx contains a pixel offset from the center of the box.
     // vRectPositionPx is set in the center of a pixel.
@@ -171,6 +174,7 @@ export class GLScatter {
     dataPointAttrs: {
         aRectPosition: number;
         aDataPoint: number;
+        aColor: number;
         uPlotSizePx: WebGLUniformLocation;
         uTransform: WebGLUniformLocation;
     };
@@ -248,6 +252,7 @@ export class GLScatter {
         this.dataPointAttrs = {
             aRectPosition: shaderAttribute(this.dataPointProgram, 'aRectPosition'),
             aDataPoint: shaderAttribute(this.dataPointProgram, 'aDataPoint'),
+            aColor: shaderAttribute(this.dataPointProgram, 'aColor'),
             uPlotSizePx: gl.getUniformLocation(this.dataPointProgram, 'uPlotSizePx'),
             uTransform: gl.getUniformLocation(this.dataPointProgram, 'uTransform'),
         };
@@ -336,8 +341,10 @@ export class GLScatter {
 
          - [dataPointX, dataPointY]: the data point value, adjusted to [0..1]
            range.
+
+         - [R,G,B]: the data point color, as 3 floats.
          */
-        const floatsPerVertex = 4;
+        const floatsPerVertex = 7;
         const floats = this.dataPointFloats = new Float32Array(
             data.length * floatsPerVertex * 6);
         let nFloat = 0;
@@ -356,11 +363,22 @@ export class GLScatter {
             return (y - minY) / rangeY;
         }
 
+        var colorScale = d3.scale.category10();
+        function hexToR(h) {return parseInt(h.substring(0,2),16)}
+        function hexToG(h) {return parseInt(h.substring(2,4),16)}
+        function hexToB(h) {return parseInt(h.substring(4,6),16)}
+
         function addDataPointData(dataPoint: DataPoint) {
             // Add these properties that are the same for all the vertices of a
             // data point.
             floats[nFloat++] = scaleX(dataPoint.x_center);
             floats[nFloat++] = scaleY(dataPoint.y);
+
+            var key = dataPoint.inspire_record + '-' + dataPoint.table_num;
+            var colorHex = colorScale(key).substring(1);
+            floats[nFloat++] = hexToR(colorHex) / 255;
+            floats[nFloat++] = hexToG(colorHex) / 255;
+            floats[nFloat++] = hexToB(colorHex) / 255;
         }
 
         function addVertex(dataPoint: DataPoint, rectX: number, rectY: number) {
@@ -453,13 +471,15 @@ export class GLScatter {
         gl.uniformMatrix4fv(this.dataPointAttrs.uTransform, false,
             this.transformationMatrix)
 
-        const floatsPerVertex = 4;
+        const floatsPerVertex = 7;
         const floatSize = 4; // bytes
         const stride = 4 * floatsPerVertex;
         this.vertexAttribPointer(this.dataPointAttrs
             .aRectPosition, 2, gl.FLOAT, false, stride, 0);
         this.vertexAttribPointer(this.dataPointAttrs
             .aDataPoint, 2, gl.FLOAT, false, stride, 2 * floatSize);
+        this.vertexAttribPointer(this.dataPointAttrs
+            .aColor, 3, gl.FLOAT, false, stride, 4 * floatSize);
 
         gl.drawArrays(gl.TRIANGLES, 0, this.data.length * 6);
     }
