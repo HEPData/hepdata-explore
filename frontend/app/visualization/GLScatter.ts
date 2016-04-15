@@ -30,6 +30,23 @@ uniform mat4 uTransform;
 
 varying mediump vec2 vRectPosition;
 
+vec2 alignToPixelBoundaries(vec2 pointInGLcoords) {
+    // [-1,1] coords to [0,1] coords
+    vec2 pointInRelCoords = (pointInGLcoords + vec2(1.0, 1.0)) * vec2(0.5, 0.5);
+    
+    // [0,1] coords to pixel coords (e.g. 640, 480)
+    vec2 pointInPixels = pointInRelCoords * uPlotSizePx;
+    
+    // round to the nearest integer pixel
+    vec2 roundedPointInPixels = floor(pointInPixels + vec2(0.5, 0.5));
+    
+    // we want the point to be in an actual pixel boundary, so move it half a pixel
+    roundedPointInPixels += vec2(0.5, 0.5);
+    
+    // finally return [-1,1] coords, as expected by WebGL
+    return (roundedPointInPixels / uPlotSizePx) * vec2(2.0, 2.0) - vec2(1.0, 1.0);
+}
+
 void main() {
     // Size of the dot box in WebGL [-1, 1] coordinates
     vec2 uRectSize = vec2(2.0 * boxRadiusPx / uPlotSizePx.x, 
@@ -39,7 +56,8 @@ void main() {
     vec2 aDataPointNorm = aDataPoint * vec2(2.0, 2.0) - vec2(1.0, 1.0);
     
     // Transform aDataPointNorm to fit in the plot area (e.g. inside the axes)
-    aDataPointNorm = vec4(uTransform * vec4(aDataPointNorm, 0.0, 1.0)).xy; 
+    aDataPointNorm = vec4(uTransform * vec4(aDataPointNorm, 0.0, 1.0)).xy;
+    aDataPointNorm = alignToPixelBoundaries(aDataPointNorm);
     
     gl_Position = vec4(aDataPointNorm + (aRectPosition * uRectSize), 1.0, 1.0);
     vRectPosition = aRectPosition;
