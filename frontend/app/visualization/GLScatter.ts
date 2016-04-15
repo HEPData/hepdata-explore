@@ -94,15 +94,7 @@ float getOpacityForPixelPosition(in vec2 positionPx) {
     // The distance of the fragment from the center of the box is the magnitude
     // of the position vector. 
     float distanceFromCenterPx = length(positionPx);
-        
-    // Here comes the smoothing: the amount of red this fragment gets depends on
-    // how far away it is from the center.
-    // If it's less than the dot radius - 1, it will be fully opaque.
-    // If it's more than the dot radius, it will be fully transparent.
-    // If it's between those two limits, the amount of color it be 
-    // semitransparent in proportion.
-//    float opacity = clamp(dotRadiusPx - distanceFromCenterPx, 0.0, 1.0);
-//    return opacity;
+    
     return (distanceFromCenterPx <= dotRadiusPx ? 1.0 : 0.0);
 }
 
@@ -112,13 +104,12 @@ void main() {
     // vRectPositionPx contains a pixel offset from the center of the box.
     // vRectPositionPx is set in the center of a pixel.
     
-    // Calculate the opacity as the average of the opacity that would correspond
-    // to the four pixel corners:
+    // MSAA 4x, 2x2 grid
     float opacity = (
-        getOpacityForPixelPosition(vec2(floor(vRectPositionPx.x), floor(vRectPositionPx.y))) +
-        getOpacityForPixelPosition(vec2(floor(vRectPositionPx.x), ceil(vRectPositionPx.y))) +
-        getOpacityForPixelPosition(vec2(ceil(vRectPositionPx.x), ceil(vRectPositionPx.y))) +
-        getOpacityForPixelPosition(vec2(ceil(vRectPositionPx.x), floor(vRectPositionPx.y)))
+        getOpacityForPixelPosition(vRectPositionPx + vec2(-0.25, -0.25)) +
+        getOpacityForPixelPosition(vRectPositionPx + vec2( 0.25, -0.25)) +
+        getOpacityForPixelPosition(vRectPositionPx + vec2( 0.25,  0.25)) +
+        getOpacityForPixelPosition(vRectPositionPx + vec2(-0.25,  0.25))
     ) * 0.25;
     
     // Set the opacity, minding the output is in premultiplied alpha format
