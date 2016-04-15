@@ -28,7 +28,7 @@ attribute vec2 aDataPoint;
 uniform vec2 uPlotSizePx;
 uniform mat4 uTransform;
 
-varying mediump vec2 vRectPosition;
+varying mediump vec2 vRectPositionPx;
 
 vec2 glCoordsToRelCoords(in vec2 glCoords) {
     return (glCoords + vec2(1.0, 1.0)) * vec2(0.5, 0.5);
@@ -76,7 +76,7 @@ void main() {
     
     // Turn the pixel coords back into GL coords
     gl_Position = vec4(pixelCoordsToGlCoords(vertexPx), 1.0, 1.0);
-    vRectPosition = aRectPosition;
+    vRectPositionPx = aRectPosition * dotRadiusPx;
 }
 `;
 
@@ -86,21 +86,14 @@ const dataPointFragSource = constants + `
 precision mediump float;
 
 // Position of this fragment within the box, between (-1,-1) and (1,1)
-varying vec2 vRectPosition;
+varying vec2 vRectPositionPx;
 
 uniform vec2 uPlotSizePx;
 
-void main() {
-    const vec4 dotColor = vec4(1.0, 0.0, 0.0, 1.0);
-    // Size of the box, in pixels
-    
+float getOpacityForPixelPosition(in vec2 positionPx) {
     // The distance of the fragment from the center of the box is the magnitude
-    // of the vRectPosition vector. 
-    float distanceFromCenter = length(vRectPosition);
-    // This magnitude is in the same units as vRectPosition, so a magnitude of 1
-    // would mean the half the height (or width) of the box. 
-    // Convert it to pixels:
-    float distanceFromCenterPx = distanceFromCenter * boxRadiusPx;
+    // of the position vector. 
+    float distanceFromCenterPx = length(positionPx);
         
     // Here comes the smoothing: the amount of red this fragment gets depends on
     // how far away it is from the center.
@@ -108,10 +101,28 @@ void main() {
     // If it's more than the dot radius, it will be fully transparent.
     // If it's between those two limits, the amount of color it be 
     // semitransparent in proportion.
-    float opacity = clamp(dotRadiusPx - distanceFromCenterPx, 0.0, 1.0);
+//    float opacity = clamp(dotRadiusPx - distanceFromCenterPx, 0.0, 1.0);
+//    return opacity;
+    return (distanceFromCenterPx <= dotRadiusPx ? 1.0 : 0.0);
+}
+
+void main() {
+    const vec4 dotColor = vec4(1.0, 0.0, 0.0, 1.0);
+    
+    // vRectPositionPx contains a pixel offset from the center of the box.
+    // vRectPositionPx is set in the center of a pixel.
+    
+    // Calculate the opacity as the average of the opacity that would correspond
+    // to the four pixel corners:
+    float opacity = (
+        getOpacityForPixelPosition(vec2(floor(vRectPositionPx.x), floor(vRectPositionPx.y))) +
+        getOpacityForPixelPosition(vec2(floor(vRectPositionPx.x), ceil(vRectPositionPx.y))) +
+        getOpacityForPixelPosition(vec2(ceil(vRectPositionPx.x), ceil(vRectPositionPx.y))) +
+        getOpacityForPixelPosition(vec2(ceil(vRectPositionPx.x), floor(vRectPositionPx.y)))
+    ) * 0.25;
     
     // Set the opacity, minding the output is in premultiplied alpha format
-    gl_FragColor = dotColor * opacity + vec4(1.0, 0.0, 0.0, 1.0); 
+    gl_FragColor = opacity * dotColor;
 }
 `;
 
