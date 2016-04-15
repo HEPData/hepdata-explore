@@ -112,6 +112,13 @@ void main() {
         getOpacityForPixelPosition(vRectPositionPx + vec2(-0.25,  0.25))
     ) * 0.25;
     
+    // This is somewhat hacky... It artificially reduces opacity for the 
+    // semitransparent pixels so that it's not that easier for dot over dots
+    // to become squares.
+    if (opacity < .9) {
+        opacity = opacity * 0.6;
+    }
+    
     // Set the opacity, minding the output is in premultiplied alpha format
     gl_FragColor = opacity * dotColor;
 }
