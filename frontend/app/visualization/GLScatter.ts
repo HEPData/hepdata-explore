@@ -8,7 +8,7 @@ export function ShaderError(message) {
 ShaderError.prototype = new Error();
 
 // Shader constants
-const dotRadiusPx = 1.5;
+const dotRadiusPx = 2;
 const boxRadiusPx = dotRadiusPx;
 // const boxRadiusPx = dotRadiusPx + 2;
 const constants = `
@@ -30,36 +30,52 @@ uniform mat4 uTransform;
 
 varying mediump vec2 vRectPosition;
 
-vec2 alignToPixelBoundaries(vec2 pointInGLcoords) {
-    // [-1,1] coords to [0,1] coords
-    vec2 pointInRelCoords = (pointInGLcoords + vec2(1.0, 1.0)) * vec2(0.5, 0.5);
-    
-    // [0,1] coords to pixel coords (e.g. 640, 480)
-    vec2 pointInPixels = pointInRelCoords * uPlotSizePx;
+vec2 glCoordsToRelCoords(in vec2 glCoords) {
+    return (glCoords + vec2(1.0, 1.0)) * vec2(0.5, 0.5);
+}
+
+vec2 relCoordsToGLCoords(in vec2 relCoords) {
+    return (relCoords * vec2(2.0, 2.0)) - vec2(1.0, 1.0);
+}
+
+vec2 glCoordsToPixelCoords(in vec2 glCoords) {
+    return glCoordsToRelCoords(glCoords) * uPlotSizePx;
+}
+
+vec2 pixelCoordsToGlCoords(in vec2 pixelCoords) {
+    return relCoordsToGLCoords(pixelCoords / uPlotSizePx);
+}
+
+vec2 alignToPixelBoundaries(in vec2 pointInGLcoords) {
+    // Convert to pixel coords (e.g. 640, 480)
+    vec2 pointInPixels = glCoordsToPixelCoords(pointInGLcoords);
     
     // round to the nearest integer pixel
     vec2 roundedPointInPixels = floor(pointInPixels + vec2(0.5, 0.5));
     
-    // we want the point to be in an actual pixel boundary, so move it half a pixel
-    roundedPointInPixels += vec2(0.5, 0.5);
+    // Note the result is in a pixel boundary, not the center of a pixel.
+    // If we have a 8x8 px canvas we have 9 pixel boundaries on each axis 
+    // (0 to 8, both included).
     
-    // finally return [-1,1] coords, as expected by WebGL
-    return (roundedPointInPixels / uPlotSizePx) * vec2(2.0, 2.0) - vec2(1.0, 1.0);
+    // finally return pixel coords
+    return roundedPointInPixels;
 }
 
 void main() {
-    // Size of the dot box in WebGL [-1, 1] coordinates
-    vec2 uRectSize = vec2(2.0 * boxRadiusPx / uPlotSizePx.x, 
-                          2.0 * boxRadiusPx / uPlotSizePx.y);
-    
     // Normalize aDataPoint from [0, 1] to [-1, 1]
-    vec2 aDataPointNorm = aDataPoint * vec2(2.0, 2.0) - vec2(1.0, 1.0);
+    vec2 aDataPointNorm = relCoordsToGLCoords(aDataPoint);
     
     // Transform aDataPointNorm to fit in the plot area (e.g. inside the axes)
     aDataPointNorm = vec4(uTransform * vec4(aDataPointNorm, 0.0, 1.0)).xy;
-    aDataPointNorm = alignToPixelBoundaries(aDataPointNorm);
     
-    gl_Position = vec4(aDataPointNorm + (aRectPosition * uRectSize), 1.0, 1.0);
+    // Find a pixel boundary for the data point
+    vec2 aDataPointNormPx = alignToPixelBoundaries(aDataPointNorm);
+    
+    // Calculate the pixel for this box vertex
+    vec2 vertexPx = aDataPointNormPx + aRectPosition * boxRadiusPx;
+    
+    // Turn the pixel coords back into GL coords
+    gl_Position = vec4(pixelCoordsToGlCoords(vertexPx), 1.0, 1.0);
     vRectPosition = aRectPosition;
 }
 `;
@@ -95,7 +111,7 @@ void main() {
     float opacity = clamp(dotRadiusPx - distanceFromCenterPx, 0.0, 1.0);
     
     // Set the opacity, minding the output is in premultiplied alpha format
-    gl_FragColor = dotColor * opacity; 
+    gl_FragColor = dotColor * opacity + vec4(1.0, 0.0, 0.0, 1.0); 
 }
 `;
 
