@@ -164,6 +164,7 @@ export interface ScaleFunction {
     (value: number): number;
 
     ticks(): number[];
+    tickFormat(count?: number, format?: string): (n: number) => string;
 }
 
 export class GLScatter {
@@ -505,7 +506,12 @@ export class GLScatter {
         ctx.lineTo(W - margin.right, H - margin.bottom);
         ctx.stroke();
 
+        const tickFormat = this.xScale.tickFormat();
+
+        ctx.font = '9px sans';
+
         // Draw X ticks
+        let pastTickEnd = null;
         for (const tickValue of this.xScale.ticks()) {
             const tickXRelPosition = this.xScale(tickValue);
             const tickX = Math.round(margin.left + w * tickXRelPosition);
@@ -513,6 +519,18 @@ export class GLScatter {
             ctx.moveTo(tickX, H - margin.bottom);
             ctx.lineTo(tickX, H - margin.bottom + 5);
             ctx.stroke();
+
+            const textW = ctx.measureText(tickFormat(tickValue)).width;
+            const textX = tickX - textW / 2;
+
+            // There must be a margin of at least 1px between the end of the
+            // previous tick label and the start of the current one.
+            if (pastTickEnd === null || textX - textW / 2 - pastTickEnd > 1) {
+                ctx.fillText(tickFormat(tickValue), textX,
+                    H - margin.bottom + 15);
+
+                pastTickEnd = textX + textW / 2;
+            }
         }
 
         // Draw Y ticks
@@ -523,6 +541,10 @@ export class GLScatter {
             ctx.moveTo(margin.left, tickY);
             ctx.lineTo(margin.left - 5, tickY);
             ctx.stroke();
+
+            const textW = ctx.measureText(tickFormat(tickValue)).width;
+            ctx.fillText(tickFormat(tickValue), margin.left - 8 - textW,
+                tickY + 3);
         }
 
         ctx.restore();
