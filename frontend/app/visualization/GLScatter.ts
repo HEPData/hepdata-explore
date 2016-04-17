@@ -512,7 +512,7 @@ export class GLScatter {
 
         // Draw X ticks
         let pastTickEnd = null;
-        for (const tickValue of this.xScale.ticks()) {
+        for (let tickValue of this.xScale.ticks()) {
             const tickXRelPosition = this.xScale(tickValue);
             const tickX = Math.round(margin.left + w * tickXRelPosition);
 
@@ -534,7 +534,7 @@ export class GLScatter {
         }
 
         // Draw Y ticks
-        for (const tickValue of this.yScale.ticks()) {
+        for (let tickValue of this.yScale.ticks()) {
             const tickYRelPosition = this.yScale(tickValue);
             const tickY = Math.round(margin.top + h * (1 - tickYRelPosition));
 
