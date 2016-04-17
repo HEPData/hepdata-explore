@@ -162,6 +162,8 @@ export interface Margins {
 
 export interface ScaleFunction {
     (value: number): number;
+
+    ticks(): number[];
 }
 
 export class GLScatter {
@@ -502,6 +504,26 @@ export class GLScatter {
         ctx.lineTo(margin.left, H - margin.bottom);
         ctx.lineTo(W - margin.right, H - margin.bottom);
         ctx.stroke();
+
+        // Draw X ticks
+        for (const tickValue of this.xScale.ticks()) {
+            const tickXRelPosition = this.xScale(tickValue);
+            const tickX = Math.round(margin.left + w * tickXRelPosition);
+
+            ctx.moveTo(tickX, H - margin.bottom);
+            ctx.lineTo(tickX, H - margin.bottom + 5);
+            ctx.stroke();
+        }
+
+        // Draw Y ticks
+        for (const tickValue of this.yScale.ticks()) {
+            const tickYRelPosition = this.yScale(tickValue);
+            const tickY = Math.round(margin.top + h * (1 - tickYRelPosition));
+
+            ctx.moveTo(margin.left, tickY);
+            ctx.lineTo(margin.left - 5, tickY);
+            ctx.stroke();
+        }
 
         ctx.restore();
 
