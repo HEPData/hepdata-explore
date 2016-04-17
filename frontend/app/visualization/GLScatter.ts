@@ -160,6 +160,10 @@ export interface Margins {
     left: number;
 }
 
+export interface ScaleFunction {
+    (value: number): number;
+}
+
 export class GLScatter {
     gl: WebGLRenderingContext;
     private canvas2d: HTMLCanvasElement;
@@ -189,6 +193,9 @@ export class GLScatter {
     margin: Margins;
     transformationMatrix: Float32Array;
 
+    xScale: ScaleFunction;
+    yScale: ScaleFunction;
+
     constructor(public canvas: HTMLCanvasElement,
                 public data: DataPoint[],
                 public width: number,
@@ -213,6 +220,11 @@ export class GLScatter {
             bottom: 30,
             left: 42
         };
+
+        this.xScale = d3.scale.pow().exponent(.5).domain([
+            this.dataMinX, this.dataMaxX]);
+        this.yScale = d3.scale.linear().domain([
+            this.dataMinY, this.dataMaxY]);
 
         this.transformationMatrix = GLScatter.getAxesTransformationMatrix(
             this.width, this.height, this.margin);
@@ -345,19 +357,8 @@ export class GLScatter {
             data.length * floatsPerVertex * 6);
         let nFloat = 0;
 
-        const minX = this.dataMinX;
-        const maxX = this.dataMaxX;
-        const rangeX = maxX - minX;
-        function scaleX(x: number) {
-            return (x - minX) / rangeX;
-        }
-
-        const minY = this.dataMinY;
-        const maxY = this.dataMaxY;
-        const rangeY = maxY - minY;
-        function scaleY(y: number) {
-            return (y - minY) / rangeY;
-        }
+        const xScale = this.xScale.bind(this);
+        const yScale = this.yScale.bind(this);
 
         var colorScale = d3.scale.category10();
         function hexToR(h) {return parseInt(h.substring(0,2),16)}
@@ -367,8 +368,8 @@ export class GLScatter {
         function addDataPointData(dataPoint: DataPoint) {
             // Add these properties that are the same for all the vertices of a
             // data point.
-            floats[nFloat++] = scaleX(dataPoint.x_center);
-            floats[nFloat++] = scaleY(dataPoint.y);
+            floats[nFloat++] = xScale(dataPoint.x_center);
+            floats[nFloat++] = yScale(dataPoint.y);
 
             var key = dataPoint.inspire_record + '-' + dataPoint.table_num;
             var colorHex = colorScale(key).substring(1);
