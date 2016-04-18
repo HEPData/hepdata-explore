@@ -222,8 +222,8 @@ export class GLScatter {
         this.margin = {
             top: 10,
             right: 50,
-            bottom: 30,
-            left: 42
+            bottom: 32,
+            left: 52
         };
 
         this.xScale = d3.scale.pow().exponent(.5).domain([
@@ -510,7 +510,7 @@ export class GLScatter {
 
         const tickFormat = this.xScale.tickFormat();
 
-        ctx.font = '9px sans';
+        ctx.font = '8px sans';
 
         // Draw X ticks
         let pastTickEnd = null;
@@ -529,7 +529,7 @@ export class GLScatter {
             // previous tick label and the start of the current one.
             if (pastTickEnd === null || textX - textW / 2 - pastTickEnd > 1) {
                 ctx.fillText(tickFormat(tickValue), textX,
-                    H - margin.bottom + 15);
+                    H - margin.bottom + 14);
 
                 pastTickEnd = textX + textW / 2;
             }
@@ -549,15 +549,30 @@ export class GLScatter {
                 tickY + 3);
         }
 
+        ctx.restore();
+
         // draw X label
         {
             const axisXCenter = margin.left + (w / 2);
             const textW = ctx.measureText(this.varX).width;
-            ctx.font = '11px sans';
-            ctx.fillText(this.varX, axisXCenter - textW / 2, margin.top + h + 28);
+            ctx.font = '14px sans';
+            ctx.fillText(this.varX, axisXCenter - textW / 2, margin.top + h + 30);
         }
 
-        ctx.restore();
+        // draw Y label
+        {
+            const axisYCenter = margin.top + (h / 2);
+            const textW = ctx.measureText(this.varY).width;
+            const textH = 12; // approximately
+
+            ctx.save();
+            ctx.translate(margin.left - 32, axisYCenter);
+            ctx.rotate(-Math.PI / 2);
+
+            ctx.fillText(this.varY, -textW / 2, -textH / 2);
+
+            ctx.restore();
+        }
 
         const gl = this.gl;
         gl.useProgram(this.simpleTextureProgram);
