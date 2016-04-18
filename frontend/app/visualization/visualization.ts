@@ -246,6 +246,8 @@ function searchMinMax(data: DataPoint[]) {
     return [minX, maxX];
 }
 
+const glScattersList = [];
+
 export function showGraphs(data: DataPoint[], dataGroups: Map2<string,string,DataPoint[]>) {
     const ndx = crossfilter<DataPoint>(data);
 
@@ -293,6 +295,12 @@ export function showGraphs(data: DataPoint[], dataGroups: Map2<string,string,Dat
     // Delete previous charts and generate new ones, one for each variable pair
     $('#variable-charts').empty();
 
+    // Delete previous plots
+    glScattersList.forEach((scatter) => {
+        scatter.dispose()
+    });
+    glScattersList.splice(0, glScattersList.length);
+
     sortedKeys.forEach(([varX, varY]) => {
         const filteredData = dataGroups.get(varX, varY);
         plotVariablePairGL(ndx, xyDimension, xyDimensionGroup,
@@ -308,6 +316,7 @@ function plotVariablePairGL(ndx: CrossFilter.CrossFilter<DataPoint>,
     const canvas = document.createElement('canvas');
     $('#variable-charts').append(canvas);
     const scatter = new GLScatter(canvas, filteredData, 300, 300, varX, varY);
+    glScattersList.push(scatter);
 }
 
 function plotVariablePairDCjs(ndx: CrossFilter.CrossFilter<DataPoint>,

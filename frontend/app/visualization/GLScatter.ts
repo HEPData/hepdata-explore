@@ -632,4 +632,11 @@ export class GLScatter {
         gl.deleteBuffer(textureCoordsBuf);
         gl.deleteBuffer(vertexBuf);
     }
+
+    dispose() {
+        const gl = this.gl;
+        gl.deleteBuffer(this.dataPointVertexBuffer);
+        gl.deleteProgram(this.dataPointProgram);
+        gl.deleteProgram(this.simpleTextureProgram);
+    }
 }
