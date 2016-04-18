@@ -307,7 +307,7 @@ function plotVariablePairGL(ndx: CrossFilter.CrossFilter<DataPoint>,
                             varX: string, varY: string, filteredData: DataPoint[]) {
     const canvas = document.createElement('canvas');
     $('#variable-charts').append(canvas);
-    const scatter = new GLScatter(canvas, filteredData, 300, 300);
+    const scatter = new GLScatter(canvas, filteredData, 300, 300, varX, varY);
 }
 
 function plotVariablePairDCjs(ndx: CrossFilter.CrossFilter<DataPoint>,

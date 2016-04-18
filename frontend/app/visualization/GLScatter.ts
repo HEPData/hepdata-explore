@@ -202,7 +202,9 @@ export class GLScatter {
     constructor(public canvas: HTMLCanvasElement,
                 public data: DataPoint[],
                 public width: number,
-                public height: number) {
+                public height: number,
+                public varX: string,
+                public varY: string) {
 
         // Precompute minimums and maximums
         this.computeMinMax();
@@ -545,6 +547,14 @@ export class GLScatter {
             const textW = ctx.measureText(tickFormat(tickValue)).width;
             ctx.fillText(tickFormat(tickValue), margin.left - 8 - textW,
                 tickY + 3);
+        }
+
+        // draw X label
+        {
+            const axisXCenter = margin.left + (w / 2);
+            const textW = ctx.measureText(this.varX).width;
+            ctx.font = '11px sans';
+            ctx.fillText(this.varX, axisXCenter - textW / 2, margin.top + h + 28);
         }
 
         ctx.restore();
