@@ -1,4 +1,5 @@
 from math import isinf, isnan
+import re
 
 
 class NotNumeric(Exception):
@@ -20,6 +21,12 @@ def coerce_float_or_null(value):
         return coerce_float(value)
 
 
+# All this to parse a floating point number :)
+re_src_float = r'[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?'
+re_number_exp_number = re.compile('(' + re_src_float + ') *exp *(' +
+                                  re_src_float + ')')
+
+
 def coerce_float(value):
     if type(value) == float:
         if isinf(value):
@@ -32,12 +39,29 @@ def coerce_float(value):
             raise NotNumeric(value)
         else:
             return value
-    elif 'exp' in value:
-        base = value.split(' ')[0]
-        exp = value.split('exp')[-1]
+
+    # Maybe it's a weird scientific notation format
+    sn_match = re_number_exp_number.match(value)
+    if sn_match:
+        print(sn_match.groups())
+        base, exp = sn_match.groups()
         return float(base + 'e' + exp)
     else:
         raise NotNumeric(value)
+
+re_latex_plusminus_range = re.compile('(' + re_src_float + r') *\\\$pm\$ *(' +
+                                      re_src_float + ')')
+
+
+def value_is_actually_a_range(value):
+    return isinstance(value, str) and re_latex_plusminus_range.match(value)
+
+
+def parse_value_range(value):
+    return tuple(
+        coerce_float(float(x.strip()))
+        for x in value.split(r'$\pm$')
+    )
 
 
 def find_keyword(table, keyword):

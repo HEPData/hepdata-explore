@@ -5,7 +5,7 @@ import yaml
 
 from aggregator.harmonizing import find_keyword, find_qualifier, \
     coerce_float, NotNumeric, find_inspire_record, ensure_list, \
-    coerce_float_or_null
+    coerce_float_or_null, value_is_actually_a_range, parse_value_range
 from aggregator.shared_dcontext import dcontext
 from elasticsearch import Elasticsearch
 
@@ -86,17 +86,6 @@ def extract_variable_name(header):
         return '%s (%s)' % (header['name'], header['units'])
     else:
         return header['name']
-
-
-def value_is_actually_a_range(value):
-    return isinstance(value, str) and r'$\pm$' in value
-
-
-def parse_value_range(value):
-    return tuple(
-        coerce_float(float(x.strip()))
-        for x in value.split(r'$\pm$')
-    )
 
 
 class RejectedTable(Exception):
@@ -230,6 +219,8 @@ class RecordAggregator(object):
                         del value['value']
 
                     try:
+                        # Note: nulls are allowed in dependent variables, but
+                        # not in independent ones.
                         value['value'] = coerce_float(value['value'])
                     except NotNumeric as err:
                         excluded_indep_vars.add(col)
