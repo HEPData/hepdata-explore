@@ -13,6 +13,13 @@ class TooManyResults(Exception):
     pass
 
 
+def coerce_float_or_null(value):
+    if value == '-':
+        return None
+    else:
+        return coerce_float(value)
+
+
 def coerce_float(value):
     if type(value) == float:
         if isinf(value):
@@ -41,7 +48,8 @@ def find_keyword(table, keyword):
     if len(matches) == 1:
         return matches[0]['values']
     elif len(matches) == 0:
-        raise KeyError('No keyword ' + keyword)
+        #raise KeyError('No keyword ' + keyword)
+        return []
     else:
         raise RuntimeError('Too many entries for keyword ' + keyword)
 
@@ -83,6 +91,6 @@ def find_qualifier(dep_var, name, allow_many=False):
             raise RuntimeError('Too many entries for qualifier ' + name)
 
 
-def coerce_list(thing):
+def ensure_list(thing):
     assert isinstance(thing, list), (type(thing))
     return thing
