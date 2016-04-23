@@ -8,6 +8,7 @@ interface ChoiceSuggestion {
     absoluteFrequencyFullDB: number;
 }
 
+/* Lunr variable tokenizer */
 const variableSeparator = /\W+/;
 function variableTokenizer(obj: any) {
     if (!arguments.length || obj == null || obj == undefined) {
