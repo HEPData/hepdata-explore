@@ -1,2 +1,4 @@
 *.bak
 prototype/frontend/data
+npm-debug.log
+.idea
