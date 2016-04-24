@@ -58,7 +58,7 @@ class ChoiceFilterComponent {
             searchFn: this.search.bind(this),
             rankingFn: (s: ChoiceSuggestion) => s.absoluteFrequencyFullDB,
             keyFn: (s: ChoiceSuggestion) => s.suggestedValue,
-            maxSuggestions: 20,
+            maxSuggestions: 5,
             suggestionClickedFn: this.useSuggestion.bind(this),
         });
     }
