@@ -8,6 +8,7 @@ import KeywordFilter = require("filters/KeywordFilter");
 import 'base/templateFromUrlLoader';
 
 // Ensure components are pulled as a dependencies
+import 'bindings/all-bindings';
 import 'components/all-components';
 import {IndepVarFilter} from "./filters/filter-factories";
 
@@ -20,6 +21,7 @@ import {
     sampleData
 } from "./visualization/visualization";
 import TableCache = require("./services/TableCache");
+import {PlotPool} from "./services/PlotPool";
 
 function screenUpdated() {
     return new Promise(function (resolve, reject) {
@@ -38,6 +40,7 @@ class AppViewModel {
     currentFilterUri: KnockoutComputed<String>;
     processingState: ProcessingState = ProcessingState.Done;
     tableCache = new TableCache;
+    plotPool = new PlotPool;
     
     isLoading() {
         return this.processingState != ProcessingState.Done;

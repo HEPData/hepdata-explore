@@ -53,15 +53,8 @@
 
     <div class="visualization-box">
         <div id="visualization" data-bind="visible: !isLoading()">
-
-
-            <div id="all-vars-chart"></div>
-
-            <div id="cmenergies-chart"></div>
-
-
             <div id="variable-charts">
-
+                <hep-plot-pool params="plotPool: plotPool"></hep-plot-pool>
             </div>
         </div>
         <div id="visualization-loading" data-bind="visible: isLoading()">
