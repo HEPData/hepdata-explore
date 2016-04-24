@@ -1,6 +1,6 @@
 import DslParam = require("../app/base/DslParam");
 import ComponentRef = require("../app/base/ComponentRef");
-import {DataPoint} from "../base/dataFormat";
+import {DataPoint, PublicationTable} from "../base/dataFormat";
 
 abstract class Filter {
     // Can't be defined in TypeScript... so there you are.
@@ -46,7 +46,7 @@ abstract class Filter {
 
     abstract getComponent(): ComponentRef;
 
-    abstract filterDataPoint(dataPoint: DataPoint): boolean;
+    abstract filterTable(table: PublicationTable): boolean;
 
     isRemoveAllowed() {
         return true;

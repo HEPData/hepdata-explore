@@ -1,5 +1,5 @@
 import Filter = require("./Filter");
-import {DataPoint} from "../base/dataFormat";
+import {DataPoint, PublicationTable} from "../base/dataFormat";
 
 class ChoiceFilter extends Filter {
     constructor(public field: string = '', public value = '') {
@@ -24,13 +24,13 @@ class ChoiceFilter extends Filter {
     toElasticQuery(): any {
         return {
             "match": {
-                ["tables.groups." + this.field]: this.value,
+                ["tables." + this.field]: this.value,
             }
         }
     }
 
-    filterDataPoint(dataPoint: DataPoint): boolean {
-        return dataPoint[this.field] == this.value;
+    filterTable(table: PublicationTable): boolean {
+        return table[this.field] == this.value;
     }
 
     getComponent() {

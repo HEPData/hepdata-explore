@@ -1,44 +1,49 @@
-export interface DataPoint {
-    inspire_record: number;
-    table_num: number;
-    cmenergies1: number;
-    cmenergies2: number;
-    reaction: string;
-    observables: string[];
-    var_y: string;
-    var_x: string;
-    x_low: number;
-    x_high: number;
-    x_center: number;
-    y: number;
-    errors: any[];
-}
-
 export interface Publication {
     comment: string;
     inspire_record: number;
     tables: PublicationTable[];
 }
 
+export interface VariableQualifier {
+    name: string;
+    value: string;
+}
+
 export interface PublicationTable {
+    // Parent node
+    publication: Publication;
+
     table_num: number;
     description: string;
+
+    cmenergies_min: number;
+    cmenergies_max: number;
+    reactions: string[];
     observables: string[];
-    groups: PublicationTableGroup[];
+    phrases: string[];
+
+    indep_vars: {
+        name: string;
+    }[];
+    dep_vars: {
+        name: string;
+        qualifiers: VariableQualifier[];
+    }[];
+
+    data_points: DataPoint[];
 }
 
-export interface PublicationTableGroup {
-    cmenergies: number[];
-    reaction: string;
-    var_x: string;
-    var_y: string;
-    data_points: GroupDataPoint[];
+export interface DataPoint {
+    // Parent node
+    table: PublicationTable;
+    
+    columns: DataPointColumn;
 }
 
-export interface GroupDataPoint {
-    x_high: number;
-    x_low: number;
-    y: number;
+export interface DataPointColumn {
+    value: number;
+    low: number;
+    high: number;
     errors: DataPointError[];
 }
 

@@ -48,7 +48,7 @@ export class Elastic {
     elasticUrl: string;
 
     constructor() {
-        this.elasticUrl = 'http://' + location.hostname + ':9200/hepdata';
+        this.elasticUrl = 'http://' + location.hostname + ':9200/hepdata2';
     }
 
     jsonQuery(path: string, data: {}): Promise<any> {
@@ -66,14 +66,12 @@ export class Elastic {
             "size": 100,
             "query": {
                 "nested": {
-                    "path": "tables.groups",
+                    "path": "tables",
                     "query": rootFilter.toElasticQuery(),
-                    "inner_hits": {
-                        "name": "matching_groups"
-                    }
                 }
             }
         };
+        console.log(JSON.stringify(requestData, null, 3));
         return this.jsonQuery('/publication/_search', requestData)
             .then((results: ElasticQueryResult) => {
                 let dataPoints: DataPoint[] = [];
@@ -83,6 +81,23 @@ export class Elastic {
                         throw new Error("Undefined");
                     }
                     return val;
+                }
+
+                const publications: Publication[] = _.map(results.hits.hits,
+                    (x) => x._source);
+                console.log(publications);
+
+                const tables = [];
+
+                for (let publication of publications) {
+                    for (let table of publication.tables) {
+                        if (rootFilter.filterTable(table)) {
+                            table.publication = publication;
+
+
+                            tables.push(table);
+                        }
+                    }
                 }
 
                 _.each(results.hits.hits, function (hit) {

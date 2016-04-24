@@ -1,5 +1,5 @@
 import Filter = require("./Filter");
-import {DataPoint} from "../base/dataFormat";
+import {DataPoint, PublicationTable} from "../base/dataFormat";
 
 class KeywordFilter extends Filter {
     keyword: string;
@@ -22,7 +22,7 @@ class KeywordFilter extends Filter {
         throw new Error('Not implemented');
     }
 
-    filterDataPoint(dataPoint: DataPoint): boolean {
+    filterTable(table: PublicationTable): boolean {
         throw new Error('Not implemented');
     }
 
