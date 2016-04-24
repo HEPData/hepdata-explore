@@ -1,5 +1,9 @@
 import Filter = require("../filters/Filter");
-import {DataPoint, Publication} from "../base/dataFormat";
+import {
+    DataPoint, Publication, DataPointError,
+    DataPointColumn, PublicationTable
+} from "../base/dataFormat";
+import sum = d3.sum;
 export function ServerError(message: string = null) {
     this.name = 'ServerError';
     this.message = message || 'The server returned an invalid response';
@@ -61,7 +65,7 @@ export class Elastic {
             })
     }
 
-    fetchFilteredData(rootFilter: Filter) {
+    fetchFilteredData(rootFilter: Filter): Promise<PublicationTable[]> {
         const requestData = {
             "size": 100,
             "query": {
@@ -71,7 +75,6 @@ export class Elastic {
                 }
             }
         };
-        console.log(JSON.stringify(requestData, null, 3));
         return this.jsonQuery('/publication/_search', requestData)
             .then((results: ElasticQueryResult) => {
                 let dataPoints: DataPoint[] = [];
@@ -85,7 +88,6 @@ export class Elastic {
 
                 const publications: Publication[] = _.map(results.hits.hits,
                     (x) => x._source);
-                console.log(publications);
 
                 const tables = [];
 
@@ -93,47 +95,57 @@ export class Elastic {
                     for (let table of publication.tables) {
                         if (rootFilter.filterTable(table)) {
                             table.publication = publication;
-
-
+                            this.addRangeProperties(table.data_points);
                             tables.push(table);
                         }
                     }
                 }
 
-                _.each(results.hits.hits, function (hit) {
-                    const publication = hit._source;
-                    _.each(publication.tables, function (table) {
-                        _.each(table.groups, function (group) {
-                            _.each(group.data_points, function (dataPoint) {
-                                const flatDataPoint: DataPoint = {
-                                    inspire_record: nu(publication.inspire_record),
-                                    table_num: nu(table.table_num),
-                                    cmenergies1: nu(group.cmenergies[0]),
-                                    cmenergies2: nu(group.cmenergies[1]),
-                                    reaction: nu(group.reaction),
-                                    observables: nu(table.observables),
-                                    var_y: nu(group.var_y),
-                                    var_x: nu(group.var_x),
-                                    x_low: nu(dataPoint.x_low),
-                                    x_high: nu(dataPoint.x_high),
-                                    x_center: nu((dataPoint.x_low + dataPoint.x_high) / 2),
-                                    y: nu(dataPoint.y),
-                                    errors: nu(dataPoint.errors),
-                                };
-                                dataPoints.push(flatDataPoint);
-                            })
-                        })
-                    })
-                });
-
-                // ElasticSearch filters on document (i.e. publication) level. It will return
-                // publications that have at least one matching data point, but there may be
-                // many non-matching data points in those publications.
-                // We proceed now to filter those at client side.
-                dataPoints = _.filter(dataPoints, rootFilter.filterDataPoint.bind(rootFilter));
-
-                return dataPoints;
+                return tables;
             })
+    }
+    
+    private addRangeProperties(dataPoints: DataPoint[]) {
+        // Values may come with a range (low, high) or with a series of error tags.
+        // This function unifies them as a single representation.
+
+        function square(x: number) {
+            return x * x;
+        }
+
+        function sumErrors(column: DataPointColumn) {
+            const errors = column.errors;
+            let summedMinus, summedPlus;
+
+            if (errors.length == 0) {
+                summedMinus = summedPlus = 0;
+            } else if (errors.length == 1) {
+                summedMinus = errors[0].minus;
+                summedPlus = errors[0].plus;
+            } else {
+                // Square root of the sum of the squares of errors, as Eammon asked
+                summedPlus = 0;
+                summedMinus = 0;
+                for (let error of errors) {
+                    summedPlus += square(error.plus);
+                    summedMinus += square(error.minus);
+                }
+                summedPlus = Math.sqrt(summedPlus);
+                summedMinus = Math.sqrt(summedMinus);
+            }
+
+            column.low = column.value - summedMinus;
+            column.high = column.value - summedPlus;
+        }
+
+        for (let dataPoint of dataPoints) {
+            for (let column of dataPoint) {
+                if (column.low === undefined) {
+                    // It may have error tag representation, sum the errors
+                    sumErrors(column);
+                }
+            }
+        }
     }
 
     fetchAllByField(field: string): Promise<CountAggregationBucket[]> {
@@ -142,21 +154,14 @@ export class Elastic {
             "aggs": {
                 "tables": {
                     "nested": {
-                        "path": "tables.groups"
+                        "path": "tables"
                     },
                     "aggs": {
                         "variables": {
                             "terms": {
-                                "field": "tables.groups." + field,
+                                "field": "tables." + field,
                                 "size": 10000,
                             },
-                            "aggs": {
-                                "data_point_count": {
-                                    "nested": {
-                                        "path": "tables.groups.data_points"
-                                    }
-                                }
-                            }
                         }
                     }
                 }
@@ -165,10 +170,8 @@ export class Elastic {
             return _(results.aggregations.tables.variables.buckets)
                 .map((bucket) => ({
                     name: bucket.key,
-                    count: bucket.data_point_count.doc_count
+                    count: bucket.doc_count
                 }))
-                // Hack: I'm sorting variables client side because I don't know
-                // how to do it in ElasticSearch, if it is possible.
                 .sortBy(d => -d.count)
                 .value();
         });

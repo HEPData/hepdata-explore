@@ -33,12 +33,7 @@ export interface PublicationTable {
     data_points: DataPoint[];
 }
 
-export interface DataPoint {
-    // Parent node
-    table: PublicationTable;
-    
-    columns: DataPointColumn;
-}
+export type DataPoint = DataPointColumn[];
 
 export interface DataPointColumn {
     value: number;

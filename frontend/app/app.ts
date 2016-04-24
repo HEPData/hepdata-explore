@@ -14,11 +14,12 @@ import {IndepVarFilter} from "./filters/filter-factories";
 // Ensure template utility functions are pulled too
 import 'utils/recordCountFormat';
 import {elastic} from "./services/Elastic";
-import {DataPoint} from "./base/dataFormat";
+import {DataPoint, PublicationTable} from "./base/dataFormat";
 import {
     groupDataByVariablePairs, showGraphs,
     sampleData
 } from "./visualization/visualization";
+import TableCache = require("./services/TableCache");
 
 function screenUpdated() {
     return new Promise(function (resolve, reject) {
@@ -36,6 +37,7 @@ class AppViewModel {
     rootFilter: Filter;
     currentFilterUri: KnockoutComputed<String>;
     processingState: ProcessingState = ProcessingState.Done;
+    tableCache = new TableCache;
     
     isLoading() {
         return this.processingState != ProcessingState.Done;
@@ -49,7 +51,7 @@ class AppViewModel {
         return this.rootFilter.toDsl();
     }
     
-    private loadDataPromise: Promise<DataPoint[]> = Promise.resolve(null);
+    private loadDataPromise: Promise<PublicationTable[]> = Promise.resolve(null);
     
     private loadData() {
         this.loadDataPromise.cancel();
@@ -57,21 +59,16 @@ class AppViewModel {
         
         this.loadDataPromise = elastic.fetchFilteredData(this.rootFilter);
         this.loadDataPromise
-            .then((dataPoints: DataPoint[]) => {
+            .then((tables: PublicationTable[]) => {
                 this.processingState = ProcessingState.Rendering;
 
                 // Wait one frame for the screen to update
-                return screenUpdated().then(() => dataPoints);
+                return screenUpdated().then(() => tables);
             })
-            .then((dataPoints: DataPoint[]) => {
-                var t1 = performance.now();
-                const dataGroups = groupDataByVariablePairs(dataPoints);
-                var [filteredDataPoints, filteredGroups] = sampleData(dataGroups);
-                // var ret = showGraphs(filteredDataPoints, filteredGroups);
-                console.log(filteredDataPoints.length);
-                var ret = showGraphs(filteredDataPoints, filteredGroups);
-                var t2 = performance.now();
-                console.log("Data indexed in %.2f ms.", t2 - t1);
+            .then((tables: PublicationTable[]) => {
+                // var t1 = performance.now();
+                // var t2 = performance.now();
+                // console.log("Data indexed in %.2f ms.", t2 - t1);
 
                 this.processingState = ProcessingState.Done;
             })
