@@ -1,4 +1,5 @@
 import {PublicationTable} from "../base/dataFormat";
+import {RuntimeError} from "../base/errors";
 
 class TableCache {
     public allTables: PublicationTable[];
@@ -24,6 +25,21 @@ class TableCache {
                 this._tablesByDepVar.set(varName.name, table);
             }
         }
+    }
+
+    /** Returns a list of tables containing the required variables.
+     *
+     * Both xVar and yVars may be kdependent or independent variables.
+     *
+     * For a table to be selected it MUST have both xVar and and yVar.
+     */
+    public getTablesWithVariables(xVar: string, yVar: string): PublicationTable[] {
+        return _.filter(this.allTables, (table) => {
+            const variableNames = _.map(table.indep_vars, 'name').concat(
+                                  _.map(table.dep_vars, 'name'));
+            return variableNames.indexOf(xVar) != -1 &&
+                    variableNames.indexOf(yVar) != -1;
+        });
     }
 }
 

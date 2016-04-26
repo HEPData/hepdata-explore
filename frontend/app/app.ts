@@ -16,10 +16,6 @@ import {IndepVarFilter} from "./filters/filter-factories";
 import 'utils/recordCountFormat';
 import {elastic} from "./services/Elastic";
 import {DataPoint, PublicationTable} from "./base/dataFormat";
-import {
-    groupDataByVariablePairs, showGraphs,
-    sampleData
-} from "./visualization/visualization";
 import TableCache = require("./services/TableCache");
 import {PlotPool} from "./services/PlotPool";
 

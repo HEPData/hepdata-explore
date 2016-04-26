@@ -403,3 +403,10 @@ ul.suggestions {
 .dc-chart {
     float: left;
 }
+
+.plot-box {
+    display: inline-block;
+    border: 1px solid lightgray;
+    box-shadow: 1px 1px 1px lightgray;
+    padding: 10px;
+}

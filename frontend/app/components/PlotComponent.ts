@@ -12,8 +12,9 @@ class PlotComponent {
         this.plot = params.plot;
     }
 
-    bindCanvas(canvas: HTMLCanvasElement) {
-        this.plot.canvas = canvas;
+    bindCanvasOnion(canvasOnion: HTMLDivElement) {
+        // TODO null
+        this.plot.bootstrap(canvasOnion, null);
     }
 }
 
