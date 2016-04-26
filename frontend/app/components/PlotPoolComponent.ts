@@ -7,7 +7,7 @@ export class PlotPoolComponent {
 
     constructor(params: any) {
         assertHas(params, [
-            {name: 'plotPool', type: PlotPool}
+            {name: 'plotPool', type: PlotPool},
         ]);
 
         this.plotPool = params.plotPool;

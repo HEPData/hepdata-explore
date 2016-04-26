@@ -54,7 +54,10 @@
     <div class="visualization-box">
         <div id="visualization" data-bind="visible: !isLoading()">
             <div id="variable-charts">
-                <hep-plot-pool params="plotPool: plotPool"></hep-plot-pool>
+                <hep-plot-pool params="
+                    plotPool: plotPool,
+                    tableCache: tableCache
+                "></hep-plot-pool>
             </div>
         </div>
         <div id="visualization-loading" data-bind="visible: isLoading()">

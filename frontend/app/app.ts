@@ -36,7 +36,7 @@ class AppViewModel {
     currentFilterUri: KnockoutComputed<String>;
     processingState: ProcessingState = ProcessingState.Done;
     tableCache = new TableCache;
-    plotPool = new PlotPool;
+    plotPool: PlotPool;
     
     isLoading() {
         return this.processingState != ProcessingState.Done;
@@ -74,6 +74,7 @@ class AppViewModel {
     }
 
     constructor() {
+        this.plotPool = new PlotPool(this.tableCache);
         this.rootFilter = new AllFilter([
             new IndepVarFilter('COS(THETA)'),
         ]);

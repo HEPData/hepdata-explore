@@ -1,3 +1,6 @@
 <div class="plot-pool" data-bind="foreach: plotPool.plots">
-    <hep-plot params="plot: $data"></hep-plot>
+    <hep-plot params="
+        plot: $data,
+        tableCache: $parent.plotPool.tableCache
+    "></hep-plot>
 </div>

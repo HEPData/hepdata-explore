@@ -1,20 +1,23 @@
 import {Plot} from "../visualization/Plot";
 import {assertHas} from "../utils/assert";
+import TableCache = require("../services/TableCache");
 
 class PlotComponent {
     plot: Plot;
+    tableCache: TableCache;
 
-    constructor(params) {
+    constructor(params: any) {
         assertHas(params, [
-            {'name': 'plot', 'type': Plot}
+            {name: 'plot', type: Plot},
+            {name: 'tableCache', type: TableCache},
         ]);
 
         this.plot = params.plot;
+        this.tableCache = params.tableCache;
     }
 
     bindCanvasOnion(canvasOnion: HTMLDivElement) {
-        // TODO null
-        this.plot.bootstrap(canvasOnion, null);
+        this.plot.bootstrap(canvasOnion, this.tableCache);
     }
 }
 

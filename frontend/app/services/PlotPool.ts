@@ -1,4 +1,5 @@
 import {Plot} from "../visualization/Plot";
+import TableCache = require("./TableCache");
 
 export function ExhaustedPool() {
     this.name = 'ExhaustedPool';
@@ -9,10 +10,12 @@ ExhaustedPool.prototype = new Error();
 
 export class PlotPool {
     plots: Plot[];
+    tableCache: TableCache;
     maxPlots = 3;
 
-    constructor() {
+    constructor(tableCache: TableCache) {
         this.plots = [];
+        this.tableCache = tableCache;
 
         for (let i = 0; i < this.maxPlots; i++) {
             this.plots[i] = new Plot;
