@@ -311,22 +311,22 @@ export class GLScatter {
 
         for (let i = 0; i < data.length; i++) {
             let dataPoint = data[i];
-
-            // x
-            if (dataPoint.x_low < minX) {
-                minX = dataPoint.x_low;
-            }
-            if (dataPoint.x_high > maxX) {
-                maxX = dataPoint.x_high;
-            }
-
-            // y
-            if (dataPoint.y < minY) {
-                minY = dataPoint.y;
-            }
-            if (dataPoint.y > maxY) {
-                maxY = dataPoint.y;
-            }
+            //
+            // // x
+            // if (dataPoint.x_low < minX) {
+            //     minX = dataPoint.x_low;
+            // }
+            // if (dataPoint.x_high > maxX) {
+            //     maxX = dataPoint.x_high;
+            // }
+            //
+            // // y
+            // if (dataPoint.y < minY) {
+            //     minY = dataPoint.y;
+            // }
+            // if (dataPoint.y > maxY) {
+            //     maxY = dataPoint.y;
+            // }
         }
 
         this.dataMinX = minX;
@@ -373,14 +373,14 @@ export class GLScatter {
         function addDataPointData(dataPoint: DataPoint) {
             // Add these properties that are the same for all the vertices of a
             // data point.
-            floats[nFloat++] = xScale(dataPoint.x_center);
-            floats[nFloat++] = yScale(dataPoint.y);
+            // floats[nFloat++] = xScale(dataPoint.x_center);
+            // floats[nFloat++] = yScale(dataPoint.y);
 
-            var key = dataPoint.inspire_record + '-' + dataPoint.table_num;
-            var colorHex = colorScale(key).substring(1);
-            floats[nFloat++] = hexToR(colorHex) / 255;
-            floats[nFloat++] = hexToG(colorHex) / 255;
-            floats[nFloat++] = hexToB(colorHex) / 255;
+            // var key = dataPoint.inspire_record + '-' + dataPoint.table_num;
+            // var colorHex = colorScale(key).substring(1);
+            // floats[nFloat++] = hexToR(colorHex) / 255;
+            // floats[nFloat++] = hexToG(colorHex) / 255;
+            // floats[nFloat++] = hexToB(colorHex) / 255;
         }
 
         function addVertex(dataPoint: DataPoint, rectX: number, rectY: number) {

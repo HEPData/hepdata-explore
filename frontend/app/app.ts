@@ -18,6 +18,7 @@ import {elastic} from "./services/Elastic";
 import {DataPoint, PublicationTable} from "./base/dataFormat";
 import TableCache = require("./services/TableCache");
 import {PlotPool} from "./services/PlotPool";
+import {Plot} from "./visualization/Plot";
 
 function screenUpdated() {
     return new Promise(function (resolve, reject) {
@@ -62,12 +63,20 @@ class AppViewModel {
                 this.processingState = ProcessingState.Rendering;
 
                 // Wait one frame for the screen to update
-                return screenUpdated().then(() => tables);
+                return screenUpdated()
+                    // Continue with the next step
+                    .then(() => tables);
             })
             .then((tables: PublicationTable[]) => {
-                // var t1 = performance.now();
-                // var t2 = performance.now();
-                // console.log("Data indexed in %.2f ms.", t2 - t1);
+                var t1 = performance.now();
+
+                this.tableCache.replaceAllTables(tables);
+
+                const plot: Plot = this.plotPool.getFreePlot();
+                plot.spawn('M(GLUINO) (GEV)', ['M(NEUTRALINO1) (GEV)']);
+
+                var t2 = performance.now();
+                console.log("Data indexed in %.2f ms.", t2 - t1);
 
                 this.processingState = ProcessingState.Done;
             })
@@ -76,7 +85,7 @@ class AppViewModel {
     constructor() {
         this.plotPool = new PlotPool(this.tableCache);
         this.rootFilter = new AllFilter([
-            new IndepVarFilter('COS(THETA)'),
+            new IndepVarFilter('M(GLUINO) (GEV)'),
         ]);
         this.currentFilterUri = ko.computed(this.calcCurrentFilterUri, this);
         this.currentFilterUri.subscribe((newFilterUri: string) => {
@@ -96,6 +105,7 @@ window.onhashchange = function () {
 };
 
 const app = new AppViewModel();
+(<any>window).app = app;
 export = app;
 
 ko.applyBindings(app);

@@ -15,10 +15,6 @@ class PlotComponent {
         this.plot = params.plot;
         this.tableCache = params.tableCache;
     }
-
-    bindCanvasOnion(canvasOnion: HTMLDivElement) {
-        this.plot.bootstrap(canvasOnion, this.tableCache);
-    }
 }
 
 ko.components.register('hep-plot', {

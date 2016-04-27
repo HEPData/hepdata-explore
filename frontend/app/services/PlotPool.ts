@@ -18,7 +18,7 @@ export class PlotPool {
         this.tableCache = tableCache;
 
         for (let i = 0; i < this.maxPlots; i++) {
-            this.plots[i] = new Plot;
+            this.plots[i] = new Plot(tableCache);
         }
     }
 

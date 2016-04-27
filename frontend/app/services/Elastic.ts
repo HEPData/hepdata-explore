@@ -77,15 +77,6 @@ export class Elastic {
         };
         return this.jsonQuery('/publication/_search', requestData)
             .then((results: ElasticQueryResult) => {
-                let dataPoints: DataPoint[] = [];
-
-                function nu<T>(val: T): T {
-                    if (val === undefined) {
-                        throw new Error("Undefined");
-                    }
-                    return val;
-                }
-
                 const publications: Publication[] = _.map(results.hits.hits,
                     (x) => x._source);
 
@@ -114,7 +105,7 @@ export class Elastic {
         }
 
         function sumErrors(column: DataPointColumn) {
-            const errors = column.errors;
+            const errors = column.errors || [];
             let summedMinus, summedPlus;
 
             if (errors.length == 0) {

@@ -1,5 +1,6 @@
 import ChoiceFilter = require("./ChoiceFilter");
 import Filter = require("./Filter");
+import {PublicationTable} from "../base/dataFormat";
 
 export class DepVarFilter extends ChoiceFilter {
     constructor(value: string) {
@@ -18,5 +19,9 @@ export class IndepVarFilter extends ChoiceFilter {
 
     static getLongName() {
         return 'Independent variable'
+    }
+
+    filterTable(table: PublicationTable): boolean {
+        return table.indep_vars.map((v) => v.name).indexOf(this.value) != -1;
     }
 }

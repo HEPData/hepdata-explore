@@ -7,6 +7,7 @@
     "d3": "registry:dt/d3#0.0.0+20160315011939",
     "dc": "registry:dt/dc#1.6.0+20160317120654",
     "es6-collections": "registry:dt/es6-collections#0.5.1+20160316155526",
+    "es6-shim": "registry:dt/es6-shim#0.31.2+20160317120654",
     "gl-matrix": "registry:dt/gl-matrix#2.2.2+20160317120654",
     "jasmine": "registry:dt/jasmine#2.2.0+20160308082659",
     "jquery": "registry:dt/jquery#1.10.0+20160303223636",
