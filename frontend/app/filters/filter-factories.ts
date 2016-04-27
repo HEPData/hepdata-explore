@@ -10,6 +10,10 @@ export class DepVarFilter extends ChoiceFilter {
     static getLongName() {
         return 'Dependent variable'
     }
+
+    filterTable(table: PublicationTable): boolean {
+        return table.dep_vars.map((v) => v.name).indexOf(this.value) != -1;
+    }
 }
 
 export class IndepVarFilter extends ChoiceFilter {
