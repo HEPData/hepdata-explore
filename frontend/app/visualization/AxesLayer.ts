@@ -42,8 +42,7 @@ export class AxesLayer extends PlotLayer {
         // Draw X ticks
         let pastTickEnd = null;
         for (let tickValue of this.plot.xScale.ticks()) {
-            const tickXRelPosition = this.plot.xScale(tickValue);
-            const tickX = Math.round(margin.left + w * tickXRelPosition);
+            const tickX = Math.round(this.plot.xScale(tickValue));
 
             ctx.moveTo(tickX, H - margin.bottom);
             ctx.lineTo(tickX, H - margin.bottom + 5);
@@ -64,8 +63,7 @@ export class AxesLayer extends PlotLayer {
 
         // Draw Y ticks
         for (let tickValue of this.plot.yScale.ticks()) {
-            const tickYRelPosition = this.plot.yScale(tickValue);
-            const tickY = Math.round(margin.top + h * (1 - tickYRelPosition));
+            const tickY = Math.round(this.plot.yScale(tickValue));
 
             ctx.moveTo(margin.left, tickY);
             ctx.lineTo(margin.left - 5, tickY);

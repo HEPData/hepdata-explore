@@ -410,3 +410,17 @@ ul.suggestions {
     box-shadow: 1px 1px 1px lightgray;
     padding: 10px;
 }
+
+.canvas-onion {
+    position: relative;
+}
+
+.canvas-onion canvas:first-child {
+    position: static;
+}
+
+.canvas-onion canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}

@@ -4,6 +4,7 @@ import {PublicationTable} from "../base/dataFormat";
 import {RuntimeError} from "../base/errors";
 import {PlotLayer} from "./PlotLayer";
 import {assertDefined} from "../utils/assert";
+import {ScatterLayer} from "./ScatterLayer";
 
 export interface Margins {
     top: number;
@@ -17,6 +18,22 @@ export interface ScaleFunction {
 
     ticks(): number[];
     tickFormat(count?: number, format?: string): (n: number) => string;
+}
+
+export function findColIndex(variableName: string, table: PublicationTable) {
+    const colIndep = table.indep_vars.findIndex(
+        (variable) => variable.name == variableName);
+    if (colIndep != -1) {
+        return colIndep;
+    }
+
+    const colDep = table.dep_vars.findIndex(
+        (variable) => variable.name == variableName);
+    if (colDep != -1) {
+        return table.indep_vars.length + colDep;
+    }
+
+    throw new RuntimeError('findColIndex: Variable name not found');
 }
 
 export class Plot {
@@ -52,11 +69,14 @@ export class Plot {
     countPublications: number;
 
     axesLayer: AxesLayer;
+    scatterLayer: ScatterLayer;
 
     constructor(tableCache: TableCache) {
         this.tableCache = tableCache;
         this.canvasOnion = document.createElement('div');
 
+        this.scatterLayer = new ScatterLayer(this);
+        this.addLayer(this.scatterLayer);
         this.axesLayer = new AxesLayer(this);
         this.addLayer(this.axesLayer);
 
@@ -86,13 +106,19 @@ export class Plot {
             (t: PublicationTable) => t.publication)).length;
         this.calculateMinMax(allTables);
 
-        this.xScale = d3.scale.pow().exponent(.5).domain([
-            this.dataMinX, this.dataMaxX]);
-        this.yScale = d3.scale.linear().domain([
-            this.dataMinY, this.dataMaxY]);
+        this.xScale = d3.scale.pow().exponent(.5)
+            .domain([this.dataMinX, this.dataMaxX])
+            .range([this.margins.left, this.width - this.margins.right]);
+        this.yScale = d3.scale.linear()
+            .domain([this.dataMinY, this.dataMaxY])
+            .range([this.height - this.margins.bottom, this.margins.top]);
 
         this.axesLayer.clean();
         this.axesLayer.draw();
+        
+        this.scatterLayer.replaceDataPoints();
+        this.scatterLayer.clean();
+        this.scatterLayer.draw();
     }
 
     private calculateMinMax(allTables: PublicationTable[]) {
@@ -103,8 +129,8 @@ export class Plot {
 
         for (let yVar of this.yVars) {
             for (let table of allTables) {
-                const xCol = this.findColIndex(this.xVar, table);
-                const yCol = this.findColIndex(yVar, table);
+                const xCol = findColIndex(this.xVar, table);
+                const yCol = findColIndex(yVar, table);
                 
                 for (let dataPoint of table.data_points) {
                     const x = dataPoint[xCol].value;
@@ -130,22 +156,6 @@ export class Plot {
         this.dataMinY = dataMinY;
         this.dataMaxX = dataMaxX;
         this.dataMaxY = dataMaxY;
-    }
-    
-    private findColIndex(variableName: string, table: PublicationTable) {
-        const colIndep = table.indep_vars.findIndex(
-            (variable) => variable.name == variableName);
-        if (colIndep != -1) {
-            return colIndep;
-        }
-        
-        const colDep = table.dep_vars.findIndex(
-            (variable) => variable.name == variableName);
-        if (colDep != -1) {
-            return table.indep_vars.length + colDep;
-        }
-        
-        throw new RuntimeError('findColIndex: Variable name not found');
     }
 
     kill() {
