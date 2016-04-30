@@ -40,6 +40,8 @@ class AppViewModel {
     processingState: ProcessingState = ProcessingState.Done;
     tableCache = new TableCache;
     plotPool: PlotPool;
+    // The 'loading' screen only appears on the first data load since the page started
+    firstLoad = true;
     
     isLoading() {
         return this.processingState != ProcessingState.Done;
@@ -79,6 +81,7 @@ class AppViewModel {
                 console.log("Data indexed in %.2f ms.", t2 - t1);
 
                 this.processingState = ProcessingState.Done;
+                this.firstLoad = false;
             })
     }
 
@@ -228,11 +231,11 @@ class AppViewModel {
         this.currentFilterUri.subscribe((newFilterUri: string) => {
             history.replaceState(null, null, '#' + newFilterUri)
             this.loadData();
-        })
+        });
 
         this.loadData();
 
-        ko.track(this, ['processingState']);
+        ko.track(this, ['processingState', 'firstLoad']);
     }
 }
 

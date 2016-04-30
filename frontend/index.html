@@ -52,7 +52,7 @@
 
 
     <div class="visualization-box">
-        <div id="visualization" data-bind="visible: !isLoading()">
+        <div id="visualization" data-bind="visible: !firstLoad || !isLoading()">
             <div id="variable-charts">
                 <hep-plot-pool params="
                     plotPool: plotPool,
@@ -60,7 +60,7 @@
                 "></hep-plot-pool>
             </div>
         </div>
-        <div id="visualization-loading" data-bind="visible: isLoading()">
+        <div id="visualization-loading" data-bind="visible: firstLoad && isLoading()">
             <div class="loading-box">
                 <h2>Please wait...</h2>
                 <div>
