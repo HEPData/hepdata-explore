@@ -1,6 +1,24 @@
 import {PlotLayer} from "./PlotLayer";
 import {Plot} from "./Plot";
 
+function yottaAndBeyondFormat(normalFormat: (n: number) => string) {
+    return (n: number) => {
+        const abs = Math.abs(n);
+        let ret: string;
+        if (abs == 0) {
+            ret = '0';
+        } else if (abs < 1e24 && (abs == 0 || abs > 1e-24)) {
+            // If the absolute value of the exponent is less than 24
+            // use normal format (e.g. with SI prefixes, like 30.2M)
+            ret = normalFormat(n);
+        } else {
+            // Use scientific notation (e.g. 2.78e+100)
+            ret = n.toExponential(1);
+        }
+        return ret;
+    }
+}
+
 export class AxesLayer extends PlotLayer {
     ctx: CanvasRenderingContext2D;
 
@@ -37,6 +55,7 @@ export class AxesLayer extends PlotLayer {
 
         // Draw X ticks
         let pastTickEnd = null;
+        const xTickFormat = yottaAndBeyondFormat(this.plot.xScale.tickFormat(null, 's'));
         for (let tickValue of this.plot.xScale.ticks()) {
             const tickX = Math.round(this.plot.xScale(tickValue));
 
@@ -44,14 +63,13 @@ export class AxesLayer extends PlotLayer {
             ctx.lineTo(tickX, H - margin.bottom + 5);
             ctx.stroke();
 
-            const tickFormat = this.plot.xScale.tickFormat();
-            const textW = ctx.measureText(tickFormat(tickValue)).width;
+            const textW = ctx.measureText(xTickFormat(tickValue)).width;
             const textX = tickX - textW / 2;
 
             // There must be a margin of at least 1px between the end of the
             // previous tick label and the start of the current one.
             if (pastTickEnd === null || textX - textW / 2 - pastTickEnd > 1) {
-                ctx.fillText(tickFormat(tickValue), textX,
+                ctx.fillText(xTickFormat(tickValue), textX,
                     H - margin.bottom + 14);
 
                 pastTickEnd = textX + textW / 2;
@@ -59,6 +77,7 @@ export class AxesLayer extends PlotLayer {
         }
 
         // Draw Y ticks
+        const yTickFormat = yottaAndBeyondFormat(this.plot.yScale.tickFormat(null, 's'));
         for (let tickValue of this.plot.yScale.ticks()) {
             const tickY = Math.round(this.plot.yScale(tickValue));
 
@@ -66,9 +85,8 @@ export class AxesLayer extends PlotLayer {
             ctx.lineTo(margin.left - 5, tickY);
             ctx.stroke();
 
-            const tickFormat = this.plot.yScale.tickFormat();
-            const textW = ctx.measureText(tickFormat(tickValue)).width;
-            ctx.fillText(tickFormat(tickValue), margin.left - 8 - textW,
+            const textW = ctx.measureText(yTickFormat(tickValue)).width;
+            ctx.fillText(yTickFormat(tickValue), margin.left - 8 - textW,
                 tickY + 3);
         }
 
