@@ -34,6 +34,12 @@ export function union<T>(lists: Iterable<Iterable<T>>): T[] {
     return _.union.apply(_, map(lists, (list) => Array.from(list)));
 }
 
+export function* range(limit: number) {
+    for (let i = 0; i < limit; i++) {
+        yield i;
+    }
+}
+
 function test() {
     interface Point {
         x: number;

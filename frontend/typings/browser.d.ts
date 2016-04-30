@@ -13,3 +13,4 @@
 /// <reference path="browser/ambient/rx-lite/index.d.ts" />
 /// <reference path="browser/ambient/rx.async/index.d.ts" />
 /// <reference path="browser/ambient/rx/index.d.ts" />
+/// <reference path="browser/ambient/map2/map2.d.ts" />

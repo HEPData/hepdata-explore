@@ -20,7 +20,7 @@ import TableCache = require("./services/TableCache");
 import {PlotPool} from "./services/PlotPool";
 import {Plot} from "./visualization/Plot";
 import {assertHas, assert} from "./utils/assert";
-import {map, imap, sum, union} from "./utils/map";
+import {map, imap, sum, union, range} from "./utils/map";
 
 function screenUpdated() {
     return new Promise(function (resolve, reject) {
@@ -106,38 +106,115 @@ class AppViewModel {
             return;
         }
 
-        // Compute how many data points there are for each independent variable
-        const dataPointCountByIndepVar = new Map(
-            imap(this.tableCache.tablesByIndepVar, ([indepVar, tables]): [string, number] =>
-                [indepVar, sum(imap(tables, (t) => t.data_points.length))])
-        );
-        // Sort independent variables by number of data points.
-        // The top ones will get a new plot.
-        const topIndepVars = _.sortBy(Array.from(dataPointCountByIndepVar.keys()),
-            (varName) => -dataPointCountByIndepVar.get(varName)).slice(0, remainingPlots);
-
-        // The independent variables have been chosen. Time for dependent variables.            
-        for (let indepVar of topIndepVars) {
-            const tables = this.tableCache.tablesByIndepVar.get(indepVar);
-            
-            // First we need to find all the dependent variables of the tables and 
-            // count the number of data points for each one.
-            const dataPointCountByDepVar: Map<string, number> = new Map(); 
-            for (let table of tables) {
-                for (let depVar of table.dep_vars) {
-                    const oldCount = dataPointCountByDepVar.get(depVar.name) || 0;
-                    const newCount = oldCount + table.data_points.length;
-                    dataPointCountByDepVar.set(depVar.name, newCount);
+        // Compute how many data points there are for each (dep var, indep var) pair
+        const countByVariablePair = new Map2<string,string,number>();
+        for (let table of this.tableCache.allTables) {
+            for (let depVar of table.dep_vars) {
+                for (let indepVar of table.indep_vars) {
+                    const oldCount = countByVariablePair.get(indepVar.name, depVar.name) || 0;
+                    const newCount = oldCount + table.data_points.length; 
+                    countByVariablePair.set(indepVar.name, depVar.name, newCount);
                 }
             }
+        }
+        
+        // Sort the pairs by data point count
+        const countByVariablePairSorted = _.sortBy(Array.from(countByVariablePair.entries()),
+            ([indepVar, depVar, dataPointCount]) => {
+                return -dataPointCount
+            });
+
+        // Now comes assigning plots to the variable pairs.
+        // It works like this: Each plot has one independent variable and upto 
+        // `maxPlotVars` dependent variables.
+        const maxPlotVars = 5;
+        // `freePlotSlots` plots can be added in total.
+        let freePlotSlots = remainingPlots;
+        let freeVariableSlots = remainingPlots * maxPlotVars;
+        
+        const groupsAssigned = new Map<string, PlotGroupConfiguration>();
+        
+        /** We define a 'plot group' as a pair of (xVar, yVars). A plot group may
+         * be split later into one or more plots.
+         */ 
+        class PlotGroupConfiguration {
+            /** Will be assigned an independent variable. */
+            xVar: string;
+            /** Will be assigned one or more dependent variables. */
+            yVars: string[] = [];
             
-            // Now we sort the variables by data point count in order to get the top ones
-            const maxDepVars = 5;
-            const topDepVars = _.sortBy(Array.from(dataPointCountByDepVar.keys()),
-                (varName) => -dataPointCountByDepVar.get(varName)).slice(0, maxDepVars);
+            plotsAllocated = 1;
+            /** How many variables we can add to yVars without requiring a new plot. */
+            variableSlotsFree = maxPlotVars;
+            
+            constructor(xVar: string) {
+                assert(freePlotSlots > 0, 'No plot slots available');
+                this.xVar = xVar;
                 
-            // We are ready to add a new plot now
-            const plot = this.plotPool.getFreePlot().spawn(indepVar, topDepVars);
+                freePlotSlots -= 1;
+                groupsAssigned.set(xVar, this);
+            }
+            
+            addVariable(yVar: string) {
+                assert(this.variableSlotsFree > 0, 'No variable slots available');
+                
+                this.yVars.push(yVar);
+                this.variableSlotsFree -= 1;
+                freeVariableSlots -= 1;
+            }
+            
+            allocateAnotherPlot() {
+                assert(freePlotSlots > 0, 'No plot slots available');
+                assert(this.variableSlotsFree == 0, 'Unnecessary plot allocation');
+                
+                this.plotsAllocated += 1;
+                this.variableSlotsFree += maxPlotVars;
+                freePlotSlots -= 1;
+            }
+        }
+        
+        for (let [indepVar, depVar, dataPointCount] of countByVariablePairSorted) {
+            const existingGroup = groupsAssigned.get(indepVar);
+            if (!existingGroup) {
+                if (freePlotSlots > 0) {
+                    // No plot group exists for this indepVar, but we have room
+                    // for a new one. 
+                    const group = new PlotGroupConfiguration(indepVar);
+                    group.addVariable(depVar);
+                }
+            } else {
+                // A group for this indepVar variable already exists
+                if (existingGroup.variableSlotsFree) {
+                    // If it has no room for more variables already try to get
+                    // a new plot.
+                    if (existingGroup.variableSlotsFree == 0 && freePlotSlots > 0) {
+                        existingGroup.allocateAnotherPlot();
+                    }
+                    
+                    // If it has enough space, add the variable
+                    if (existingGroup.variableSlotsFree > 0) {
+                        existingGroup.addVariable(depVar);
+                    }
+                }
+            }
+        }
+        
+        // Before we can create the plots, we have to split the groups in plots 
+        // of up to `maxPlotVars` variables.
+        
+        // At this point the algorithm it's a bit naive in that it chooses them
+        // randomly by the order they were inserted. It could be improved to
+        // always put some groups of related variables (e.g. 'expected' and 
+        // 'observed' variables) in the same plot. 
+
+        for (let group of groupsAssigned.values()) {
+            for (let numPlot of range(group.plotsAllocated)) {
+                const yVars = group.yVars.slice(numPlot * maxPlotVars,
+                                                (numPlot + 1) * maxPlotVars);
+                
+                // Finally, we add the new plot now
+                const plot = this.plotPool.getFreePlot().spawn(group.xVar, yVars);
+            }
         }
     }
 
