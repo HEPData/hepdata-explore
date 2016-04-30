@@ -93,11 +93,11 @@ class FilterIndex {
 export const filterIndex = new FilterIndex();
 
 filterIndex.populate([
-    {
-        filterClass: KeywordFilter,
-        description: `Each HEPData table has a series of keywords. This filter allows you to filter by one of these.`,
-        tags: ['keyword'],
-    },
+    // {
+    //     filterClass: KeywordFilter,
+    //     description: `Each HEPData table has a series of keywords. This filter allows you to filter by one of these.`,
+    //     tags: ['keyword'],
+    // },
     {
         filterClass: AllFilter,
         description: `Performs a logical <code>AND</code>. This compound filter matches a data point if it matches <b>all</b> the filters inside it.`,
