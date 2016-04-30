@@ -409,6 +409,8 @@ ul.suggestions {
     border: 1px solid lightgray;
     box-shadow: 1px 1px 1px lightgray;
     padding: 10px;
+    vertical-align: top;
+    margin: 5px;
 }
 
 .canvas-onion {
