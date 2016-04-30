@@ -23,8 +23,6 @@ export class AxesLayer extends PlotLayer {
         const w = this.plot.width - margin.left - margin.right;
         const h = this.plot.height - margin.top - margin.bottom;
 
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
         // Adjust to pixel boundaries
         ctx.save();
         ctx.translate(-0.5, 0.5);
