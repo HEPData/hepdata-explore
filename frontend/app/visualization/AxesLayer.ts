@@ -33,8 +33,6 @@ export class AxesLayer extends PlotLayer {
         ctx.lineTo(W - margin.right, H - margin.bottom);
         ctx.stroke();
 
-        const tickFormat = this.plot.xScale.tickFormat();
-
         ctx.font = '8px sans';
 
         // Draw X ticks
@@ -46,6 +44,7 @@ export class AxesLayer extends PlotLayer {
             ctx.lineTo(tickX, H - margin.bottom + 5);
             ctx.stroke();
 
+            const tickFormat = this.plot.xScale.tickFormat();
             const textW = ctx.measureText(tickFormat(tickValue)).width;
             const textX = tickX - textW / 2;
 
@@ -67,6 +66,7 @@ export class AxesLayer extends PlotLayer {
             ctx.lineTo(margin.left - 5, tickY);
             ctx.stroke();
 
+            const tickFormat = this.plot.yScale.tickFormat();
             const textW = ctx.measureText(tickFormat(tickValue)).width;
             ctx.fillText(tickFormat(tickValue), margin.left - 8 - textW,
                 tickY + 3);
