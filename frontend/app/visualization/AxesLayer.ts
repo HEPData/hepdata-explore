@@ -99,22 +99,5 @@ export class AxesLayer extends PlotLayer {
             ctx.font = '14px sans';
             ctx.fillText(this.plot.xVar, axisXCenter - textW / 2, margin.top + h + 30);
         }
-
-        // draw Y label
-        if (this.plot.yVars.length == 1) {
-            const yVar = this.plot.yVars[0];
-
-            const axisYCenter = margin.top + (h / 2);
-            const textW = ctx.measureText(yVar).width;
-            const textH = 12; // approximately
-
-            ctx.save();
-            ctx.translate(margin.left - 32, axisYCenter);
-            ctx.rotate(-Math.PI / 2);
-
-            ctx.fillText(yVar, -textW / 2, -textH / 2);
-
-            ctx.restore();
-        }
     }
 }

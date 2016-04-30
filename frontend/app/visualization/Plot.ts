@@ -66,9 +66,9 @@ export class Plot {
     height: number = 300;
     margins: Margins = {
         top: 10,
-        right: 50,
+        right: 20,
         bottom: 32,
-        left: 52
+        left: 40
     };
 
     xVar: string = null;
