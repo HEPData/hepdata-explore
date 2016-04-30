@@ -71,8 +71,8 @@ export class Plot {
         left: 52
     };
 
-    xVar: string;
-    yVars: string[];
+    xVar: string = null;
+    yVars: string[] = [];
 
     xScale: ScaleFunction;
     yScale: ScaleFunction;
@@ -98,7 +98,7 @@ export class Plot {
         this.axesLayer = new AxesLayer(this);
         this.addLayer(this.axesLayer);
 
-        ko.track(this, ['alive', 'pinned']);
+        ko.track(this, ['alive', 'pinned', 'xVar', 'yVars']);
     }
 
     private addLayer(layer: PlotLayer) {
@@ -193,5 +193,9 @@ export class Plot {
 
     kill() {
         this.alive = false;
+    }
+
+    getPointCount() {
+        return this.scatterLayer.points.length;
     }
 }

@@ -1,3 +1,11 @@
 <div class="plot-box">
     <div class="canvas-onion" data-bind="embedDom: plot.canvasOnion"></div>
+    <div>
+        <span data-bind="text: plot.getPointCount()"></span> points.
+    </div>
+    <ul data-bind="foreach: plot.yVars">
+        <li>
+            <span data-bind="text: $data"></span>
+        </li>
+    </ul>
 </div>
