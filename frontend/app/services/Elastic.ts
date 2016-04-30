@@ -96,9 +96,17 @@ export class Elastic {
             })
     }
     
+    /**
+     * Values may come with a range (low, high) or with a series of error tags.
+     * This function unifies them as a single representation.
+     * 
+     * It also adds a calculated `value` property from the range if the column
+     * lacked it.
+     */
     private addRangeProperties(dataPoints: DataPoint[]) {
         // Values may come with a range (low, high) or with a series of error tags.
         // This function unifies them as a single representation.
+        // 
 
         function square(x: number) {
             return x * x;
@@ -134,6 +142,12 @@ export class Elastic {
                 if (column.low === undefined) {
                     // It may have error tag representation, sum the errors
                     sumErrors(column);
+                }
+                
+                // If the data point comes without a value, infer it from the 
+                // range.
+                if (column.value === undefined) {
+                    column.value = (column.low + column.high) / 2;
                 }
             }
         }

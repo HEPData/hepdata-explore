@@ -1,12 +1,9 @@
 import isInstance = require('./isInstance');
 import typeOf = require('./typeOf');
+import {RuntimeError} from '../base/errors';
 
-export function AssertionError(message) {
-    this.name = 'AssertionError';
-    this.message = message;
-    this.stack = (<any>new Error()).stack;
+export class AssertionError extends RuntimeError {
 }
-AssertionError.prototype = new Error();
 
 export interface PropertyDeclaration {
     name: string;

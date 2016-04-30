@@ -2,6 +2,7 @@
     <div class="canvas-onion" data-bind="embedDom: plot.canvasOnion"></div>
     <div>
         <span data-bind="text: plot.getPointCount()"></span> points.
+        <span data-bind="text: plot.getRange()"></span>
     </div>
     <ul data-bind="foreach: plot.yVars">
         <li>

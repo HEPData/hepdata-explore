@@ -151,10 +151,10 @@ export class Plot {
 
     private calculateMinMax(allTables: PublicationTable[]) {
         let dataMinX = Infinity;
-        let dataMinY = Infinity;
         let dataMaxX = -Infinity;
+        let dataMinY = Infinity;
         let dataMaxY = -Infinity;
-
+        
         for (let yVar of this.yVars) {
             for (let table of allTables) {
                 const xCol = findColIndex(this.xVar, table);
@@ -167,18 +167,19 @@ export class Plot {
 
                 for (let dataPoint of table.data_points) {
                     const x = dataPoint[xCol].value;
-                    if (x > dataMaxX) {
+                    assertDefined(x);
+                    if (isFinite(x) && x > dataMaxX) {
                         dataMaxX = x;
                     }
-                    if (x < dataMinX) {
+                    if (isFinite(x) && x < dataMinX) {
                         dataMinX = x;
                     }
 
                     const y = dataPoint[yCol].value;
-                    if (y > dataMaxY) {
+                    if (isFinite(y) && y > dataMaxY) {
                         dataMaxY = y;
                     }
-                    if (y < dataMinY) {
+                    if (isFinite(y) && y < dataMinY) {
                         dataMinY = y;
                     }
                 }
@@ -186,8 +187,8 @@ export class Plot {
         }
 
         this.dataMinX = dataMinX;
-        this.dataMinY = dataMinY;
         this.dataMaxX = dataMaxX;
+        this.dataMinY = dataMinY;
         this.dataMaxY = dataMaxY;
     }
 
@@ -197,5 +198,9 @@ export class Plot {
 
     getPointCount() {
         return this.scatterLayer.points.length;
+    }
+
+    getRange() {
+        return this.dataMinX + ' to ' + this.dataMaxX;
     }
 }
