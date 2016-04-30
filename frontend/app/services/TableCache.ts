@@ -4,19 +4,19 @@ import {RuntimeError} from "../base/errors";
 class TableCache {
     public allTables: PublicationTable[];
 
-    private _tablesByIndepVar: Map<string, PublicationTable[]>;
-    private _tablesByDepVar: Map<string, PublicationTable[]>;
+    tablesByIndepVar: Map<string, PublicationTable[]>;
+    tablesByDepVar: Map<string, PublicationTable[]>;
 
     constructor(allTables: PublicationTable[] = []) {
-        this._tablesByIndepVar = new Map<string, PublicationTable[]>();
-        this._tablesByDepVar = new Map<string, PublicationTable[]>();
+        this.tablesByIndepVar = new Map<string, PublicationTable[]>();
+        this.tablesByDepVar = new Map<string, PublicationTable[]>();
         this.replaceAllTables(allTables);
     }
 
     public replaceAllTables(newTables: PublicationTable[]) {
         this.allTables = newTables;
-        this._tablesByIndepVar.clear();
-        this._tablesByDepVar.clear();
+        this.tablesByIndepVar.clear();
+        this.tablesByDepVar.clear();
 
         function addItemToMultiMap<K,V>(map: Map<K,V[]>, key: K, value: V) {
             let array = map.get(key);
@@ -29,10 +29,10 @@ class TableCache {
 
         for (let table of this.allTables) {
             for (let varName of table.indep_vars) {
-                addItemToMultiMap(this._tablesByIndepVar, varName.name, table);
+                addItemToMultiMap(this.tablesByIndepVar, varName.name, table);
             }
             for (let varName of table.dep_vars) {
-                addItemToMultiMap(this._tablesByDepVar, varName.name, table);
+                addItemToMultiMap(this.tablesByDepVar, varName.name, table);
             }
         }
     }

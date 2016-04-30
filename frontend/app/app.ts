@@ -19,6 +19,8 @@ import {DataPoint, PublicationTable} from "./base/dataFormat";
 import TableCache = require("./services/TableCache");
 import {PlotPool} from "./services/PlotPool";
 import {Plot} from "./visualization/Plot";
+import {assertHas, assert} from "./utils/assert";
+import {map, imap, sum, union} from "./utils/map";
 
 function screenUpdated() {
     return new Promise(function (resolve, reject) {
@@ -71,9 +73,7 @@ class AppViewModel {
                 var t1 = performance.now();
 
                 this.tableCache.replaceAllTables(tables);
-
-                const plot: Plot = this.plotPool.getFreePlot();
-                plot.spawn('M(GLUINO) (GEV)', ['M(NEUTRALINO1) (GEV)']);
+                this.updateUnpinnedPlots();
 
                 var t2 = performance.now();
                 console.log("Data indexed in %.2f ms.", t2 - t1);
@@ -82,12 +82,72 @@ class AppViewModel {
             })
     }
 
+    updateUnpinnedPlots() {
+        // After the next loop, this variable will hold how many free plots we have
+        let remainingPlots = this.plotPool.maxPlots;
+
+        // Update every plot data
+        for (let plot of this.plotPool.plots) {
+            if (plot.alive) {
+                // Update data
+                plot.loadTables();
+                // Kill if no data is matched with the new tables
+                if (plot.isEmpty()) {
+                    plot.kill();
+                } else {
+                    remainingPlots--;
+                }
+            }
+        }
+
+        // Continue only if we still have free plots
+        assert(remainingPlots >= 0, 'remainingPlots >= 0');
+        if (remainingPlots == 0) {
+            return;
+        }
+
+        // Compute how many data points there are for each independent variable
+        const dataPointCountByIndepVar = new Map(
+            imap(this.tableCache.tablesByIndepVar, ([indepVar, tables]): [string, number] =>
+                [indepVar, sum(imap(tables, (t) => t.data_points.length))])
+        );
+        // Sort independent variables by number of data points.
+        // The top ones will get a new plot.
+        const topIndepVars = _.sortBy(Array.from(dataPointCountByIndepVar.keys()),
+            (varName) => -dataPointCountByIndepVar.get(varName)).slice(0, remainingPlots);
+
+        // The independent variables have been chosen. Time for dependent variables.            
+        for (let indepVar of topIndepVars) {
+            const tables = this.tableCache.tablesByIndepVar.get(indepVar);
+            
+            // First we need to find all the dependent variables of the tables and 
+            // count the number of data points for each one.
+            const dataPointCountByDepVar: Map<string, number> = new Map(); 
+            for (let table of tables) {
+                for (let depVar of table.dep_vars) {
+                    const oldCount = dataPointCountByDepVar.get(depVar.name) || 0;
+                    const newCount = oldCount + table.data_points.length;
+                    dataPointCountByDepVar.set(depVar.name, newCount);
+                }
+            }
+            
+            // Now we sort the variables by data point count in order to get the top ones
+            const maxDepVars = 5;
+            const topDepVars = _.sortBy(Array.from(dataPointCountByDepVar.keys()),
+                (varName) => -dataPointCountByDepVar.get(varName)).slice(0, maxDepVars);
+                
+            // We are ready to add a new plot now
+            const plot = this.plotPool.getFreePlot().spawn(indepVar, topDepVars);
+        }
+    }
+
     constructor() {
         this.plotPool = new PlotPool(this.tableCache);
         this.rootFilter = new AllFilter([
             new IndepVarFilter('M(GLUINO) (GEV)'),
         ]);
         this.currentFilterUri = ko.computed(this.calcCurrentFilterUri, this);
+        
         this.currentFilterUri.subscribe((newFilterUri: string) => {
             history.replaceState(null, null, '#' + newFilterUri)
             this.loadData();

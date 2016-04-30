@@ -1,7 +1,11 @@
-export function RuntimeError(message) {
-    this.name = 'RuntimeError';
-    this.message = message;
-    this.stack = (<any>new Error()).stack;
-    debugger;
+export class RuntimeError extends Error {
+    stack: string;
+
+    constructor(message: string) {
+        super();
+        this.name = this.constructor.name;
+        this.message = message;
+        this.stack = (<any>new Error()).stack;
+        debugger;
+    }
 }
-RuntimeError.prototype = new Error();

@@ -1,5 +1,5 @@
 import {PlotLayer} from "./PlotLayer";
-import {Plot, findColIndex} from "./Plot";
+import {Plot, findColIndex, findColIndexOrNull} from "./Plot";
 
 export interface CanvasScatterPoint {
     x: number;
@@ -57,7 +57,11 @@ export class ScatterLayer extends PlotLayer {
             const tables = plot.tableCache.getTablesWithVariables(xVar, yVar);
             for (let table of tables) {
                 const colX = findColIndex(xVar, table);
-                const colY = findColIndex(yVar, table);
+                const colY = findColIndexOrNull(yVar, table);
+                if (colY == null) {
+                    // This table does not have this yVar, but may have other y
+                    // variables.
+                }
                 const color = colorScale(yVar + '-' + table.table_num + '-' + table.publication.inspire_record);
 
                 for (let row of table.data_points) {

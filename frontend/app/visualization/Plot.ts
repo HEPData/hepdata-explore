@@ -33,7 +33,23 @@ export function findColIndex(variableName: string, table: PublicationTable) {
         return table.indep_vars.length + colDep;
     }
 
-    throw new RuntimeError('findColIndex: Variable name not found');
+    throw new RuntimeError('Variable name not found');
+}
+
+export function findColIndexOrNull(variableName: string, table: PublicationTable) {
+    const colIndep = table.indep_vars.findIndex(
+        (variable) => variable.name == variableName);
+    if (colIndep != -1) {
+        return colIndep;
+    }
+
+    const colDep = table.dep_vars.findIndex(
+        (variable) => variable.name == variableName);
+    if (colDep != -1) {
+        return table.indep_vars.length + colDep;
+    }
+
+    return null; // Variable name not found
 }
 
 export class Plot {
@@ -43,6 +59,8 @@ export class Plot {
     canvasOnion: HTMLDivElement;
     /** Needed to extract data for plots. */
     tableCache: TableCache;
+    /** Non pinned plots may be removed from the interface when search terms are modified. */
+    pinned: boolean = false;
 
     width: number = 300;
     height: number = 300;
@@ -55,7 +73,7 @@ export class Plot {
 
     xVar: string;
     yVars: string[];
-    
+
     xScale: ScaleFunction;
     yScale: ScaleFunction;
 
@@ -80,14 +98,14 @@ export class Plot {
         this.axesLayer = new AxesLayer(this);
         this.addLayer(this.axesLayer);
 
-        ko.track(this, ['alive']);
+        ko.track(this, ['alive', 'pinned']);
     }
 
     private addLayer(layer: PlotLayer) {
         this.canvasOnion.insertBefore(layer.canvas, null);
     }
 
-    spawn(xVar: string, yVars: string[]) {
+    spawn(xVar: string, yVars: string[]): this {
         this.alive = true;
         this.xVar = xVar;
         this.yVars = yVars;
@@ -97,6 +115,12 @@ export class Plot {
                 [yVar, this.tableCache.getTablesWithVariables(xVar, yVar)])
         );
 
+        this.loadTables();
+        return this;
+    }
+
+    public loadTables() {
+        // Collect all tables having data going to be plotted
         let allTables: PublicationTable[] = [];
         for (let tables of Array.from(this.tablesByYVar.values())) {
             allTables = allTables.concat(tables);
@@ -115,10 +139,14 @@ export class Plot {
 
         this.axesLayer.clean();
         this.axesLayer.draw();
-        
+
         this.scatterLayer.replaceDataPoints();
         this.scatterLayer.clean();
         this.scatterLayer.draw();
+    }
+
+    public isEmpty() {
+        return (this.scatterLayer.points.length == 0);
     }
 
     private calculateMinMax(allTables: PublicationTable[]) {
@@ -130,8 +158,13 @@ export class Plot {
         for (let yVar of this.yVars) {
             for (let table of allTables) {
                 const xCol = findColIndex(this.xVar, table);
-                const yCol = findColIndex(yVar, table);
-                
+                const yCol = findColIndexOrNull(yVar, table);
+                if (yCol == null) {
+                    // This table does not have this yVar, but may have other y
+                    // variables.
+                    continue;
+                }
+
                 for (let dataPoint of table.data_points) {
                     const x = dataPoint[xCol].value;
                     if (x > dataMaxX) {
@@ -140,7 +173,7 @@ export class Plot {
                     if (x < dataMinX) {
                         dataMinX = x;
                     }
-                    
+
                     const y = dataPoint[yCol].value;
                     if (y > dataMaxY) {
                         dataMaxY = y;
@@ -151,7 +184,7 @@ export class Plot {
                 }
             }
         }
-        
+
         this.dataMinX = dataMinX;
         this.dataMinY = dataMinY;
         this.dataMaxX = dataMaxX;

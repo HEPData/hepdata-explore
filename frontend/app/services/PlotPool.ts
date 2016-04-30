@@ -1,17 +1,17 @@
 import {Plot} from "../visualization/Plot";
 import TableCache = require("./TableCache");
+import {RuntimeError} from "../base/errors";
 
-export function ExhaustedPool() {
-    this.name = 'ExhaustedPool';
-    this.message = 'Exhausted plot pool';
-    this.stack = (<any>new Error()).stack;
+class ExhaustedPool extends RuntimeError {
+    constructor() {
+        super('Exhausted plot pool');
+    }
 }
-ExhaustedPool.prototype = new Error();
 
 export class PlotPool {
     plots: Plot[];
     tableCache: TableCache;
-    maxPlots = 3;
+    maxPlots = 6;
 
     constructor(tableCache: TableCache) {
         this.plots = [];

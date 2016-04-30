@@ -13,6 +13,12 @@ export interface PropertyDeclaration {
     type: any;
 }
 
+export function assert(value: boolean, message: string = 'Assertion failed') {
+    if (!value) {
+        throw new AssertionError(message);
+    }
+}
+
 export function assertHas(object: Object,
                           properties: (PropertyDeclaration|string)[])
 {
