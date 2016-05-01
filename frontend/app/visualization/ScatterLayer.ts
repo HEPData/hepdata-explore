@@ -1,9 +1,12 @@
 import {PlotLayer} from "./PlotLayer";
 import {Plot, findColIndex, findColIndexOrNull} from "./Plot";
+import {assert} from "../utils/assert";
 
 export interface CanvasScatterPoint {
     x: number;
     y: number;
+    low: number;
+    high: number;
     color: string;
 }
 
@@ -34,9 +37,24 @@ export class ScatterLayer extends PlotLayer {
 
         // console.log(this.points.length);
         for (let point of this.points) {
+            // assert(point.high <= point.y);
+            // assert(point.low >= point.y);
+
+            // Adjust to pixel grid
+            const x = Math.round(point.x);
+            const y = Math.round(point.y);
+
+            // Error bar
+            // ctx.strokeStyle = point.color;
+            ctx.beginPath();
+            ctx.moveTo(x, Math.round(point.low));
+            ctx.lineTo(x, Math.round(point.high));
+            ctx.stroke();
+
+            // Circle
             ctx.fillStyle = point.color;
             ctx.beginPath();
-            ctx.arc(point.x, point.y, 2, 0, 2 * Math.PI);
+            ctx.arc(x, y, 2, 0, 2 * Math.PI);
             ctx.fill();
         }
 
@@ -68,6 +86,8 @@ export class ScatterLayer extends PlotLayer {
                     const point: CanvasScatterPoint = {
                         x: xScale(row[colX].value),
                         y: yScale(row[colY].value),
+                        low: yScale(row[colY].low),
+                        high: yScale(row[colY].high),
                         color: color,
                     };
                     points.push(point);
