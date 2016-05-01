@@ -12,8 +12,8 @@ from elasticsearch import Elasticsearch
 try:
     from yaml import CSafeLoader as SafeLoader
 except ImportError:
-    print(
-        "WARNING: Using Python YAML loader, which is very slow. Please build PyYAML with C extensions.")
+    print("WARNING: Using Python YAML loader, which is very slow. "
+          "Please build PyYAML with C extensions.")
     from yaml import SafeLoader
 
 
