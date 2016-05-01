@@ -70,8 +70,7 @@ def clean_errors(y, errors):
             plus = clean_error_value(y, error['asymerror']['plus'])
             minus = clean_error_value(y, error['asymerror']['minus'])
         elif 'symerror' in error:
-            plus = clean_error_value(y, error['symerror'])
-            minus = -plus
+            plus = minus = clean_error_value(y, error['symerror'])
 
         ret.append({
             'label': label,
