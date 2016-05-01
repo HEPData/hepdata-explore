@@ -120,8 +120,9 @@ export class Elastic {
             if (errors.length == 0) {
                 summedMinus = summedPlus = 0;
             } else if (errors.length == 1) {
-                summedMinus = errors[0].minus;
-                summedPlus = errors[0].plus;
+                // TODO clarify why we have negative errors
+                summedMinus = Math.abs(errors[0].minus);
+                summedPlus = Math.abs(errors[0].plus);
             } else {
                 // Square root of the sum of the squares of errors, as Eammon asked
                 summedPlus = 0;

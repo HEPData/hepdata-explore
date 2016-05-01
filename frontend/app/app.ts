@@ -10,7 +10,7 @@ import 'base/templateFromUrlLoader';
 // Ensure components are pulled as a dependencies
 import 'bindings/all-bindings';
 import 'components/all-components';
-import {IndepVarFilter} from "./filters/filter-factories";
+import {IndepVarFilter, DepVarFilter} from "./filters/filter-factories";
 
 // Ensure template utility functions are pulled too
 import 'utils/recordCountFormat';
@@ -224,7 +224,9 @@ class AppViewModel {
     constructor() {
         this.plotPool = new PlotPool(this.tableCache);
         this.rootFilter = new AllFilter([
+            // new IndepVarFilter('PT (GEV)'),
             new IndepVarFilter('PT (GEV)'),
+            new DepVarFilter('D(N)/DPT (c/GEV)'),
         ]);
         this.currentFilterUri = ko.computed(this.calcCurrentFilterUri, this);
         
