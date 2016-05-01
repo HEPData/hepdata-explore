@@ -4,6 +4,7 @@ import {
     DataPointColumn, PublicationTable
 } from "../base/dataFormat";
 import sum = d3.sum;
+import {assert} from "../utils/assert";
 export function ServerError(message: string = null) {
     this.name = 'ServerError';
     this.message = message || 'The server returned an invalid response';
@@ -134,11 +135,16 @@ export class Elastic {
             }
 
             column.low = column.value - summedMinus;
-            column.high = column.value - summedPlus;
+            column.high = column.value + summedPlus;
         }
 
         for (let dataPoint of dataPoints) {
             for (let column of dataPoint) {
+                assert(column.value == undefined || column.low == undefined
+                    || column.value >= column.low);
+                assert(column.value == undefined || column.low == undefined
+                    || column.value <= column.high);
+
                 if (column.low === undefined) {
                     // It may have error tag representation, sum the errors
                     sumErrors(column);
@@ -149,6 +155,9 @@ export class Elastic {
                 if (column.value === undefined) {
                     column.value = (column.low + column.high) / 2;
                 }
+
+                assert(column.value >= column.low);
+                assert(column.value <= column.high);
             }
         }
     }
