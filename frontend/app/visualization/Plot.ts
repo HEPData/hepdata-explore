@@ -36,6 +36,8 @@ export function findColIndex(variableName: string, table: PublicationTable) {
     throw new RuntimeError('Variable name not found');
 }
 
+export type ScaleType = "lin" | "log";
+
 export function findColIndexOrNull(variableName: string, table: PublicationTable) {
     const colIndep = table.indep_vars.findIndex(
         (variable) => variable.name == variableName);
@@ -74,6 +76,8 @@ export class Plot {
     xVar: string = null;
     yVars: string[] = [];
 
+    xScaleType: ScaleType = null;
+    yScaleType: ScaleType = null;
     xScale: ScaleFunction;
     yScale: ScaleFunction;
 
@@ -98,7 +102,8 @@ export class Plot {
         this.axesLayer = new AxesLayer(this);
         this.addLayer(this.axesLayer);
 
-        ko.track(this, ['alive', 'pinned', 'xVar', 'yVars']);
+        ko.track(this, ['alive', 'pinned', 'xVar', 'yVars',
+            'xScaleType', 'yScaleType']);
     }
 
     private addLayer(layer: PlotLayer) {
@@ -119,6 +124,22 @@ export class Plot {
         return this;
     }
 
+    public chooseScale(minValue: number, maxValue: number): ScaleType {
+        if (Math.abs(maxValue / minValue) > 10) {
+            return 'log';
+        } else {
+            return 'lin';
+        }
+    }
+
+    public d3Scale(scaleType: ScaleType) {
+        if (scaleType == 'lin') {
+            return d3.scale.linear();
+        } else {
+            return d3.scale.pow().exponent(.5);
+        }
+    }
+
     public loadTables() {
         // Collect all tables having data going to be plotted
         let allTables: PublicationTable[] = [];
@@ -130,10 +151,13 @@ export class Plot {
             (t: PublicationTable) => t.publication)).length;
         this.calculateMinMax(allTables);
 
-        this.xScale = d3.scale.pow().exponent(.5)
+        this.xScaleType = this.chooseScale(this.dataMinX, this.dataMaxX);
+        this.xScale = this.d3Scale(this.xScaleType)
             .domain([this.dataMinX, this.dataMaxX])
             .range([this.margins.left, this.width - this.margins.right]);
-        this.yScale = d3.scale.linear()
+
+        this.yScaleType = this.chooseScale(this.dataMinY, this.dataMaxY);
+        this.yScale = this.d3Scale(this.yScaleType)
             .domain([this.dataMinY, this.dataMaxY])
             .range([this.height - this.margins.bottom, this.margins.top]);
 
