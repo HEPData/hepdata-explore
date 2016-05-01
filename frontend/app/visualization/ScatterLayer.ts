@@ -36,7 +36,7 @@ export class ScatterLayer extends PlotLayer {
         for (let point of this.points) {
             ctx.fillStyle = point.color;
             ctx.beginPath();
-            ctx.arc(point.x, point.y, 2.5, 0, 2 * Math.PI);
+            ctx.arc(point.x, point.y, 2, 0, 2 * Math.PI);
             ctx.fill();
         }
 
