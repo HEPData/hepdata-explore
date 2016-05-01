@@ -43,7 +43,6 @@ def coerce_float(value):
     # Maybe it's a weird scientific notation format
     sn_match = re_number_exp_number.match(value)
     if sn_match:
-        print(sn_match.groups())
         base, exp = sn_match.groups()
         return float(base + 'e' + exp)
     else:
