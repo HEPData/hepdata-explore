@@ -28,8 +28,7 @@ def clean_cmenergies(cmenergies):
         if cmenergies.endswith(' GeV'):
             cmenergies = cmenergies.replace(' GeV', '')
 
-        if '-' in cmenergies[
-                  1:]:  # '-' appears in any position except the first (it would be a minus symbol then)
+        if '-' in cmenergies[1:]:  # '-' appears in any position except the first (it would be a minus symbol then)
             # cmenergies is a range
             cmenergies = tuple(
                 float(n)
