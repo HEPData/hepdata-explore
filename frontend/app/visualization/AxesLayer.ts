@@ -34,7 +34,8 @@ export class AxesLayer extends PlotLayer {
     draw() {
         const ctx = this.ctx;
         ctx.lineWidth = 1;
-        ctx.strokeStyle = 'black';
+        ctx.strokeStyle = ctx.fillStyle =
+            localStorage.getItem('dark') ? 'white' : 'black';
 
         const margin = this.plot.margins;
         const W = this.plot.width, H = this.plot.height;
@@ -45,7 +46,6 @@ export class AxesLayer extends PlotLayer {
         ctx.save();
         ctx.translate(-0.5, 0.5);
 
-        ctx.strokeStyle = '#000000';
         ctx.moveTo(margin.left, margin.top);
         ctx.lineTo(margin.left, H - margin.bottom);
         ctx.lineTo(W - margin.right, H - margin.bottom);

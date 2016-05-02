@@ -35,17 +35,16 @@ export class ScatterLayer extends PlotLayer {
         ctx.save();
         ctx.translate(0.5, 0.5);
 
-        // console.log(this.points.length);
         for (let point of this.points) {
-            // assert(point.high <= point.y);
-            // assert(point.low >= point.y);
+            assert(point.high <= point.y);
+            assert(point.low >= point.y);
 
             // Adjust to pixel grid
             const x = Math.round(point.x);
             const y = Math.round(point.y);
 
             // Error bar
-            // ctx.strokeStyle = point.color;
+            ctx.strokeStyle = point.color;
             ctx.beginPath();
             ctx.moveTo(x, Math.round(point.low));
             ctx.lineTo(x, Math.round(point.high));
