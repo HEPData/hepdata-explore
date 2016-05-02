@@ -53,7 +53,13 @@ export class Elastic {
     elasticUrl: string;
 
     constructor() {
-        this.elasticUrl = 'http://' + location.hostname + ':9200/hepdata2';
+        if (location.hostname.indexOf('rufian.eu') != -1) {
+            // my test server
+            this.elasticUrl = location.origin + '/elastic/hepdata2';
+        } else {
+            // testing on localhost and LAN
+            this.elasticUrl = 'http://' + location.hostname + ':9200/hepdata2';
+        }
     }
 
     jsonQuery(path: string, data: {}): Promise<any> {
@@ -141,10 +147,10 @@ export class Elastic {
 
         for (let dataPoint of dataPoints) {
             for (let column of dataPoint) {
-                assert(column.value == undefined || column.low == undefined
-                    || column.value >= column.low);
-                assert(column.value == undefined || column.low == undefined
-                    || column.value <= column.high);
+                // assert(column.value == undefined || column.low == undefined
+                //     || column.value >= column.low);
+                // assert(column.value == undefined || column.low == undefined
+                //     || column.value <= column.high);
 
                 if (column.low === undefined) {
                     // It may have error tag representation, sum the errors
@@ -157,8 +163,8 @@ export class Elastic {
                     column.value = (column.low + column.high) / 2;
                 }
 
-                assert(column.value >= column.low);
-                assert(column.value <= column.high);
+                // assert(column.value >= column.low);
+                // assert(column.value <= column.high);
             }
         }
     }
