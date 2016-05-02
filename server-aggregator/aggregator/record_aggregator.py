@@ -66,19 +66,21 @@ def clean_errors(y, errors):
         label = error.get('label') or 'main'
 
         if 'asymerror' in error:
-            raw_plus = clean_error_value(y, error['asymerror']['plus'])
-            raw_minus = clean_error_value(y, error['asymerror']['minus'])
-            # Sometimes signs are twisted
-            plus = min(raw_plus, raw_minus, 0.0)
-            minus = min(plus, minus, 0.0)
+            plus = clean_error_value(y, error['asymerror']['plus'])
+            minus = clean_error_value(y, error['asymerror']['minus'])
+            ret.append({
+                'type': 'asymerror',
+                'label': label,
+                'plus': plus,
+                'minus': minus,
+            })
         elif 'symerror' in error:
-            plus = minus = clean_error_value(y, error['symerror'])
-
-        ret.append({
-            'label': label,
-            'plus': plus,
-            'minus': minus,
-        })
+            value = clean_error_value(y, error['symerror'])
+            ret.append({
+                'type': 'symerror',
+                'label': label,
+                'value': value,
+            })
     return ret
 
 
@@ -97,6 +99,23 @@ class RejectedTable(Exception):
 
 def format_exception(ex):
     return '%s: %s' % (type(ex).__name__, ex)
+
+
+def analyze_reactions(reactions):
+    ret = []
+    for string_full in reactions:
+        assert ' --> ' in string_full
+        string_in, string_out = (x.strip() for x in string_full.split(' --> '))
+        particles_in = string_in.split(' ')
+        particles_out = string_out.split(' ')
+        ret.append({
+            'string_full': string_full,
+            'string_in': string_in,
+            'string_out': string_out,
+            'particles_in': particles_in,
+            'particles_out': particles_out,
+        })
+    return ret
 
 
 class RecordAggregator(object):
@@ -167,7 +186,7 @@ class RecordAggregator(object):
 
         observables = ensure_list(find_keyword(table, 'observables'))
         phrases   = ensure_list(find_keyword(table, 'phrases'))
-        reactions = ensure_list(find_keyword(table, 'reactions'))
+        reactions = analyze_reactions(ensure_list(find_keyword(table, 'reactions')))
 
         indep_var_meta = [
             {'name': extract_variable_name(var['header'])}
@@ -398,7 +417,16 @@ class RecordAggregator(object):
 
                                 "cmenergies_min": {"type": "double"},
                                 "cmenergies_max": {"type": "double"},
-                                "reactions": {"type": "string","index": "not_analyzed"},
+                                "reactions": {
+                                    "type": "nested",
+                                    "properties": {
+                                        "string_full": {"type": "string","index": "not_analyzed"},
+                                        "string_in": {"type": "string","index": "not_analyzed"},
+                                        "string_out": {"type": "string","index": "not_analyzed"},
+                                        "particles_in": {"type": "string","index": "not_analyzed"},
+                                        "particles_out": {"type": "string","index": "not_analyzed"},
+                                    }
+                                },
                                 "observables": {"type": "string"},
                                 "phrases": {"type": "string"},
 
