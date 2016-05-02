@@ -1,7 +1,10 @@
 import Filter = require("../filters/Filter");
 import KeywordFilter = require("../filters/KeywordFilter");
 import AllFilter = require("../filters/AllFilter");
-import {IndepVarFilter, DepVarFilter} from "../filters/filter-factories";
+import {
+    IndepVarFilter, DepVarFilter,
+    ReactionFilter
+} from "../filters/filter-factories";
 import SomeFilter = require("../filters/SomeFilter");
 
 
@@ -100,22 +103,27 @@ filterIndex.populate([
     // },
     {
         filterClass: AllFilter,
-        description: `Performs a logical <code>AND</code>. This compound filter matches a data point if it matches <b>all</b> the filters inside it.`,
+        description: `Performs a logical <code>AND</code>. This compound filter matches a table if it matches <b>all</b> the filters inside it.`,
         tags: ['all', 'and', 'compound'],
     },
     {
         filterClass: SomeFilter,
-        description: `Performs a logical <code>OR</code>. This compound filter matches a data point if it matches <b>at least one</b> the filters inside it.`,
+        description: `Performs a logical <code>OR</code>. This compound filter matches a table if it matches <b>at least one</b> the filters inside it.`,
         tags: ['all', 'and', 'compound'],
     },
     {
         filterClass: IndepVarFilter,
-        description: `Returns data points with for a certain independent variable.`,
+        description: `Returns tables with a certain independent variable.`,
         tags: ['x', 'indep', 'independent', 'variable'],
     },
     {
         filterClass: DepVarFilter,
-        description: `Returns data points with for a certain dependent variable.`,
+        description: `Returns tables with a certain dependent variable.`,
         tags: ['y', 'dep', 'dependent', 'variable'],
     },
+    {
+        filterClass: ReactionFilter,
+        description: `Returns tables matching a certain reaction`,
+        tags: ['reaction', 'keyword'],
+    }
 ]);

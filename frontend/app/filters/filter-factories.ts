@@ -29,3 +29,17 @@ export class IndepVarFilter extends ChoiceFilter {
         return table.indep_vars.map((v) => v.name).indexOf(this.value) != -1;
     }
 }
+
+export class ReactionFilter extends ChoiceFilter {
+    constructor(value: string = '') {
+        super('reactions', value);
+    }
+
+    static getLongName() {
+        return 'Reaction'
+    }
+
+    filterTable(table: PublicationTable): boolean {
+        return table.reactions.indexOf(this.value) != -1;
+    }
+}
