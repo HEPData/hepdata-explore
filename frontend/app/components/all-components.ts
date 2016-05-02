@@ -6,3 +6,4 @@ import "./ChoiceFilterComponent";
 import "./SuggestionsBoxComponent";
 import "./PlotComponent";
 import "./PlotPoolComponent";
+import "./CMEnergiesFilterComponent";

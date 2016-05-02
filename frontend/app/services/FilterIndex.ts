@@ -6,6 +6,7 @@ import {
     ReactionFilter
 } from "../filters/filter-factories";
 import SomeFilter = require("../filters/SomeFilter");
+import CMEnergiesFilter = require("../filters/CMEnergiesFilter");
 
 
 interface FilterIndexRecordDefinition {
@@ -125,5 +126,10 @@ filterIndex.populate([
         filterClass: ReactionFilter,
         description: `Returns tables matching a certain reaction`,
         tags: ['reaction', 'keyword'],
-    }
+    },
+    {
+        filterClass: CMEnergiesFilter,
+        description: `Returns tables having a <code>cmenergies</code> overlapping the specified range.`,
+        tags: ['sqrt', 'sqrts', 'cmenergies'],
+    },
 ]);

@@ -426,3 +426,16 @@ ul.suggestions {
     top: 0;
     left: 0;
 }
+
+.filter-form {
+    padding: 10px;
+}
+
+.filter-form label {
+    width: 100%;
+    margin-top: 5px;
+}
+
+.filter-form label:first-child {
+    margin-top: 0px;
+}

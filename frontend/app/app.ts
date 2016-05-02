@@ -21,6 +21,7 @@ import {PlotPool} from "./services/PlotPool";
 import {Plot} from "./visualization/Plot";
 import {assertHas, assert} from "./utils/assert";
 import {map, imap, sum, union, range} from "./utils/map";
+import CMEnergiesFilter = require("./filters/CMEnergiesFilter");
 
 function screenUpdated() {
     return new Promise(function (resolve, reject) {
@@ -73,6 +74,10 @@ class AppViewModel {
             })
             .then((tables: PublicationTable[]) => {
                 var t1 = performance.now();
+
+                for (let table of tables) {
+                    console.log(table.cmenergies_min + ' ' + table.cmenergies_max);
+                }
 
                 this.tableCache.replaceAllTables(tables);
                 this.updateUnpinnedPlots();
@@ -224,9 +229,10 @@ class AppViewModel {
     constructor() {
         this.plotPool = new PlotPool(this.tableCache);
         this.rootFilter = new AllFilter([
-            new IndepVarFilter('PT (GEV)'),
+            // new IndepVarFilter('PT (GEV)'),
             // new IndepVarFilter('PT (GEV)'),
             // new DepVarFilter('D(N)/DPT (c/GEV)'),
+            new CMEnergiesFilter()
         ]);
         this.currentFilterUri = ko.computed(this.calcCurrentFilterUri, this);
         

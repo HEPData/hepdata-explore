@@ -73,6 +73,7 @@ export class Elastic {
     }
 
     fetchFilteredData(rootFilter: Filter): Promise<PublicationTable[]> {
+        console.log(rootFilter);
         const requestData = {
             "size": 100,
             "query": {
