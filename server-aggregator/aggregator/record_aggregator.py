@@ -107,8 +107,10 @@ re_arrow = re.compile(r' *-+> *')
 def analyze_reactions(reactions):
     ret = []
     for string_full in reactions:
-        assert ' -> ' in string_full or ' --> ' in string_full
-        string_in, string_out = (x.strip() for x in re_arrow.split(string_full))
+        assert '->' in string_full or '-->' in string_full
+        reaction_stages = [x.strip() for x in re_arrow.split(string_full)]
+        # Usually there are two reaction stages, but sometimes there are more
+        string_in, string_out = reaction_stages[0], reaction_stages[-1]
         particles_in = string_in.split(' ')
         particles_out = string_out.split(' ')
         ret.append({
