@@ -8,6 +8,7 @@ from aggregator.harmonizing import find_keyword, find_qualifier, \
     coerce_float_or_null, value_is_actually_a_range, parse_value_range
 from aggregator.shared_dcontext import dcontext
 from elasticsearch import Elasticsearch
+import re
 
 try:
     from yaml import CSafeLoader as SafeLoader
@@ -101,11 +102,13 @@ def format_exception(ex):
     return '%s: %s' % (type(ex).__name__, ex)
 
 
+re_arrow = re.compile(r' *-+> *')
+
 def analyze_reactions(reactions):
     ret = []
     for string_full in reactions:
-        assert ' --> ' in string_full
-        string_in, string_out = (x.strip() for x in string_full.split(' --> '))
+        assert ' -> ' in string_full or ' --> ' in string_full
+        string_in, string_out = (x.strip() for x in re_arrow.split(string_full))
         particles_in = string_in.split(' ')
         particles_out = string_out.split(' ')
         ret.append({
