@@ -107,6 +107,11 @@ re_arrow = re.compile(r' *-+> *')
 def analyze_reactions(reactions):
     ret = []
     for string_full in reactions:
+        if string_full == 'N':
+            print('Skipped reaction: %s, %s. Reason: %s' %
+                  (dcontext.submission, dcontext.table, "'N'"))
+            continue
+
         assert '->' in string_full or '-->' in string_full
         reaction_stages = [x.strip() for x in re_arrow.split(string_full)]
         # Usually there are two reaction stages, but sometimes there are more
