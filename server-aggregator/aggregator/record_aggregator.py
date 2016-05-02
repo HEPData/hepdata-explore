@@ -107,24 +107,29 @@ re_arrow = re.compile(r' *-+> *')
 def analyze_reactions(reactions):
     ret = []
     for string_full in reactions:
-        if string_full == 'N':
-            print('Skipped reaction: %s, %s. Reason: %s' %
-                  (dcontext.submission, dcontext.table, "'N'"))
-            continue
-
-        assert '->' in string_full or '-->' in string_full
-        reaction_stages = [x.strip() for x in re_arrow.split(string_full)]
-        # Usually there are two reaction stages, but sometimes there are more
-        string_in, string_out = reaction_stages[0], reaction_stages[-1]
-        particles_in = string_in.split(' ')
-        particles_out = string_out.split(' ')
-        ret.append({
-            'string_full': string_full,
-            'string_in': string_in,
-            'string_out': string_out,
-            'particles_in': particles_in,
-            'particles_out': particles_out,
-        })
+        if '->' not in string_full:
+            print('Reaction without arrow in %s, %s. Value: %s' %
+                  (dcontext.submission, dcontext.table, string_full))
+            ret.append({
+                'string_full': string_full,
+                'string_in': None,
+                'string_out': None,
+                'particles_in': [],
+                'particles_out': [],
+            })
+        else:
+            reaction_stages = [x.strip() for x in re_arrow.split(string_full)]
+            # Usually there are two reaction stages, but sometimes there are more
+            string_in, string_out = reaction_stages[0], reaction_stages[-1]
+            particles_in = string_in.split(' ')
+            particles_out = string_out.split(' ')
+            ret.append({
+                'string_full': string_full,
+                'string_in': string_in,
+                'string_out': string_out,
+                'particles_in': particles_in,
+                'particles_out': particles_out,
+            })
     return ret
 
 
