@@ -1,6 +1,4 @@
 import ChoiceFilter = require("../filters/ChoiceFilter");
-import {elastic} from "../services/Elastic";
-import {AutocompleteService} from "../services/AutocompleteService";
 import CMEnergiesFilter = require("../filters/CMEnergiesFilter");
 import {floatEquals} from "../utils/floatEquals";
 
