@@ -224,9 +224,9 @@ class AppViewModel {
     constructor() {
         this.plotPool = new PlotPool(this.tableCache);
         this.rootFilter = new AllFilter([
-            // new IndepVarFilter('PT (GEV)'),
             new IndepVarFilter('PT (GEV)'),
-            new DepVarFilter('D(N)/DPT (c/GEV)'),
+            // new IndepVarFilter('PT (GEV)'),
+            // new DepVarFilter('D(N)/DPT (c/GEV)'),
         ]);
         this.currentFilterUri = ko.computed(this.calcCurrentFilterUri, this);
         

@@ -66,8 +66,11 @@ def clean_errors(y, errors):
         label = error.get('label') or 'main'
 
         if 'asymerror' in error:
-            plus = clean_error_value(y, error['asymerror']['plus'])
-            minus = clean_error_value(y, error['asymerror']['minus'])
+            raw_plus = clean_error_value(y, error['asymerror']['plus'])
+            raw_minus = clean_error_value(y, error['asymerror']['minus'])
+            # Sometimes signs are twisted
+            plus = min(raw_plus, raw_minus, 0.0)
+            minus = min(plus, minus, 0.0)
         elif 'symerror' in error:
             plus = minus = clean_error_value(y, error['symerror'])
 
