@@ -1,0 +1,23 @@
+.visualization-box {
+    background: #2C2C2C;
+    color: white;
+}
+
+.sidebar {
+    background: #424855;
+    color: white;
+}
+
+div#fake-header {
+    background: #B2B2B2;
+}
+
+.suggestion:focus, .suggestion:hover:not(:active) {
+    color: black;
+}
+
+input {
+    background: none;
+    color: white;
+    border: 1px solid#919191;
+}
