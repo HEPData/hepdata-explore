@@ -8,7 +8,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
 CORS(app, resources={
     '*': {
-        'origins': '*' #''http://localhost:*/'
+        'origins': 'http://localhost:*/'
     }
 })
 
