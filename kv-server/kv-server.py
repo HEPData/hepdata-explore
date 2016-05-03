@@ -6,7 +6,7 @@ def create_db():
     db.create_all()
 
 
-def run_server(host='0.0.0.0', port=10020, debug=False):
+def run_server(host='0.0.0.0', port=9201, debug=False):
     from kv_server.app import app
     app.run(host, port, debug)
 
