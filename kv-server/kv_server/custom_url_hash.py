@@ -16,13 +16,18 @@ def number_to_url_string(number):
 
 
 def url_string_to_number(url_string):
+    if len(url_string) != len_url_string:
+        raise ValueError('Invalid URL string')
+
     number = 0
     for i, char in enumerate(reversed(url_string)):
+        # .index() will also throw a ValueError if invalid characters are used
         number += url_chars.index(char) * len(url_chars) ** i
     return number
 
 
 def hash_to_url_number(string):
+    assert(len(string) >= 4)
     suffix = string[-4:]  # last four bytes
     return struct.unpack('>L', suffix)[0] % url_number_modulo
 

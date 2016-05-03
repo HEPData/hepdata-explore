@@ -16,7 +16,12 @@ def hello():
 
 @app.route('/states/<id>', methods=['GET'])
 def get_state(id):
-    state = State.query.get(url_string_to_number(id))
+    try:
+        numeric_id = url_string_to_number(id)
+    except ValueError:
+        something_fishy('Malformated id')
+
+    state = State.query.get(numeric_id)
     if state is not None:
         return state.value
     else:

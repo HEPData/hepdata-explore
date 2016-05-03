@@ -23,8 +23,10 @@ class HTTPError(Exception):
 def something_fishy(reason):
     ip = request.remote_addr
     cropped_body = request.get_data(as_text=True)[:200]
-    app.logger.warn('A fishy request came from %s: %s' % (ip, reason))
-    app.logger.warn('Request content: %s' % cropped_body)
+    app.logger.warn('A fishy request came from %s at %s %s: %s' %
+                    (ip, request.method, request.path, reason))
+    if cropped_body:
+        app.logger.warn('Request content: %s' % cropped_body)
     raise HTTPError(400, 'Bad request')
 
 
