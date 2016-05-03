@@ -5,35 +5,7 @@ import {
 } from "../base/dataFormat";
 import sum = d3.sum;
 import {assert} from "../utils/assert";
-export function ServerError(message: string = null) {
-    this.name = 'ServerError';
-    this.message = message || 'The server returned an invalid response';
-    this.stack = (<any>new Error()).stack;
-}
-ServerError.prototype = Object.create(Error.prototype);
-ServerError.prototype.constructor = ServerError;
-
-Promise.config({
-    cancellation: true,
-});
-
-function asyncFetch(xhr: XMLHttpRequest, data = null) {
-    return new Promise(function (resolve, reject, onCancel) {
-        xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                resolve();
-            } else {
-                reject(new ServerError());
-            }
-        };
-        xhr.onerror = reject;
-        xhr.send(data);
-
-        onCancel(function () {
-            xhr.abort();
-        })
-    });
-}
+import {jsonPOST} from "../base/network";
 
 export interface CountAggregationBucket {
     name: string;
@@ -62,18 +34,7 @@ export class Elastic {
         }
     }
 
-    jsonQuery(path: string, data: {}): Promise<any> {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', this.elasticUrl + path, true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        return asyncFetch(xhr, JSON.stringify(data))
-            .then(() => {
-                return JSON.parse(xhr.responseText);
-            })
-    }
-
     fetchFilteredData(rootFilter: Filter): Promise<PublicationTable[]> {
-        console.log(rootFilter);
         const requestData = {
             "size": 100,
             "query": {
@@ -83,7 +44,7 @@ export class Elastic {
                 }
             }
         };
-        return this.jsonQuery('/publication/_search', requestData)
+        return jsonPOST(this.elasticUrl + '/publication/_search', requestData)
             .then((results: ElasticQueryResult) => {
                 const publications: Publication[] = _.map(results.hits.hits,
                     (x) => x._source);
@@ -171,7 +132,7 @@ export class Elastic {
     }
 
     fetchAllByField(field: string): Promise<CountAggregationBucket[]> {
-        return this.jsonQuery('/publication/_search', {
+        return jsonPOST(this.elasticUrl + '/publication/_search', {
             "size": 0,
             "aggs": {
                 "tables": {

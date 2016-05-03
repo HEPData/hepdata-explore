@@ -22,7 +22,7 @@ import {map, imap, sum, union, range} from "./utils/map";
 import CMEnergiesFilter = require("./filters/CMEnergiesFilter");
 import {Filter} from "./filters/Filter";
 import {StateDump} from "./base/StateDump";
-import {StateStorage} from "./services/StateStorage";
+import {stateStorage} from "./services/StateStorage";
 import {customUrlHash} from "./utils/customUrlHash";
 
 declare function stableStringify(thing: any): string;
