@@ -10,7 +10,7 @@ def warn_default_db(db_url):
               'deleted every boot. This is only suitable for debugging.')
 
 
-def create_db(db_url):
+def create_db(db_url=default_db_url):
     from kv_server.app import app
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     warn_default_db(db_url)
@@ -25,6 +25,8 @@ def run_server(host='localhost', port=9201, debug=False, db_url=default_db_url,
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     warn_default_db(db_url)
 
+    # On production CORS is not needed as kv-server lives in a proxy under
+    # /kv-server
     if enable_cors:
         from flask.ext.cors import CORS
         CORS(app, resources={
@@ -32,6 +34,10 @@ def run_server(host='localhost', port=9201, debug=False, db_url=default_db_url,
                 'origins': '*'
             }
         })
+
+    # Create the database if it does not exist already
+    from kv_server.model import db
+    db.create_all()
 
     # looks unused, but it's actually needed in order to have... well, views.
     import kv_server.views
