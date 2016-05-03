@@ -1,6 +1,6 @@
 import argh
 
-default_db_url = 'sqlite:////tmp/test.db'
+default_db_url = 'sqlite:////tmp/kv-server.db'
 
 
 def warn_default_db(db_url):
