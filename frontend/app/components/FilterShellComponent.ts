@@ -24,7 +24,6 @@ class FilterShellComponent {
     }
 
     get component() {
-        console.log(this.filter);
         return this.filter.getComponent();
     }
 

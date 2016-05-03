@@ -57,14 +57,12 @@ class AppViewModel {
             // new DepVarFilter('D(N)/DPT (c/GEV)'),
             // new CMEnergiesFilter()
         ]);
+        ko.track(this, ['processingState', 'firstLoad', 'rootFilter']);
 
         this.currentStateDump = ko.computed(this.dumpApplicationState, this);
         this.currentStateDump.subscribe(this.updatedStateDump, this);
-        this.updatedStateDump(this.currentStateDump());
 
         this.loadData();
-
-        ko.track(this, ['processingState', 'firstLoad', 'rootFilter']);
 
         // TODO A bit quirky... should add a loading screen or something
         this.loadNewHash(location.hash);
@@ -253,7 +251,6 @@ class AppViewModel {
     }
 
     private updatedStateDump(stateDump: string)  {
-        console.log(stateDump);
         // Calculate a new URL hash and persist it to the server
         // asynchronously.
         //
@@ -275,16 +272,15 @@ class AppViewModel {
         if (stateDump.version != 1) {
             console.warn('Unknown state dump version: ' + stateDump.version);
         }
-        console.log('load state');
-        console.log(this.rootFilter);
         this.rootFilter = Filter.load(stateDump.filter);
-        console.log(this.rootFilter);
     }
 
     public loadNewHash(hash: string) {
         const match = regexStateId.exec(hash);
         if (!match) {
-            console.log('No match');
+            if (hash != '' && hash != '#') {
+                console.warn('No match on URL hash: ' + hash);
+            }
             return;
         }
         const id = match[1];
