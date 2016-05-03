@@ -23,6 +23,8 @@ import CMEnergiesFilter = require("./filters/CMEnergiesFilter");
 import {Filter} from "./filters/Filter";
 import {StateDump} from "./base/StateDump";
 
+declare function stableStringify(thing: any): string;
+
 function screenUpdated() {
     return new Promise(function (resolve, reject) {
         window.requestAnimationFrame(resolve)
@@ -57,8 +59,7 @@ class AppViewModel {
             version: 1,
             filter: this.rootFilter.dump()
         };
-        // TODO use stable-stringify
-        return JSON.stringify(state);
+        return stableStringify(state);
     }
     
     private loadDataPromise: Promise<PublicationTable[]> = Promise.resolve(null);
