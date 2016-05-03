@@ -3,7 +3,6 @@ from flask.ext.cors import CORS
 
 app = Flask(__name__)
 app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
 CORS(app, resources={

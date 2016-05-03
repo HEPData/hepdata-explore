@@ -1,13 +1,28 @@
 import argh
 
+default_db_url = 'sqlite:////tmp/test.db'
 
-def create_db():
+
+def warn_default_db(db_url):
+    if db_url == default_db_url:
+        print('WARNING: You have not set a database URL with --db-url. '
+              'The default database is written in /tmp and therefore may be '
+              'deleted every boot. This is only suitable for debugging.')
+
+
+def create_db(db_url):
+    from kv_server.app import app
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+    warn_default_db(db_url)
+
     from kv_server.model import db
     db.create_all()
 
 
-def run_server(host='localhost', port=9201, debug=False):
+def run_server(host='localhost', port=9201, debug=False, db_url=default_db_url):
     from kv_server.app import app
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+    warn_default_db(db_url)
 
     # looks unused, but it's actually needed in order to have... well, views.
     import kv_server.views
