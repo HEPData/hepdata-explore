@@ -19,10 +19,19 @@ def create_db(db_url):
     db.create_all()
 
 
-def run_server(host='localhost', port=9201, debug=False, db_url=default_db_url):
+def run_server(host='localhost', port=9201, debug=False, db_url=default_db_url,
+               enable_cors=False):
     from kv_server.app import app
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     warn_default_db(db_url)
+
+    if enable_cors:
+        from flask.ext.cors import CORS
+        CORS(app, resources={
+            '*': {
+                'origins': '*'
+            }
+        })
 
     # looks unused, but it's actually needed in order to have... well, views.
     import kv_server.views

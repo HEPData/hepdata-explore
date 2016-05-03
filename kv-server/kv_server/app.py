@@ -1,15 +1,10 @@
 from flask import Flask, request, jsonify, Response
-from flask.ext.cors import CORS
+
 
 app = Flask(__name__)
 app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
-CORS(app, resources={
-    '*': {
-        'origins': 'http://localhost:*/'
-    }
-})
 
 
 class HTTPError(Exception):
