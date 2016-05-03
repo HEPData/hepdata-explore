@@ -97,7 +97,7 @@ def url_string_to_number(url_string):
 
 def hash_to_url_number(string):
     suffix = string[-4:]  # last four bytes
-    return struct.unpack('<L', suffix)[0] % url_number_modulo
+    return struct.unpack('>L', suffix)[0] % url_number_modulo
 
 
 def hash_string(a_string):
@@ -105,4 +105,6 @@ def hash_string(a_string):
     m.update(a_string.encode('UTF-8'))
     return m.digest()
 
-print(number_to_url_string(hash_to_url_number(hash_string('Hoo'))))
+
+def custom_url_hash(input):
+    return number_to_url_string(hash_to_url_number(hash_string(input)))
