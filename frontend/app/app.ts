@@ -22,6 +22,7 @@ import {map, imap, sum, union, range} from "./utils/map";
 import CMEnergiesFilter = require("./filters/CMEnergiesFilter");
 import {Filter} from "./filters/Filter";
 import {StateDump} from "./base/StateDump";
+import {StateStorage} from "./services/StateStorage";
 
 declare function stableStringify(thing: any): string;
 
@@ -243,6 +244,7 @@ class AppViewModel {
         });
 
         console.log(this.dumpApplicationState());
+        console.log(StateStorage.calcHashOfString(this.dumpApplicationState()));
 
         this.loadData();
 
