@@ -1,8 +1,10 @@
-argh
+argh==0.26.1
 Flask==0.10.1
+Flask-Cors==2.1.2
 Flask-SQLAlchemy==2.1
 itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
+six==1.10.0
 SQLAlchemy==1.0.12
 Werkzeug==0.11.9

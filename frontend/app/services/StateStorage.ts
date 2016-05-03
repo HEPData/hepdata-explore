@@ -1,5 +1,5 @@
 
-import {jsonGET, plainPUT} from "../base/network";
+import {jsonGET, plainPUT, HTTPError} from "../base/network";
 class StateStorage {
     baseUrl: string;
 

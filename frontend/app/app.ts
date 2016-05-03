@@ -41,7 +41,8 @@ enum ProcessingState {
 
 class AppViewModel {
     rootFilter: Filter;
-    currentFilterUri: KnockoutComputed<String>;
+    currentStateDump: KnockoutComputed<string>
+    currentStateUri: KnockoutComputed<string>;
     processingState: ProcessingState = ProcessingState.Done;
     tableCache = new TableCache;
     plotPool: PlotPool;
@@ -230,6 +231,24 @@ class AppViewModel {
         }
     }
 
+    private updatedStateDump(stateDump: string)  {
+        // Calculate a new URL hash and persist it to the server
+        // asynchronously.
+        //
+        // We set the urlHash *before* it exists in the server. Hopefully
+        // by the time the user has shared a link the store request will
+        // have succeed.
+        const urlHash = customUrlHash(stateDump);
+        history.replaceState(null, null, '#' + urlHash);
+        stateStorage.put(urlHash, stateDump);
+
+
+        // Query data with the new filters.
+        // TODO do this only when filter has changed (in the future the
+        // state dump will also have other modifiable information).
+        this.loadData();
+    }
+
     constructor() {
         this.plotPool = new PlotPool(this.tableCache);
         this.rootFilter = new AllFilter([
@@ -237,15 +256,10 @@ class AppViewModel {
             // new DepVarFilter('D(N)/DPT (c/GEV)'),
             // new CMEnergiesFilter()
         ]);
-        this.currentFilterUri = ko.computed(this.dumpApplicationState, this);
-        
-        this.currentFilterUri.subscribe((newFilterUri: string) => {
-            history.replaceState(null, null, '#' + newFilterUri)
-            this.loadData();
-        });
 
-        console.log(this.dumpApplicationState());
-        console.log(customUrlHash(this.dumpApplicationState()));
+        this.currentStateDump = ko.computed(this.dumpApplicationState, this);
+        this.currentStateDump.subscribe(this.updatedStateDump, this);
+        this.updatedStateDump(this.currentStateDump());
 
         this.loadData();
 

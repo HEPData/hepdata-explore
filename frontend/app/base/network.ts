@@ -1,6 +1,9 @@
-class ServerError extends Error {
-    constructor() {
-        super('The server returned an invalid response');
+export class HTTPError extends Error {
+    code: number;
+
+    constructor(code: number, message: string) {
+        super(message);
+        this.code = code;
     }
 }
 
@@ -14,7 +17,7 @@ export function asyncFetch(xhr: XMLHttpRequest, data = null): Promise<void> {
             if (xhr.status >= 200 && xhr.status < 300) {
                 resolve();
             } else {
-                reject(new ServerError());
+                reject(new HTTPError(xhr.status, xhr.statusText));
             }
         };
         xhr.onerror = reject;
