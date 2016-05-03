@@ -1,30 +1,18 @@
-import Filter = require("./Filter");
 import {PublicationTable} from "../base/dataFormat";
 import DslParam = require("../base/DslParam");
+import {Filter} from "./Filter";
+import {registerFilterClass} from "./filterRegistry";
 
+@registerFilterClass
 class CMEnergiesFilter extends Filter {
     constructor(public min: number = null, public max: number = null) {
         super();
+        this.registerSerializableFields(['min', 'max']);
         ko.track(this, ['min', 'max']);
     }
 
     static getLongName() {
         return 'CM Energies filter';
-    }
-
-    getDslName() {
-        return 'CMEnergies';
-    }
-
-    getDslParams() {
-        const ret: DslParam[] = [];
-        if (this.min != null) {
-            ret.push({key: 'min', value: this.min.toString()});
-        }
-        if (this.max != null) {
-            ret.push({key: 'max', value: this.max.toString()});
-        }
-        return ret;
     }
 
     toElasticQuery(): any {

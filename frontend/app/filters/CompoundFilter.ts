@@ -1,16 +1,13 @@
-import Filter = require("./Filter");
+import {Filter} from "./Filter";
 
 abstract class CompoundFilter extends Filter {
     children: Filter[];
 
     constructor(children: Filter[] = null) {
         super();
+        this.registerSerializableFields(['children']);
         this.children = children || [];
         ko.track(this);
-    }
-
-    getDslItems() {
-        return this.children;
     }
 
     isRemoveAllowed() {

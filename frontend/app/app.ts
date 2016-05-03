@@ -1,8 +1,6 @@
 ///<reference path="../typings/browser.d.ts"/>
 
-import Filter = require("filters/Filter");
 import AllFilter = require("filters/AllFilter");
-import KeywordFilter = require("filters/KeywordFilter");
 
 // Ensure template loading works
 import 'base/templateFromUrlLoader';
@@ -22,6 +20,8 @@ import {Plot} from "./visualization/Plot";
 import {assertHas, assert} from "./utils/assert";
 import {map, imap, sum, union, range} from "./utils/map";
 import CMEnergiesFilter = require("./filters/CMEnergiesFilter");
+import {Filter} from "./filters/Filter";
+import {StateDump} from "./base/StateDump";
 
 function screenUpdated() {
     return new Promise(function (resolve, reject) {
@@ -52,8 +52,13 @@ class AppViewModel {
         return this.processingState == ProcessingState.Rendering;
     }
 
-    private calcCurrentFilterUri(): String {
-        return this.rootFilter.toDsl();
+    private dumpApplicationState(): string {
+        const state: StateDump = {
+            version: 1,
+            filter: this.rootFilter.dump()
+        };
+        // TODO use stable-stringify
+        return JSON.stringify(state);
     }
     
     private loadDataPromise: Promise<PublicationTable[]> = Promise.resolve(null);
@@ -74,10 +79,6 @@ class AppViewModel {
             })
             .then((tables: PublicationTable[]) => {
                 var t1 = performance.now();
-
-                for (let table of tables) {
-                    console.log(table.cmenergies_min + ' ' + table.cmenergies_max);
-                }
 
                 this.tableCache.replaceAllTables(tables);
                 this.updateUnpinnedPlots();
@@ -233,12 +234,14 @@ class AppViewModel {
             // new DepVarFilter('D(N)/DPT (c/GEV)'),
             // new CMEnergiesFilter()
         ]);
-        this.currentFilterUri = ko.computed(this.calcCurrentFilterUri, this);
+        this.currentFilterUri = ko.computed(this.dumpApplicationState, this);
         
         this.currentFilterUri.subscribe((newFilterUri: string) => {
             history.replaceState(null, null, '#' + newFilterUri)
             this.loadData();
         });
+
+        console.log(this.dumpApplicationState());
 
         this.loadData();
 

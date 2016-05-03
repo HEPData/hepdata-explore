@@ -1,5 +1,5 @@
 import CompoundFilter = require("../filters/CompoundFilter");
-import Filter = require("../filters/Filter");
+import {Filter} from "../filters/Filter";
 
 class FilterShellComponent {
     parentFilter: CompoundFilter;

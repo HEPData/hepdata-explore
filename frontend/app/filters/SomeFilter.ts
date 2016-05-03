@@ -1,13 +1,12 @@
 import CompoundFilter = require("./CompoundFilter");
-import Filter = require("./Filter");
 import {DataPoint, PublicationTable} from "../base/dataFormat";
+import {Filter} from "./Filter";
+import {registerFilterClass} from "./filterRegistry";
 
+@registerFilterClass
 class SomeFilter extends CompoundFilter {
     static getLongName() {
         return 'Some matching';
-    }
-    getDslName() {
-        return 'Some';
     }
     toElasticQuery(): any {
         return {
@@ -36,7 +35,7 @@ class SomeFilter extends CompoundFilter {
             name: 'compound-filter',
             params: {
                 filter: this,
-                flagText: this.getDslName(),
+                flagText: 'Some',
                 flagClass: 'some',
             }
         }

@@ -1,4 +1,4 @@
-import Filter = require("../filters/Filter");
+import {Filter} from "../filters/Filter";
 import {
     DataPoint, Publication, DataPointError,
     DataPointColumn, PublicationTable

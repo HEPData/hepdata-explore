@@ -1,9 +1,10 @@
 import ChoiceFilter = require("./ChoiceFilter");
-import Filter = require("./Filter");
 import {PublicationTable} from "../base/dataFormat";
+import {registerFilterClass} from "./filterRegistry";
 
+@registerFilterClass
 export class DepVarFilter extends ChoiceFilter {
-    constructor(value: string) {
+    constructor(value: string = '') {
         super('dep_vars.name', value);
     }
 
@@ -16,6 +17,7 @@ export class DepVarFilter extends ChoiceFilter {
     }
 }
 
+@registerFilterClass
 export class IndepVarFilter extends ChoiceFilter {
     constructor(value: string = '') {
         super('indep_vars.name', value);
@@ -30,6 +32,7 @@ export class IndepVarFilter extends ChoiceFilter {
     }
 }
 
+@registerFilterClass
 export class ReactionFilter extends ChoiceFilter {
     constructor(value: string = '') {
         super('reactions', value);

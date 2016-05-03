@@ -1,5 +1,5 @@
 import CompoundFilter = require("../filters/CompoundFilter");
-import Filter = require("../filters/Filter");
+import {Filter} from "../filters/Filter";
 import {assertHas} from "../utils/assert";
 import {FilterIndexSearchResult} from "../services/FilterIndex";
 import {filterIndex} from "../services/FilterIndex";

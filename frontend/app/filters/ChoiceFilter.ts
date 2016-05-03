@@ -1,24 +1,15 @@
-import Filter = require("./Filter");
 import {DataPoint, PublicationTable} from "../base/dataFormat";
+import {Filter} from "./Filter";
 
 class ChoiceFilter extends Filter {
     constructor(public field: string = '', public value = '') {
         super();
+        this.registerSerializableFields(['field', 'value']);
         ko.track(this);
     }
 
     static getLongName() {
         return 'Choice filter';
-    }
-
-    getDslName() {
-        return 'Choice';
-    }
-
-    getDslParams() {
-        return [
-            {key: this.field, value: this.value},
-        ];
     }
 
     toElasticQuery(): any {

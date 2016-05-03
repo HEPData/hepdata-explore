@@ -1,4 +1,4 @@
-import Filter = require("../filters/Filter");
+import {Filter} from "../filters/Filter";
 
 interface ComponentRef {
     name: string;
