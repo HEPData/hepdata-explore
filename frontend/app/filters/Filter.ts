@@ -59,7 +59,7 @@ export abstract class Filter {
                 'Unknown parameter found in class ' + this.constructor.name +
                 ': ' + key);
 
-            this[key] = params[key];
+            this[key] = this.loadValue(params[key]);
         }
     }
 

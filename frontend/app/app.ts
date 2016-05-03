@@ -44,7 +44,6 @@ const regexStateId = /^#([\w1-9]+)$/;
 class AppViewModel {
     rootFilter: Filter;
     currentStateDump: KnockoutComputed<string>
-    currentStateUri: KnockoutComputed<string>;
     processingState: ProcessingState = ProcessingState.Done;
     tableCache = new TableCache;
     plotPool: PlotPool;
@@ -54,7 +53,7 @@ class AppViewModel {
     constructor() {
         this.plotPool = new PlotPool(this.tableCache);
         this.rootFilter = new AllFilter([
-            // new IndepVarFilter('PT (GEV)'),
+            new IndepVarFilter('PT (GEV)'),
             // new DepVarFilter('D(N)/DPT (c/GEV)'),
             // new CMEnergiesFilter()
         ]);
@@ -65,10 +64,10 @@ class AppViewModel {
 
         this.loadData();
 
+        ko.track(this, ['processingState', 'firstLoad', 'rootFilter']);
+
         // TODO A bit quirky... should add a loading screen or something
         this.loadNewHash(location.hash);
-
-        ko.track(this, ['processingState', 'firstLoad']);
     }
     
     isLoading() {
@@ -254,6 +253,7 @@ class AppViewModel {
     }
 
     private updatedStateDump(stateDump: string)  {
+        console.log(stateDump);
         // Calculate a new URL hash and persist it to the server
         // asynchronously.
         //
@@ -275,7 +275,10 @@ class AppViewModel {
         if (stateDump.version != 1) {
             console.warn('Unknown state dump version: ' + stateDump.version);
         }
+        console.log('load state');
+        console.log(this.rootFilter);
         this.rootFilter = Filter.load(stateDump.filter);
+        console.log(this.rootFilter);
     }
 
     public loadNewHash(hash: string) {

@@ -1,19 +1,30 @@
 import CompoundFilter = require("../filters/CompoundFilter");
 import {Filter} from "../filters/Filter";
+import {assertInstance} from "../utils/assert";
 
 class FilterShellComponent {
     parentFilter: CompoundFilter;
-    filter: Filter;
+    _filter: KnockoutObservable<Filter>;
+
+    get filter(): Filter {
+        return this._filter();
+    }
 
     constructor(params: {
-        filter: Filter;
+        filter: KnockoutObservable<Filter>;
         parentFilter: CompoundFilter;
     }) {
-        this.filter = params.filter;
+        if (typeof params.filter == 'function') {
+            this._filter = params.filter;
+        } else {
+            assertInstance(params.filter, Filter);
+            this._filter = ko.computed<Filter>(() => (<Filter>(<any>params.filter)));
+        }
         this.parentFilter = params.parentFilter;
     }
 
     get component() {
+        console.log(this.filter);
         return this.filter.getComponent();
     }
 
