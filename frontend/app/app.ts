@@ -39,6 +39,8 @@ enum ProcessingState {
     Rendering,
 }
 
+const regexStateId = /^#([\w1-9]+)$/;
+
 class AppViewModel {
     rootFilter: Filter;
     currentStateDump: KnockoutComputed<string>
@@ -48,6 +50,26 @@ class AppViewModel {
     plotPool: PlotPool;
     // The 'loading' screen only appears on the first data load since the page started
     firstLoad = true;
+
+    constructor() {
+        this.plotPool = new PlotPool(this.tableCache);
+        this.rootFilter = new AllFilter([
+            // new IndepVarFilter('PT (GEV)'),
+            // new DepVarFilter('D(N)/DPT (c/GEV)'),
+            // new CMEnergiesFilter()
+        ]);
+
+        this.currentStateDump = ko.computed(this.dumpApplicationState, this);
+        this.currentStateDump.subscribe(this.updatedStateDump, this);
+        this.updatedStateDump(this.currentStateDump());
+
+        this.loadData();
+
+        // TODO A bit quirky... should add a loading screen or something
+        this.loadNewHash(location.hash);
+
+        ko.track(this, ['processingState', 'firstLoad']);
+    }
     
     isLoading() {
         return this.processingState != ProcessingState.Done;
@@ -249,27 +271,30 @@ class AppViewModel {
         this.loadData();
     }
 
-    constructor() {
-        this.plotPool = new PlotPool(this.tableCache);
-        this.rootFilter = new AllFilter([
-            new IndepVarFilter('PT (GEV)'),
-            // new DepVarFilter('D(N)/DPT (c/GEV)'),
-            // new CMEnergiesFilter()
-        ]);
+    public loadStateDump(stateDump: StateDump) {
+        if (stateDump.version != 1) {
+            console.warn('Unknown state dump version: ' + stateDump.version);
+        }
+        this.rootFilter = Filter.load(stateDump.filter);
+    }
 
-        this.currentStateDump = ko.computed(this.dumpApplicationState, this);
-        this.currentStateDump.subscribe(this.updatedStateDump, this);
-        this.updatedStateDump(this.currentStateDump());
-
-        this.loadData();
-
-        ko.track(this, ['processingState', 'firstLoad']);
+    public loadNewHash(hash: string) {
+        const match = regexStateId.exec(hash);
+        if (!match) {
+            console.log('No match');
+            return;
+        }
+        const id = match[1];
+        stateStorage.get(id)
+            .then((stateDump) => {
+                this.loadStateDump(stateDump);
+            });
     }
 }
 
 window.onhashchange = function () {
-    console.log('User changed hash:');
-    console.log(location.hash);
+    console.log('User changed hash: ' + location.hash);
+    app.loadNewHash(location.hash);
 };
 
 const app = new AppViewModel();

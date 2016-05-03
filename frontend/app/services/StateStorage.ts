@@ -1,5 +1,6 @@
 
 import {jsonGET, plainPUT, HTTPError} from "../base/network";
+import {StateDump} from "../base/StateDump";
 class StateStorage {
     baseUrl: string;
 
@@ -11,7 +12,7 @@ class StateStorage {
         }
     }
     
-    get(id: string) {
+    get(id: string): Promise<StateDump> {
         return jsonGET(this.baseUrl + '/states/' + id);
     }
     

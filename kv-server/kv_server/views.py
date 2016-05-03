@@ -16,8 +16,11 @@ def hello():
 
 @app.route('/states/<id>', methods=['GET'])
 def get_state(id):
-    state = State.query.get(id)
-    return state.value
+    state = State.query.get(url_string_to_number(id))
+    if state is not None:
+        return state.value
+    else:
+        return Response(status=404)
 
 
 @app.route('/states/<id>', methods=['PUT'])
