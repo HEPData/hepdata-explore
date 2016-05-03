@@ -23,6 +23,7 @@ import CMEnergiesFilter = require("./filters/CMEnergiesFilter");
 import {Filter} from "./filters/Filter";
 import {StateDump} from "./base/StateDump";
 import {StateStorage} from "./services/StateStorage";
+import {customUrlHash} from "./utils/customUrlHash";
 
 declare function stableStringify(thing: any): string;
 
@@ -244,7 +245,7 @@ class AppViewModel {
         });
 
         console.log(this.dumpApplicationState());
-        console.log(StateStorage.calcHashOfString(this.dumpApplicationState()));
+        console.log(customUrlHash(this.dumpApplicationState()));
 
         this.loadData();
 
