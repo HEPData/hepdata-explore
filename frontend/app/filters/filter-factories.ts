@@ -35,7 +35,7 @@ export class IndepVarFilter extends ChoiceFilter {
 @registerFilterClass
 export class ReactionFilter extends ChoiceFilter {
     constructor(value: string = '') {
-        super('reactions', value);
+        super('reactions.string_full', value);
     }
 
     static getLongName() {
@@ -43,6 +43,19 @@ export class ReactionFilter extends ChoiceFilter {
     }
 
     filterTable(table: PublicationTable): boolean {
-        return table.reactions.indexOf(this.value) != -1;
+        return _.find(table.reactions, (r) => r.string_full == this.value) != null;
+    }
+
+    toElasticQuery(): any {
+        return {
+            "nested": {
+                "path": "tables.reactions",
+                "query": {
+                    "match": {
+                        ["tables." + this.field]: this.value,
+                    }
+                }
+            }
+        }
     }
 }

@@ -27,10 +27,10 @@ export class Elastic {
     constructor() {
         if (location.hostname.indexOf('rufian.eu') != -1) {
             // my test server
-            this.elasticUrl = location.origin + '/elastic/hepdata2';
+            this.elasticUrl = location.origin + '/elastic/hepdata3';
         } else {
             // testing on localhost and LAN
-            this.elasticUrl = 'http://' + location.hostname + ':9200/hepdata2';
+            this.elasticUrl = 'http://' + location.hostname + ':9200/hepdata3';
         }
     }
 
@@ -131,13 +131,28 @@ export class Elastic {
         }
     }
 
+    /** Returns an acceptable value for the `path` attribute of the
+     * ElasticSearch nested filter in order to run a filter for some field path.
+     *
+     * The content of the function depends on how the data is mapped in
+     * ElasticSearch: Since 'reactions' is indexed as nested, it must be in path
+     * in order to filter by e.g. 'tables.reactions.string_full'
+     */
+    static getPathForFieldPath(field: string) {
+        if (field.startsWith('reactions.')) {
+            return 'tables.reactions';
+        } else {
+            return 'tables';
+        }
+    }
+
     fetchAllByField(field: string): Promise<CountAggregationBucket[]> {
         return jsonPOST(this.elasticUrl + '/publication/_search', {
             "size": 0,
             "aggs": {
                 "tables": {
                     "nested": {
-                        "path": "tables"
+                        "path": Elastic.getPathForFieldPath(field)
                     },
                     "aggs": {
                         "variables": {

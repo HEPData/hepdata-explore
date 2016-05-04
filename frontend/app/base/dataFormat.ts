@@ -9,6 +9,14 @@ export interface VariableQualifier {
     value: string;
 }
 
+export interface Reaction {
+    string_full: string;
+    string_in: string;
+    string_out: string;
+    particles_in: string[];
+    particles_out: string[];
+}
+
 export interface PublicationTable {
     // Parent node
     publication: Publication;
@@ -18,7 +26,7 @@ export interface PublicationTable {
 
     cmenergies_min: number;
     cmenergies_max: number;
-    reactions: string[];
+    reactions: Reaction[];
     observables: string[];
     phrases: string[];
 

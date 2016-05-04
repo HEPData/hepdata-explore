@@ -36,8 +36,8 @@ export class ScatterLayer extends PlotLayer {
         ctx.translate(0.5, 0.5);
 
         for (let point of this.points) {
-            assert(point.high <= point.y);
-            assert(point.low >= point.y);
+            // assert(point.high <= point.y);
+            // assert(point.low >= point.y);
 
             // Adjust to pixel grid
             const x = Math.round(point.x);
