@@ -20,7 +20,7 @@ class NewFilterComponent {
         this.onSearchResultMouseDown = this.onSearchResultMouseDown.bind(this);
 
         ko.track(this);
-        this.queryFocused = ko.observable(true);
+        this.queryFocused = ko.observable(false);
     }
 
     addSelectedFilter() {
