@@ -25,6 +25,11 @@ def run_server(host='localhost', port=9201, debug=False, db_url=default_db_url,
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     warn_default_db(db_url)
 
+    # Decode client IP from X-Forwarded-For (nginx must be used in production,
+    # configured to send this header)
+    from werkzeug.contrib.fixers import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app)
+
     # On production CORS is not needed as kv-server lives in a proxy under
     # /kv-server
     if enable_cors:
