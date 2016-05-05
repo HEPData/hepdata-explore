@@ -50,7 +50,7 @@ def clean_error_value(y, value):
         return value
     elif isinstance(value, str):
         if value.endswith('%'):
-            percentage = float(value[:-1])
+            percentage = float(value[:-1]) / 100
             return y * percentage
         elif 'e' in value.lower():
             return float(value)  # scientific notation
