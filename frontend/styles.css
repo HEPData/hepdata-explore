@@ -213,7 +213,7 @@ filter-shell .body {
     box-sizing: border-box;
 }
 
-.compound-filter .flag span {
+.compound-filter .flag > * {
     transform: rotate(90deg) translate(0px, -17px);
     transform-origin: 0 0px;
     display: block;

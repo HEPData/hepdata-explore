@@ -25,16 +25,12 @@ class AllFilter extends CompoundFilter {
         }
         return true;
     }
-
-    getComponent() {
-        return {
-            name: 'compound-filter',
-            params: {
-                filter: this,
-                flagText: 'All',
-                flagClass: 'all',
-            }
-        }
+    
+    getFlagText() {
+        return 'All';
+    }
+    getFlagClass() {
+        return 'all';
     }
 }
 export = AllFilter;

@@ -1,5 +1,5 @@
 <div data-bind="attr: {class: flagClasses}">
-    <span data-bind="text: flagText"></span>
+    <a data-bind="text: flagText, click: toggleFilterType"></a>
 </div>
 <div class="content">
     <div class="children-filter" data-bind="dragula: {

@@ -30,15 +30,11 @@ class SomeFilter extends CompoundFilter {
         return false;
     }
 
-    getComponent() {
-        return {
-            name: 'compound-filter',
-            params: {
-                filter: this,
-                flagText: 'Some',
-                flagClass: 'some',
-            }
-        }
+    getFlagText() {
+        return 'Some';
+    }
+    getFlagClass() {
+        return 'some';
     }
 }
 export = SomeFilter;

@@ -104,4 +104,17 @@ export abstract class Filter {
         instance.loadParameters(dump.params);
         return instance;
     }
+
+    /** Deeply explores this filter children in search of `oldFilter`. If found,
+     * replaces it with newFilter.
+     *
+     * Returns boolean indicating whether a replacement was made.
+     *
+     * @param oldFilter
+     * @param newFilter
+     * @returns {boolean}
+     */
+    public replaceFilter(oldFilter: Filter, newFilter: Filter): boolean {
+        return false;
+    }
 }
