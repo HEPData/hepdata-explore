@@ -1,7 +1,11 @@
 import {AutocompleteService} from "../services/AutocompleteService";
 import {assertHas} from "../utils/assert";
+import {KnockoutComponent} from "../base/KnockoutComponent";
 
-class SuggestionsBoxComponent<SuggestionType> {
+@KnockoutComponent('suggestions-box', {
+    template: { fromUrl: 'suggestions-box.html' },
+})
+export class SuggestionsBoxComponent<SuggestionType> {
     autocomplete: AutocompleteService<SuggestionType>;
 
     constructor(params:any) {
@@ -16,10 +20,3 @@ class SuggestionsBoxComponent<SuggestionType> {
         ko.untrack(this);
     }
 }
-
-ko.components.register('suggestions-box', {
-    viewModel: SuggestionsBoxComponent,
-    template: { fromUrl: 'suggestions-box.html' },
-});
-
-export = SuggestionsBoxComponent;

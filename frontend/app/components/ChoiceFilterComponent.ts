@@ -1,6 +1,7 @@
 import ChoiceFilter = require("../filters/ChoiceFilter");
 import {elastic} from "../services/Elastic";
 import {AutocompleteService} from "../services/AutocompleteService";
+import {KnockoutComponent} from "../base/KnockoutComponent";
 
 interface ChoiceSuggestion {
     suggestedValue: string;
@@ -22,6 +23,9 @@ function variableTokenizer(obj: any) {
 }
 lunr.tokenizer.registerFunction(variableTokenizer, 'variableTokenizer');
 
+@KnockoutComponent('choice-filter', {
+    template: { fromUrl: 'choice-filter.html' },
+})
 class ChoiceFilterComponent {
     filter: ChoiceFilter;
     autocomplete: AutocompleteService<ChoiceSuggestion>;
@@ -108,10 +112,3 @@ class ChoiceFilterComponent {
         ko.untrack(this);
     }
 }
-
-ko.components.register('choice-filter', {
-    viewModel: ChoiceFilterComponent,
-    template: { fromUrl: 'choice-filter.html' },
-});
-
-export = ChoiceFilterComponent;

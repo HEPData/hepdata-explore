@@ -1,8 +1,12 @@
 import ChoiceFilter = require("../filters/ChoiceFilter");
 import CMEnergiesFilter = require("../filters/CMEnergiesFilter");
 import {floatEquals} from "../utils/floatEquals";
+import {KnockoutComponent} from "../base/KnockoutComponent";
 
-class CMEnergiesFilterComponent {
+@KnockoutComponent('cmenergies-filter', {
+    template: {fromUrl: 'cmenergies-filter.html'},
+})
+export class CMEnergiesFilterComponent {
     filter: CMEnergiesFilter;
 
     minTyped: string = '10.5';
@@ -54,10 +58,3 @@ class CMEnergiesFilterComponent {
         ko.untrack(this);
     }
 }
-
-ko.components.register('cmenergies-filter', {
-    viewModel: CMEnergiesFilterComponent,
-    template: {fromUrl: 'cmenergies-filter.html'},
-});
-
-export = CMEnergiesFilterComponent;

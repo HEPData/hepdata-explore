@@ -1,8 +1,12 @@
 import CompoundFilter = require("../filters/CompoundFilter");
 import {Filter} from "../filters/Filter";
 import {assertInstance} from "../utils/assert";
+import {KnockoutComponent} from "../base/KnockoutComponent";
 
-class FilterShellComponent {
+@KnockoutComponent('filter-shell', {
+    template: { fromUrl: 'filter-shell.html' },
+})
+export class FilterShellComponent {
     parentFilter: CompoundFilter;
     _filter: KnockoutObservable<Filter>;
 
@@ -39,9 +43,3 @@ class FilterShellComponent {
         return !this.isRoot() && this.filter.isRemoveAllowed();
     }
 }
-
-ko.components.register('filter-shell', {
-    viewModel: FilterShellComponent,
-    template: { fromUrl: 'filter-shell.html' },
-});
-export = FilterShellComponent;

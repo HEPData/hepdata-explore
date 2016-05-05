@@ -1,7 +1,10 @@
-
-
 import {PlotPool} from "../services/PlotPool";
 import {assertHas} from "../utils/assert";
+import {KnockoutComponent} from "../base/KnockoutComponent";
+
+@KnockoutComponent('hep-plot-pool', {
+    template: { fromUrl: 'plot-pool.html' },
+})
 export class PlotPoolComponent {
     plotPool: PlotPool;
 
@@ -13,8 +16,3 @@ export class PlotPoolComponent {
         this.plotPool = params.plotPool;
     }
 }
-
-ko.components.register('hep-plot-pool', {
-    viewModel: PlotPoolComponent,
-    template: { fromUrl: 'plot-pool.html' },
-});

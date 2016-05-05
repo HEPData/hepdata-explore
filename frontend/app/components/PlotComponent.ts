@@ -1,8 +1,12 @@
 import {Plot} from "../visualization/Plot";
 import {assertHas} from "../utils/assert";
 import TableCache = require("../services/TableCache");
+import {KnockoutComponent} from "../base/KnockoutComponent";
 
-class PlotComponent {
+@KnockoutComponent('hep-plot', {
+    template: { fromUrl: 'plot.html' },
+})
+export class PlotComponent {
     plot: Plot;
     tableCache: TableCache;
 
@@ -16,10 +20,3 @@ class PlotComponent {
         this.tableCache = params.tableCache;
     }
 }
-
-ko.components.register('hep-plot', {
-    viewModel: PlotComponent,
-    template: { fromUrl: 'plot.html' },
-});
-
-export = PlotComponent;

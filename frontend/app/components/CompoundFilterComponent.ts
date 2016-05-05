@@ -2,6 +2,7 @@ import CompoundFilter = require("../filters/CompoundFilter");
 import AllFilter = require("../filters/AllFilter");
 import SomeFilter = require("../filters/SomeFilter");
 import {app} from "../AppViewModel";
+import {KnockoutComponent} from "../base/KnockoutComponent";
 
 // http://ejohn.org/blog/comparing-document-position/
 function htmlContains(a: HTMLElement, b: HTMLElement){
@@ -19,7 +20,10 @@ function insideElementOfClass(element: HTMLElement, className: string) {
     }
 }
 
-class CompoundFilterComponent {
+@KnockoutComponent('compound-filter', {
+    template: { fromUrl: 'compound-filter.html' },
+})
+export class CompoundFilterComponent {
     filter: CompoundFilter;
 
     constructor(params:any) {
@@ -63,10 +67,3 @@ class CompoundFilterComponent {
         this.filter = newFilter;
     }
 }
-
-ko.components.register('compound-filter', {
-    viewModel: CompoundFilterComponent,
-    template: { fromUrl: 'compound-filter.html' },
-});
-
-export = CompoundFilterComponent;

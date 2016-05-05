@@ -3,8 +3,12 @@ import {Filter} from "../filters/Filter";
 import {assertHas} from "../utils/assert";
 import {FilterIndexSearchResult} from "../services/FilterIndex";
 import {filterIndex} from "../services/FilterIndex";
+import {KnockoutComponent} from "../base/KnockoutComponent";
 
-class NewFilterComponent {
+@KnockoutComponent('new-filter', {
+    template: { fromUrl: 'new-filter.html' },
+})
+export class NewFilterComponent {
     parentFilter: CompoundFilter;
     query = '';
     queryFocused: KnockoutObservable<boolean>;
@@ -62,10 +66,3 @@ class NewFilterComponent {
         ko.untrack(this);
     }
 }
-
-ko.components.register('new-filter', {
-    viewModel: NewFilterComponent,
-    template: { fromUrl: 'new-filter.html' },
-});
-
-export = NewFilterComponent;
