@@ -79,7 +79,10 @@ export class Elastic {
         
         function normalizeError(error: DataPointError) {
             if (isSymmetricError(error)) {
-                return [error.value, error.value];
+                // Yep, sometimes is negative... even though it should not
+                // matter.
+                const value = Math.abs(error.value);
+                return [value, value];
             } else {
                 // Note: error.minus is usually negative except in anomalous
                 // cases.
@@ -88,6 +91,10 @@ export class Elastic {
                 // purposes.
                 const error_down = -Math.min(error.plus, error.minus, 0.0);
                 const error_up = Math.max(error.plus, error.minus, 0.0);
+
+                assert(error_down >= 0);
+                assert(error_up >= 0);
+
                 return [error_down, error_up];
             }
         }
@@ -114,6 +121,9 @@ export class Elastic {
                 
                 column.error_up = high - column.value;
                 column.error_down = column.value - low;
+
+                assert(column.error_up >= 0);
+                assert(column.error_down >= 0);
             } else if (column.errors == null || column.errors.length == 0) {
                 // No error specified, so just set zero.
                 column.error_down = column.error_up = 0;
@@ -144,25 +154,22 @@ export class Elastic {
 
         for (let dataPoint of dataPoints) {
             for (let column of dataPoint) {
-                assert(column.value == undefined || column.low == undefined
-                    || column.value >= column.low);
-                assert(column.value == undefined || column.low == undefined
-                    || column.value <= column.high);
                 assert(column.value == undefined || !isNaN(column.value));
 
+                // If the data point comes without a value, infer the value from
+                // the range... even if it already have a value too for some
+                // weird reason
+                if ('low' in column) {
+                    assert(typeof column.low == 'number' && !isNaN(column.low));
+                    assert(typeof column.high == 'number' && !isNaN(column.high));
+                    // if it even has that
+                    column.value = (column.low + column.high) / 2;
+                }
 
+                // Some columns may be completely void. Set them as a explicit
+                // null, not a doubtful undefined.
                 if (column.value == undefined) {
-                    // If the data point comes without a value, infer it from
-                    // the range.
-                    if ('low' in column) {
-                        assert(typeof column.low == 'number' && !isNaN(column.low));
-                        assert(typeof column.high == 'number' && !isNaN(column.high));
-                        // if it even has that
-                        column.value = (column.low + column.high) / 2;
-                    } else {
-                        // Some columns may be completely void though
-                        column.value = null;
-                    }
+                    column.value = null;
                 }
 
                 sumErrors(column);
