@@ -36,8 +36,8 @@ export class ScatterLayer extends PlotLayer {
         ctx.translate(0.5, 0.5);
 
         for (let point of this.points) {
-            // assert(point.high <= point.y);
-            // assert(point.low >= point.y);
+            assert(point.high <= point.y);
+            assert(point.low >= point.y);
 
             // Adjust to pixel grid
             const x = Math.round(point.x);
@@ -82,13 +82,20 @@ export class ScatterLayer extends PlotLayer {
                 const color = colorScale(yVar + '-' + table.table_num + '-' + table.publication.inspire_record);
 
                 for (let row of table.data_points) {
+                    if (row[colX].value == null || row[colY].value == null) {
+                        // Don't add points for undefined data
+                        continue;
+                    }
+
                     const point: CanvasScatterPoint = {
                         x: xScale(row[colX].value),
                         y: yScale(row[colY].value),
-                        low: yScale(row[colY].low),
-                        high: yScale(row[colY].high),
+                        low: yScale(row[colY].value - row[colY].error_down),
+                        high: yScale(row[colY].value + row[colY].error_up),
                         color: color,
                     };
+                    assert(!isNaN(point.low));
+                    assert(!isNaN(point.high));
                     points.push(point);
                 }
             }

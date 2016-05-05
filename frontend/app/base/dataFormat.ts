@@ -45,13 +45,38 @@ export type DataPoint = DataPointColumn[];
 
 export interface DataPointColumn {
     value: number;
-    low: number;
-    high: number;
-    errors: DataPointError[];
+
+    // Raw error/range values
+    errors: DataPointError[]; // may be undefined
+    low: number; // may be undefined
+    high: number; // may be undefined
+
+    // Computed simple error (ranges are interpreted as errors too)
+    // Both are guaranteed to be positive.
+    error_up: number;
+    error_down: number;
 }
 
-export interface DataPointError {
+
+
+export interface DataPointErrorBase {
+    type: "symerror" | "asymerror";
     label: string;
+}
+
+export interface AsymmetricDataPointError extends DataPointErrorBase {
     minus: number;
     plus: number;
+}
+
+export interface SymmetricDataPointError extends DataPointErrorBase {
+    value: number;
+}
+
+// There are only two kinds of error (well, at least for those living in the
+// `errors` property)
+export type DataPointError = AsymmetricDataPointError | SymmetricDataPointError;
+
+export function isSymmetricError(error: DataPointError): error is SymmetricDataPointError {
+    return error.type == 'symerror';
 }

@@ -1,11 +1,11 @@
 import {Filter} from "../filters/Filter";
 import {
     DataPoint, Publication, DataPointError,
-    DataPointColumn, PublicationTable
+    DataPointColumn, PublicationTable, isSymmetricError
 } from "../base/dataFormat";
-import sum = d3.sum;
-import {assert} from "../utils/assert";
+import {assert, assertInstance, assertHas} from "../utils/assert";
 import {jsonPOST} from "../base/network";
+import {sum} from "../utils/map";
 
 export interface CountAggregationBucket {
     name: string;
@@ -75,58 +75,100 @@ export class Elastic {
     private addRangeProperties(dataPoints: DataPoint[]) {
         // Values may come with a range (low, high) or with a series of error tags.
         // This function unifies them as a single representation.
-        // 
-
-        function square(x: number) {
-            return x * x;
+        //
+        
+        function normalizeError(error: DataPointError) {
+            if (isSymmetricError(error)) {
+                return [error.value, error.value];
+            } else {
+                // Note: error.minus is usually negative except in anomalous
+                // cases.
+                // Sometimes, error.plus may be negative, swapping the symbols.
+                // This code normalizes data in those cases for plotting
+                // purposes.
+                const error_down = -Math.min(error.plus, error.minus, 0.0);
+                const error_up = Math.max(error.plus, error.minus, 0.0);
+                return [error_down, error_up];
+            }
         }
 
         function sumErrors(column: DataPointColumn) {
-            const errors = column.errors || [];
-            let summedMinus, summedPlus;
+            if (column.value == null) {
+                // No value, no error
+                column.error_up = column.error_down = null;
+            } else if ('low' in column) {
+                // Just use the range as computed error
+                assertInstance(column.low, Number);
+                assertInstance(column.high, Number);
+                assertInstance(column.value, Number);
 
-            if (errors.length == 0) {
-                summedMinus = summedPlus = 0;
-            } else if (errors.length == 1) {
-                // TODO clarify why we have negative errors
-                summedMinus = Math.abs(errors[0].minus);
-                summedPlus = Math.abs(errors[0].plus);
+                // assert(column.high >= column.low);
+                // ... except the data is not that clean! (the commented out
+                // assert above fails)
+
+                // For some reason, sometimes low and high are twisted, so we
+                // will just take them as two values and compute the lower and
+                // higher respectively.
+                const high = Math.max(column.high, column.low);
+                const low = Math.min(column.high, column.low);
+                
+                column.error_up = high - column.value;
+                column.error_down = column.value - low;
+            } else if (column.errors == null || column.errors.length == 0) {
+                // No error specified, so just set zero.
+                column.error_down = column.error_up = 0;
+            } else if (column.errors.length == 1) {
+                // Just one error, use that
+                [column.error_down, column.error_up] = normalizeError(column.errors[0]);
             } else {
-                // Square root of the sum of the squares of errors, as Eammon asked
-                summedPlus = 0;
-                summedMinus = 0;
-                for (let error of errors) {
-                    summedPlus += square(error.plus);
-                    summedMinus += square(error.minus);
+                // Several errors, use the vector norm of them (sqrt of sum of
+                // squares of the error values).
+                // Do the calculation separately for error_down and error_up.
+
+                const squaredErrors: {down: number, up: number}[] = [];
+                for (let error of column.errors) {
+                    const [error_down, error_up] = normalizeError(error);
+                    squaredErrors.push({
+                        down: error_down * error_down,
+                        up: error_up * error_up,
+                    });
                 }
-                summedPlus = Math.sqrt(summedPlus);
-                summedMinus = Math.sqrt(summedMinus);
+
+                column.error_down = Math.sqrt(sum(squaredErrors, (e) => e.down));
+                column.error_up = Math.sqrt(sum(squaredErrors, (e) => e.up));
             }
 
-            column.low = column.value - summedMinus;
-            column.high = column.value + summedPlus;
+            assert(!isNaN(column.error_down));
+            assert(!isNaN(column.error_up));
         }
 
         for (let dataPoint of dataPoints) {
             for (let column of dataPoint) {
-                // assert(column.value == undefined || column.low == undefined
-                //     || column.value >= column.low);
-                // assert(column.value == undefined || column.low == undefined
-                //     || column.value <= column.high);
+                assert(column.value == undefined || column.low == undefined
+                    || column.value >= column.low);
+                assert(column.value == undefined || column.low == undefined
+                    || column.value <= column.high);
+                assert(column.value == undefined || !isNaN(column.value));
 
-                if (column.low === undefined) {
-                    // It may have error tag representation, sum the errors
-                    sumErrors(column);
-                }
-                
-                // If the data point comes without a value, infer it from the 
-                // range.
-                if (column.value === undefined) {
-                    column.value = (column.low + column.high) / 2;
+
+                if (column.value == undefined) {
+                    // If the data point comes without a value, infer it from
+                    // the range.
+                    if ('low' in column) {
+                        assert(typeof column.low == 'number' && !isNaN(column.low));
+                        assert(typeof column.high == 'number' && !isNaN(column.high));
+                        // if it even has that
+                        column.value = (column.low + column.high) / 2;
+                    } else {
+                        // Some columns may be completely void though
+                        column.value = null;
+                    }
                 }
 
-                // assert(column.value >= column.low);
-                // assert(column.value <= column.high);
+                sumErrors(column);
+
+                assert(column.error_down >= 0);
+                assert(column.error_up >= 0);
             }
         }
     }
