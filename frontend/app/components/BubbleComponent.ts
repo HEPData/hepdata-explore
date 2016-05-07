@@ -1,5 +1,6 @@
-import {assertHas, assertInstance} from "../utils/assert";
+import {assertHas, assertInstance, assert} from "../utils/assert";
 import {KnockoutComponent} from "../base/KnockoutComponent";
+import "../base/MyFocusChange";
 
 interface Point {
     x: number;
@@ -7,7 +8,7 @@ interface Point {
 }
 
 @KnockoutComponent('hep-bubble', {
-    template: { fromUrl: 'bubble.html' },
+    template: {fromUrl: 'bubble.html'},
 })
 export class BubbleComponent {
     /** The element (usually an <input>) the bubble will appear near to. */
@@ -27,8 +28,7 @@ export class BubbleComponent {
     tailY = 0;
 
     constructor(params: any) {
-        assertHas(params, [
-        ]);
+        assertHas(params, []);
 
         this.side = 'down';
 
