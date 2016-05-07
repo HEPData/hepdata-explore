@@ -82,7 +82,11 @@ document.addEventListener('focus', (e) => {
     }
 
     if (listenFocus) {
-        assert(e.target != document.body);
+        // IE focuses body sometimes. We're not interested in that.
+        if (e.target === document.body) {
+            // console.log('IE focuses body');
+            return;
+        }
         listenFocus = false;
 
         var before = document.body;
