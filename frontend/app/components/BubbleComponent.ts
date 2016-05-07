@@ -49,6 +49,14 @@ export class BubbleComponent {
                 }
                 ticking = true;
             })
+
+            document.querySelector('.bubble').addEventListener('wheel', (e) => {
+                var target = document.querySelector('.sidebar');
+                console.log(e);
+                const newEvent = new WheelEvent('wheel', e);
+                console.log(newEvent);
+                target.dispatchEvent(newEvent);
+            })
         }, 1000);
     }
 
