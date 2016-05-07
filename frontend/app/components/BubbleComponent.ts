@@ -35,9 +35,20 @@ export class BubbleComponent {
 
         ko.track(this);
 
+        let ticking = false;
         setTimeout(() => {
             this.linkedElement = <HTMLElement>document.querySelector('new-filter input');
             this.calculatePosition();
+
+            document.querySelector('.sidebar').addEventListener('scroll', (e) => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        this.calculatePosition();
+                        ticking = false;
+                    })
+                }
+                ticking = true;
+            })
         }, 1000);
     }
 
