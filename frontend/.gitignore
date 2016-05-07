@@ -1,5 +1,6 @@
 .idea
 app.js*
 build
+release
 node_modules
 npm-debug.log
