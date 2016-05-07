@@ -46,8 +46,8 @@
  Example usage, lights in yellow the focused element:
 
  document.addEventListener('myfocuschange', function (e: MyFocusChange) {
- e.after.style.backgroundColor = 'yellow';
- e.before.style.backgroundColor = null;
+     e.after.style.backgroundColor = 'yellow';
+     e.before.style.backgroundColor = null;
  });
 
  */
