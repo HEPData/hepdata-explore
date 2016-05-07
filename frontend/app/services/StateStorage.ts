@@ -8,7 +8,7 @@ class StateStorage {
         if (location.host.indexOf('rufian.eu') != -1) {
             this.baseUrl = '/kv-server';
         } else {
-            this.baseUrl = 'http://localhost:9201';
+            this.baseUrl = 'http://' + location.hostname + ':9201';
         }
     }
     
