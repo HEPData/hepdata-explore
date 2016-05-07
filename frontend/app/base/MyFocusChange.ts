@@ -47,7 +47,7 @@
 
  document.addEventListener('myfocuschange', function (e: MyFocusChange) {
      e.after.style.backgroundColor = 'yellow';
-     e.before.style.backgroundColor = null;
+     e.before.style.backgroundColor = '';
  });
 
  */
@@ -84,7 +84,7 @@ document.addEventListener('focus', (e) => {
     if (listenFocus) {
         // IE focuses body sometimes. We're not interested in that.
         if (e.target === document.body) {
-            // console.log('IE focuses body');
+            console.log('IE focuses body');
             return;
         }
         listenFocus = false;
@@ -107,6 +107,12 @@ document.addEventListener('blur', (e) => {
         return;
     }
 
+    // IE blurs body when the page loads. Other browsers only blur other
+    // elements.
+    if (e.target === document.body) {
+        return;
+    }
+
     setImmediate(() => {
         var before = <HTMLElement>e.target;
         var after = <HTMLElement>document.activeElement;
@@ -125,6 +131,3 @@ document.addEventListener('blur', (e) => {
         document.dispatchEvent(event);
     })
 }, true); // note we listen to the capturing event, as the 'blur' event does not bubble up
-
-
-
