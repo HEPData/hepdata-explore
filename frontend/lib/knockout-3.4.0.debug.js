@@ -4,6 +4,20 @@
  * License: MIT (http://www.opensource.org/licenses/mit-license.php)
  */
 
+/* WARNING: This version has been modified for better error reporting */
+function traceback() {
+    var error = new Error();
+    if (error.stack) {
+        return error.stack;
+    } else {
+        try {
+            throw error;
+        } catch (sameError) {
+            return sameError.stack;
+        }
+    }
+}
+
 (function(){
 var DEBUG=true;
 (function(undefined){
@@ -1277,7 +1291,7 @@ ko.subscription = function (target, callback, disposeCallback) {
     this.callback = callback;
     this.disposeCallback = disposeCallback;
     this.isDisposed = false;
-    this._creationTraceback = (new Error()).stack.split('\n').slice(1).join('\n');
+    this._creationTraceback = traceback().split('\n').slice(1).join('\n');
     this._es5context = ko._es5context;
     ko.exportProperty(this, 'dispose', this.dispose);
 };
@@ -1321,7 +1335,7 @@ var ko_subscribable_fn = {
     init: function(instance) {
         instance._subscriptions = {};
         instance._versionNumber = 1;
-        instance._creationTraceback = (new Error()).stack.split('\n').slice(1).join('\n');
+        instance._creationTraceback = traceback().split('\n').slice(1).join('\n');
         instance._es5context = ko._es5context;
     },
 
