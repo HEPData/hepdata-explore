@@ -540,4 +540,9 @@ ul.suggestions {
     top: 30px;
     left: 300px;
     z-index: 1000; /* should not be needed... but .hep_breadcumbs has 999 */
+    pointer-events: none; /* don't mess scrolling on containers below you */
+}
+
+.bubble-content {
+    pointer-events: auto; /* allow scrolling and clicking here */
 }
