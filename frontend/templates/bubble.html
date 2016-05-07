@@ -1,0 +1,40 @@
+<div class="bubble" data-bind="style: {
+    height: maxHeight + 'px',
+    top: styleTop,
+    left: styleLeft,
+    width: width + 'px',
+}">
+    <table data-bind="style: {
+        position: 'absolute',
+        top: side == 'down' ? '0px' : null,
+        bottom: side == 'up' ? '0px' : null,
+        width: '100%',
+        maxHeight: maxHeight + 'px',
+    }">
+        <tr>
+            <td class="bubble-top-left"></td>
+            <td class="bubble-top-middle">
+                <img src="img/bubble/tail-top.png" alt="" class="bubble-tail"
+                     data-bind="visible: side == 'down'">
+            </td>
+            <td class="bubble-top-right"></td>
+        </tr>
+
+        <tr>
+            <td class="bubble-middle-left"></td>
+            <td class="bubble-content">
+                <!-- ko template: { nodes: $componentTemplateNodes } --><!-- /ko -->
+            </td>
+            <td class="bubble-middle-right"></td>
+        </tr>
+
+        <tr>
+            <td class="bubble-bottom-left"></td>
+            <td class="bubble-bottom-middle">
+                <img src="img/bubble/tail-bottom.png" alt="" class="bubble-tail"
+                     data-bind="visible: side == 'up'">
+            </td>
+            <td class="bubble-bottom-right"></td>
+        </tr>
+    </table>
+</div>

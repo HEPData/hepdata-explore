@@ -1,6 +1,7 @@
 html {
     font-family: Lato;
 }
+
 h2 {
     font-weight: normal;
     color: #3b5169;
@@ -174,7 +175,6 @@ svg {
     pointer-events: visiblepainted;
 }
 
-
 filter-shell {
     /* border: 1px solid lightgray; */
     /* padding: 10px; */
@@ -195,9 +195,11 @@ filter-shell .body {
 .compound-filter .flag.all {
     background: #0F4CBA;
 }
+
 .compound-filter .flag.some {
     background: #37B166;
 }
+
 .compound-filter .flag.none {
     background: red;
 }
@@ -233,6 +235,7 @@ filter-shell .body {
 .compound-filter .content {
     margin-left: 25px;
 }
+
 body {
     font-family: Lato, sans-serif;
 }
@@ -257,20 +260,24 @@ new-filter .matches a {
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
     filter: alpha(opacity=80);
 }
+
 .gu-hide {
     display: none !important;
 }
+
 .gu-unselectable {
     -webkit-user-select: none !important;
     -moz-user-select: none !important;
     -ms-user-select: none !important;
     user-select: none !important;
 }
+
 .gu-transit {
     opacity: 0.2;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
     filter: alpha(opacity=20);
 }
+
 filter-shell > .head {
     padding: 5px 5px 5px 0px;
     background: #2C3E50;
@@ -438,4 +445,99 @@ ul.suggestions {
 
 .filter-form label:first-child {
     margin-top: 0px;
+}
+
+/* Bubble style adapted from jQuery Bubble Popup by Max Vergelli */
+.bubble table {
+    width: auto;
+    height: auto;
+    margin: 0px;
+    padding: 0px;
+    display: table;
+    border-collapse: collapse;
+    border-spacing: 0px;
+    border: 0px;
+    empty-cells: show;
+    background-color: transparent;
+}
+
+.bubble tbody {
+    display: table-row-group;
+    vertical-align: middle;
+    border: 0px;
+    background-color: transparent;
+}
+
+.bubble td {
+    margin: 0px;
+    padding: 0px;
+    background-color: transparent;
+}
+
+.bubble-top-left, .bubble-top-right,
+.bubble-bottom-left, .bubble-bottom-right {
+    width: 21px;
+    height: 21px;
+    overflow: hidden;
+    background-repeat: no-repeat;
+}
+
+.bubble-top-middle, .bubble-bottom-middle {
+    overflow: hidden;
+    background-repeat: repeat-x;
+    text-align: center;
+}
+
+.bubble-middle-left, .bubble-middle-right {
+    overflow: hidden;
+    background-repeat: repeat-y;
+}
+
+.bubble-tail {
+    border: 0px;
+    margin: 0px;
+    padding: 0px;
+    display: inline;
+}
+
+.bubble-top-left {
+    background-image: url(img/bubble/top-left.png);
+}
+.bubble-top-middle {
+    background-image: url(img/bubble/top-middle.png);
+}
+.bubble-top-right {
+    background-image: url(img/bubble/top-right.png);
+}
+.bubble-bottom-left {
+    background-image: url(img/bubble/bottom-left.png);
+}
+.bubble-bottom-middle {
+    background-image: url(img/bubble/bottom-middle.png);
+}
+.bubble-bottom-right {
+    background-image: url(img/bubble/bottom-right.png);
+}
+.bubble-middle-left {
+    background-image: url(img/bubble/middle-left.png);
+}
+.bubble-middle-right {
+    background-image: url(img/bubble/middle-right.png);
+}
+/*.bubble-tail-bottom {*/
+    /*background-image: url(img/bubble/tail-bottom.png);*/
+/*}*/
+/*.bubble-tail-top {*/
+    /*background-image: url(img/bubble/tail-top.png);*/
+/*}*/
+.bubble td.bubble-content {
+    background: #fff;
+    color: black;
+}
+
+.bubble {
+    position: fixed;
+    top: 30px;
+    left: 300px;
+    z-index: 1000; /* should not be needed... but .hep_breadcumbs has 999 */
 }
