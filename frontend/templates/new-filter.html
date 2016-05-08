@@ -1,11 +1,15 @@
 <form data-bind="submit: addSelectedFilter">
     <!--<hep-bubble-focus>-->
-        <input data-bind="textInput: query, hasFocus: queryFocused"
+        <input data-bind="textInput: query"
                placeholder="Add new filter...">
         <hep-bubble>
-            <div data-bind="template: { name: 'newFilterSuggestionsBox', data: {
-                getMatches: $parent.getMatches.bind($parent)
-            }}"></div>
+            <!-- ko template: {
+                name: 'newFilterSuggestionsBox',
+                data: {
+                    getMatches: $parent.getMatches.bind($parent),
+                    maxHeight: maxHeight
+                }
+            } --><!-- /ko -->
         </hep-bubble>
     <!--</hep-bubble-focus>-->
 </form>

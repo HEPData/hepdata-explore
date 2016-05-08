@@ -247,7 +247,7 @@ he-app > filter-shell {
 new-filter .matches a {
     display: block;
     cursor: pointer;
-    background-color: #E3E8DF;
+    /*background-color: #E3E8DF;*/
     margin: 0;
     padding: 4px 4px;
 }
@@ -314,6 +314,7 @@ button.remove-filter {
 ul.matches {
     list-style: none;
     padding-left: 0;
+    margin-bottom: 0;
 }
 
 ul.matches > li {
@@ -545,4 +546,8 @@ ul.suggestions {
 
 .bubble-content {
     pointer-events: auto; /* allow scrolling and clicking here */
+}
+
+.scroll-pane {
+    overflow-y: scroll;
 }

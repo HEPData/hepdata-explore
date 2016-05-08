@@ -23,10 +23,6 @@ export class BubbleComponent {
     styleTop: string = null;
     styleLeft: string = null;
 
-    /** Position of the bubble tail, as an offset of the viewport */
-    tailX = 0;
-    tailY = 0;
-
     constructor(params: any) {
         assertHas(params, []);
 

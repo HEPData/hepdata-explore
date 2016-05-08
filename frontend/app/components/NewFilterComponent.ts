@@ -11,7 +11,6 @@ import {KnockoutComponent} from "../base/KnockoutComponent";
 export class NewFilterComponent {
     parentFilter: CompoundFilter;
     query = '';
-    queryFocused: KnockoutObservable<boolean>;
     private _searchMatches: FilterIndexSearchResult[] = [];
 
     constructor(params:any) {
@@ -24,7 +23,6 @@ export class NewFilterComponent {
         this.onSearchResultMouseDown = this.onSearchResultMouseDown.bind(this);
 
         ko.track(this);
-        this.queryFocused = ko.observable(false);
     }
 
     addSelectedFilter() {
@@ -55,10 +53,8 @@ export class NewFilterComponent {
     getMatches(): FilterIndexSearchResult[] {
         if (this.query != '') {
             return this.search();
-        } else if (this.queryFocused()) {
-            return filterIndex.returnAll();
         } else {
-            return [];
+            return filterIndex.returnAll();
         }
     }
 
