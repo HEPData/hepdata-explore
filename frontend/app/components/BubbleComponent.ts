@@ -53,13 +53,24 @@ export class BubbleComponent {
 
     visible: KnockoutComputed<boolean> = ko.computed(() => {
         const element = focusedElement();
-        return hasBubbleFocusAncestor(element);
+        const bubbleRoot = findBubbleFocusAncestor(element);
+        if (!bubbleRoot) {
+            return false;
+        } else {
+            // Check that *this* bubble element is inside the bubble root.
+            return $(bubbleRoot).find(this._bubbleElement).length == 1;
+        }
     });
 
     private _scrollableParents: HTMLElement[] = [];
 
+    private _bubbleElement: HTMLElement;
+
     constructor(params: any) {
-        assertHas(params, []);
+        assertHas(params, [
+            {name: 'element', type: HTMLElement},
+        ]);
+        this._bubbleElement = params.element;
 
         this.side = 'down';
         this.scrollListener = this.scrollListener.bind(this);

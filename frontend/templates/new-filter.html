@@ -2,7 +2,7 @@
     <hep-bubble-focus>
         <input data-bind="textInput: query, hasFocus: true"
                placeholder="Add new filter...">
-        <hep-bubble>
+        <hep-bubble params="element: $element">
             <!-- ko template: {
                 name: 'newFilterSuggestionsBox',
                 data: {
