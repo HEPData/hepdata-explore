@@ -2,19 +2,36 @@ import {assertHas, assertInstance, assert} from "../utils/assert";
 import {KnockoutComponent} from "../base/KnockoutComponent";
 import "../base/MyFocusChange";
 import {focusedElement} from "../base/focusedElement";
+import {imap, map} from "../utils/map";
 
 interface Point {
     x: number;
     y: number;
 }
 
-function hasBubbleFocusAncestor(element: Element) {
+function findBubbleFocusAncestor(element: Element): HTMLElement {
     if (element == null) {
-        return false;
+        return null;
     } else if (element.tagName.toLowerCase() == 'hep-bubble-focus') {
-        return true;
+        return <HTMLElement>element;
     } else {
-        return hasBubbleFocusAncestor(element.parentElement);
+        return findBubbleFocusAncestor(element.parentElement);
+    }
+}
+
+function hasBubbleFocusAncestor(element: Element) {
+    return findBubbleFocusAncestor(element) != null;
+}
+
+function findScrollableParents(element: HTMLElement, foundList: HTMLElement[] = []): HTMLElement[] {
+    if (element == null) {
+        return foundList;
+    } else {
+        const style = window.getComputedStyle(element);
+        if (style['overflow-y'] == 'scroll' || style['overflow'] == 'scroll') {
+            foundList.push(element);
+        }
+        return findScrollableParents(<HTMLElement>element.parentElement, foundList);
     }
 }
 
@@ -34,52 +51,54 @@ export class BubbleComponent {
     styleTop: string = null;
     styleLeft: string = null;
 
-    private visible: KnockoutComputed<boolean> = ko.computed(() => {
+    visible: KnockoutComputed<boolean> = ko.computed(() => {
         const element = focusedElement();
         return hasBubbleFocusAncestor(element);
     });
+
+    private _scrollableParents: HTMLElement[] = [];
 
     constructor(params: any) {
         assertHas(params, []);
 
         this.side = 'down';
+        this.scrollListener = this.scrollListener.bind(this);
 
         ko.track(this);
 
-        let ticking = false;
-        setTimeout(() => {
-            this.linkedElement = <HTMLElement>document.querySelector('new-filter input');
-            this.calculatePosition();
+        ko.getObservable(this, 'visible').subscribe((visible: boolean) => {
+            if (visible) {
+                const bubbleRoot = findBubbleFocusAncestor(document.activeElement);
+                this.linkedElement = this.findInputField(bubbleRoot);
+                assert(this.linkedElement != null, 'Input field not found');
+                this.calculatePosition();
 
-            document.querySelector('.sidebar').addEventListener('scroll', (e) => {
-                if (!ticking) {
-                    window.requestAnimationFrame(() => {
-                        this.calculatePosition();
-                        ticking = false;
-                    })
+                this._scrollableParents = findScrollableParents(this.linkedElement);
+                for (let parent of this._scrollableParents) {
+                    parent.addEventListener('scroll', this.scrollListener);
                 }
-                ticking = true;
-            })
-        }, 1000);
+            } else {
+                for (let parent of this._scrollableParents) {
+                    parent.removeEventListener('scroll', this.scrollListener);
+                }
+                this._scrollableParents = [];
+            }
+        });
     }
 
-    calculateTailPosition() {
-        let x, y;
-
-        // getBoundingClientRect() returns a rectangle with the offsets of the
-        // element's margins measured from the respective borders of the
-        // viewport.
-        const rect = this.linkedElement.getBoundingClientRect();
-
-        x = (rect.left + rect.width) / 2;
-
-        if (this.side == 'down') {
-            y = rect.bottom;
-        } else {
-            y = rect.top;
+    private _ticking = false;
+    scrollListener(e: Event) {
+        if (!this._ticking) {
+            window.requestAnimationFrame(() => {
+                this.calculatePosition();
+                this._ticking = false;
+            })
         }
+        this._ticking = true;
+    }
 
-        return {x: x, y: y}
+    findInputField(bubbleFocusRoot: Element) {
+        return <HTMLElement>bubbleFocusRoot.querySelector('input');
     }
 
     calculatePosition() {
