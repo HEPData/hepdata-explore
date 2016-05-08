@@ -123,6 +123,9 @@
         <% }) %>
         </ul>
     </div>
+    <% if (getMatches().length == 0) { %>
+        <div>No filters found. Try with other words...</div>
+    <% } %>
 </script>
 
 <script src="lib/require.js" data-main="build/bootstrap"></script>
