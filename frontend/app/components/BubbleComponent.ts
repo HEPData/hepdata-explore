@@ -119,6 +119,8 @@ export class BubbleComponent {
         const elementRect = this.linkedElement.getBoundingClientRect();
         const tailX = elementRect.left + elementRect.width / 2;
 
+        this.calculateSide();
+
         this.styleLeft = (tailX - this.width / 2) + 'px';
 
         // `styleTop` is used by the container div, which always measures
@@ -132,5 +134,20 @@ export class BubbleComponent {
         }
     }
 
+    calculateSide() {
+        const elementRect = this.linkedElement.getBoundingClientRect();
+
+        const spaceAbove = elementRect.top;
+        const spaceBelow = document.documentElement.clientHeight - elementRect.bottom;
+
+        if (spaceBelow > this.maxHeight) {
+            this.side = 'down';
+        } else if (spaceAbove > this.maxHeight) {
+            this.side = 'up';
+        } else {
+            // No space in either... pick the biggest one
+            this.side = spaceAbove > spaceBelow ? 'up' : 'down';
+        }
+    }
 
 }
