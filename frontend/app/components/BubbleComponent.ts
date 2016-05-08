@@ -1,10 +1,21 @@
 import {assertHas, assertInstance, assert} from "../utils/assert";
 import {KnockoutComponent} from "../base/KnockoutComponent";
 import "../base/MyFocusChange";
+import {focusedElement} from "../base/focusedElement";
 
 interface Point {
     x: number;
     y: number;
+}
+
+function hasBubbleFocusAncestor(element: Element) {
+    if (element == null) {
+        return false;
+    } else if (element.tagName.toLowerCase() == 'hep-bubble-focus') {
+        return true;
+    } else {
+        return hasBubbleFocusAncestor(element.parentElement);
+    }
 }
 
 @KnockoutComponent('hep-bubble', {
@@ -23,11 +34,15 @@ export class BubbleComponent {
     styleTop: string = null;
     styleLeft: string = null;
 
+    private visible: KnockoutComputed<boolean> = ko.computed(() => {
+        const element = focusedElement();
+        return hasBubbleFocusAncestor(element);
+    });
+
     constructor(params: any) {
         assertHas(params, []);
 
         this.side = 'down';
-
 
         ko.track(this);
 
