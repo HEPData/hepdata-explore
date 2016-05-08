@@ -114,7 +114,9 @@
     <div class="scroll-pane" style="max-height: 300px">
         <ul class="matches">
         <% _.each(getMatches(), function(result, $index) { %>
-            <li><a data-bind="event: {mousedown: result.match.onSearchResultMouseDown}">
+            <li><a data-bind="event: {mousedown: function(d, event) {
+                    return handleSearchResultMouseDown(result, event);
+                }}" tabindex="0">
                 <b data-bind="text: result.match.name"></b>
                 <p data-bind="html: result.match.description"></p>
             </a></li>

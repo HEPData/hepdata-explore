@@ -20,7 +20,7 @@ export class NewFilterComponent {
         // Knockout loses the this binding when invoking click callbacks
         this.addSelectedFilter = this.addSelectedFilter.bind(this);
         this.addFilterFromSearchResult = this.addFilterFromSearchResult.bind(this);
-        this.onSearchResultMouseDown = this.onSearchResultMouseDown.bind(this);
+        this.handleSearchResultMouseDown = this.handleSearchResultMouseDown.bind(this);
 
         ko.track(this);
     }
@@ -37,8 +37,8 @@ export class NewFilterComponent {
         this.query = '';
     }
 
-    onSearchResultMouseDown(searchResult: FilterIndexSearchResult,
-                            event: MouseEvent) {
+    handleSearchResultMouseDown(searchResult: FilterIndexSearchResult,
+                                event: MouseEvent) {
         if (event.button == 0) {
             this.addFilterFromSearchResult(searchResult);
         }
