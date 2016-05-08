@@ -66,26 +66,6 @@
     <div class="visualization-box">
         <div id="visualization" data-bind="visible: !firstLoad || !isLoading()">
             <div id="variable-charts">
-                <hep-bubble>
-                    <div style="overflow: scroll; height: 100px;">
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                        <p>I'm harder to program than I look!</p>
-                    </div>
-                    <b>I'm harder to program than I look!</b>
-                </hep-bubble>
                 <hep-plot-pool params="
                     plotPool: plotPool,
                     tableCache: tableCache
@@ -129,6 +109,18 @@
         <% }) %>
     </ul>
 </script>
+
+<script id="newFilterSuggestionsBox" type="text/html">
+    <ul class="matches">
+    <% _.each(getMatches(), function(result, $index) { %>
+        <li><a data-bind="event: {mousedown: result.match.onSearchResultMouseDown}">
+            <b data-bind="text: result.match.name"></b>
+            <p data-bind="html: result.match.description"></p>
+        </a></li>
+    <% }) %>
+    </ul>
+</script>
+
 <script src="lib/require.js" data-main="build/bootstrap"></script>
 </body>
 </html>

@@ -1,10 +1,11 @@
 <form data-bind="submit: addSelectedFilter">
-    <input data-bind="textInput: query, hasFocus: queryFocused"
-           placeholder="Add new filter...">
+    <!--<hep-bubble-focus>-->
+        <input data-bind="textInput: query, hasFocus: queryFocused"
+               placeholder="Add new filter...">
+        <hep-bubble>
+            <div data-bind="template: { name: 'newFilterSuggestionsBox', data: {
+                getMatches: $parent.getMatches.bind($parent)
+            }}"></div>
+        </hep-bubble>
+    <!--</hep-bubble-focus>-->
 </form>
-<ul class="matches" data-bind="foreach: getMatches()">
-    <li><a data-bind="event: {mousedown: $parent.onSearchResultMouseDown}">
-        <b data-bind="text: match.name"></b>
-        <p data-bind="html: match.description"></p>
-    </a></li>
-</ul>
