@@ -255,10 +255,19 @@ export class AppViewModel {
         // We set the urlHash *before* it exists in the server. Hopefully
         // by the time the user has shared a link the store request will
         // have succeed.
-        const urlHash = customUrlHash(stateDump);
-        history.replaceState(null, null, '#' + urlHash);
-        stateStorage.put(urlHash, stateDump);
 
+        const urlHash = customUrlHash(stateDump);
+
+        // skip this if the URL hash already matches the application state (e.g.
+        // after clicking back: loadNewHash() has already been called to fetch
+        // the pertinent data, and as a consequence of it modifying filters this
+        // function has been triggered, but there is no need to change the URL.
+
+        // Moreover, if we did a pushState here, we would have undo but no redo.
+        if (urlHash != this.getCurrentHash()) {
+            history.pushState(null, null, '#' + urlHash);
+            stateStorage.put(urlHash, stateDump);
+        }
 
         // Query data with the new filters.
         // TODO do this only when filter has changed (in the future the
@@ -271,6 +280,11 @@ export class AppViewModel {
             console.warn('Unknown state dump version: ' + stateDump.version);
         }
         this.rootFilter = Filter.load(stateDump.filter);
+    }
+
+    public getCurrentHash(): string {
+        const match = regexStateId.exec(location.hash);
+        return match && match[1];
     }
 
     public loadNewHash(hash: string) {
