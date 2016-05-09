@@ -151,4 +151,8 @@ export class BubbleComponent {
         }
     }
 
+    public dispose() {
+        ko.untrack(this);
+    }
+
 }
