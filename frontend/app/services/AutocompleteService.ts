@@ -1,4 +1,5 @@
 import {assertInstance, assertDefined} from "../utils/assert";
+import {Option, Some, None} from "../base/Option";
 const KEY_ARROW_DOWN = 40;
 const KEY_ARROW_UP = 38;
 const KEY_TAB = 9;
@@ -92,11 +93,11 @@ export class AutocompleteService<SuggestionType> {
             this.suggestions.length);
     }
 
-    public getSelectedSuggestion(): SuggestionType {
+    public getSelectedSuggestion(): Option<SuggestionType> {
         if (this.selectedSuggestionIx != null) {
-            return this.suggestions[this.selectedSuggestionIx];
+            return new Some(this.suggestions[this.selectedSuggestionIx]);
         } else {
-            return null;
+            return new None<SuggestionType>();
         }
     }
 
