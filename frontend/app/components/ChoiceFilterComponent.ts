@@ -34,10 +34,15 @@ class ChoiceFilterComponent {
     allPossibleValuesPromise: Promise<ChoiceSuggestion[]>;
     possibleValuesIndex: lunr.Index;
 
+    /** This observable property is used by the template to focus the text box
+     * when the component is created.
+     */
+    focused = true;
+
     constructor(params: any) {
         this.filter = params.filter;
         this.valueTyped = this.filter.value;
-        ko.track(this, ['filter', 'valueTyped']);
+        ko.track(this, ['filter', 'valueTyped', 'focused']);
 
         this.possibleValuesIndex = lunr(function() {
             this.field('value');

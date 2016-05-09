@@ -12,6 +12,11 @@ export class CMEnergiesFilterComponent {
     minTyped: string = '10.5';
     maxTyped: string = '';
 
+    /** This observable property is used by the template to focus the text box
+     * when the component is created.
+     */
+    focused = true;
+
     protected _disposables: KnockoutSubscription[] = [];
 
     constructor(params: any) {

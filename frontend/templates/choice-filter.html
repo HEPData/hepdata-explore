@@ -5,7 +5,7 @@
         attr: {
             placeholder: 'Filter by ' + filter.getLongName().toLowerCase() + '...'
         },
-        hasFocus: true">
+        hasFocus: ko.getObservable($data, 'focused')">
     <!-- ko component: {
         name: "suggestions-box",
         params: {

@@ -1,6 +1,6 @@
 <form data-bind="submit: addSelectedFilter">
     <hep-bubble-focus>
-        <input data-bind="textInput: query, hasFocus: true"
+        <input data-bind="textInput: query, hasFocus: ko.getObservable($data, 'focused')"
                placeholder="Add new filter...">
         <hep-bubble params="element: $element">
             <!-- ko template: {

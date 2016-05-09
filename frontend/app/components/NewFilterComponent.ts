@@ -13,6 +13,11 @@ export class NewFilterComponent {
     query = '';
     private _searchMatches: FilterIndexSearchResult[] = [];
 
+    /** This observable property is used by the template to focus the text box
+     * when the component is created.
+     */
+    focused = true;
+
     constructor(params:any) {
         assertHas(params, ['parentFilter']);
         this.parentFilter = params.parentFilter;
