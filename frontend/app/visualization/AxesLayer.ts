@@ -37,6 +37,11 @@ export class AxesLayer extends PlotLayer {
         ctx.strokeStyle = ctx.fillStyle =
             localStorage.getItem('dark') ? 'white' : 'black';
 
+        console.log(ctx.font);
+        const fontFace = ' "Noto Sans", sans-serif';
+        ctx.font = '10px' + fontFace;
+        console.log(ctx.font);
+
         const margin = this.plot.margins;
         const W = this.plot.width, H = this.plot.height;
         const w = this.plot.width - margin.left - margin.right;
@@ -51,7 +56,7 @@ export class AxesLayer extends PlotLayer {
         ctx.lineTo(W - margin.right, H - margin.bottom);
         ctx.stroke();
 
-        ctx.font = '8px sans';
+        ctx.font = '8px' + fontFace;
 
         // Draw X ticks
         let pastTickEnd = null;
@@ -96,7 +101,7 @@ export class AxesLayer extends PlotLayer {
         {
             const axisXCenter = margin.left + (w / 2);
             const textW = ctx.measureText(this.plot.xVar).width;
-            ctx.font = '14px sans';
+            ctx.font = '14px' + fontFace;
             ctx.fillText(this.plot.xVar, axisXCenter - textW / 2, margin.top + h + 30);
         }
     }
