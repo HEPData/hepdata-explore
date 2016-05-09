@@ -52,7 +52,7 @@ export class NewFilterComponent {
     search() {
         const matches = filterIndex.search(this.query);
         this._searchMatches = matches;
-        return matches;
+        return this._searchMatches;
     }
 
     getMatches(): FilterIndexSearchResult[] {

@@ -25,6 +25,7 @@ interface AutocompleteOptions<SuggestionType> {
 }
 
 export class AutocompleteService<SuggestionType> {
+    /** Returns the current query string */
     public koQuery: KnockoutObservable<string>;
     public searchFn: (query: string) => Promise<SuggestionType[]>;
     public rankingFn: (suggestion: SuggestionType) => number;
@@ -46,7 +47,7 @@ export class AutocompleteService<SuggestionType> {
         this.search(this.koQuery());
 
         this.keyPressed = this.keyPressed.bind(this);
-        ko.track(this);
+        ko.track(this, ['suggestions', 'selectedSuggestionIx']);
     }
 
     public suggestions: SuggestionType[] = [];

@@ -99,7 +99,7 @@ export class BubbleComponent {
     }
 
     private _ticking = false;
-    scrollListener(e: Event) {
+    private scrollListener(e: Event) {
         if (!this._ticking) {
             window.requestAnimationFrame(() => {
                 this.calculatePosition();
@@ -109,11 +109,11 @@ export class BubbleComponent {
         this._ticking = true;
     }
 
-    findInputField(bubbleFocusRoot: Element) {
+    private findInputField(bubbleFocusRoot: Element) {
         return <HTMLElement>bubbleFocusRoot.querySelector('input');
     }
 
-    calculatePosition() {
+    private calculatePosition() {
         // getBoundingClientRect() returns a rectangle with the offsets of the
         // element's margins measured from the respective borders of the
         // viewport.
@@ -135,7 +135,7 @@ export class BubbleComponent {
         }
     }
 
-    calculateSide() {
+    private calculateSide() {
         const elementRect = this._linkedElement.getBoundingClientRect();
 
         const spaceAbove = elementRect.top;
