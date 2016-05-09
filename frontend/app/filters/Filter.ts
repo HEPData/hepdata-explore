@@ -1,5 +1,5 @@
-import DslParam = require("../app/base/DslParam");
-import ComponentRef = require("../app/base/ComponentRef");
+import DslParam = require("../base/DslParam");
+import ComponentRef = require("../base/ComponentRef");
 import {DataPoint, PublicationTable} from "../base/dataFormat";
 import {filterRegistry} from "./filterRegistry";
 import {assert, assertInstance} from "../utils/assert";
