@@ -39,15 +39,13 @@ function findScrollableParents(element: HTMLElement, foundList: HTMLElement[] = 
     template: {fromUrl: 'bubble.html'},
 })
 export class BubbleComponent {
-    /** The element (usually an <input>) the bubble will appear near to. */
-    linkedElement: HTMLElement = null;
-
     /** Indicates on which side of the element the bubble will pop up. */
     side: 'up' | 'down' = 'down';
 
     maxHeight = 200;
     width = 300;
 
+    /** The template receives CSS position here */
     styleTop: string = null;
     styleLeft: string = null;
 
@@ -66,6 +64,9 @@ export class BubbleComponent {
 
     private _bubbleElement: HTMLElement;
 
+    /** The element (usually an <input>) the bubble will appear near to. */
+    private _linkedElement: HTMLElement = null;
+
     constructor(params: any) {
         assertHas(params, [
             {name: 'element', type: HTMLElement},
@@ -80,11 +81,11 @@ export class BubbleComponent {
         ko.getObservable(this, 'visible').subscribe((visible: boolean) => {
             if (visible) {
                 const bubbleRoot = findBubbleFocusAncestor(document.activeElement);
-                this.linkedElement = this.findInputField(bubbleRoot);
-                assert(this.linkedElement != null, 'Input field not found');
+                this._linkedElement = this.findInputField(bubbleRoot);
+                assert(this._linkedElement != null, 'Input field not found');
                 this.calculatePosition();
 
-                this._scrollableParents = findScrollableParents(this.linkedElement);
+                this._scrollableParents = findScrollableParents(this._linkedElement);
                 for (let parent of this._scrollableParents) {
                     parent.addEventListener('scroll', this.scrollListener);
                 }
@@ -116,7 +117,7 @@ export class BubbleComponent {
         // getBoundingClientRect() returns a rectangle with the offsets of the
         // element's margins measured from the respective borders of the
         // viewport.
-        const elementRect = this.linkedElement.getBoundingClientRect();
+        const elementRect = this._linkedElement.getBoundingClientRect();
         const tailX = elementRect.left + elementRect.width / 2;
 
         this.calculateSide();
@@ -135,7 +136,7 @@ export class BubbleComponent {
     }
 
     calculateSide() {
-        const elementRect = this.linkedElement.getBoundingClientRect();
+        const elementRect = this._linkedElement.getBoundingClientRect();
 
         const spaceAbove = elementRect.top;
         const spaceBelow = document.documentElement.clientHeight - elementRect.bottom;
