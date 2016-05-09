@@ -29,6 +29,8 @@ export class AutocompleteService<SuggestionType> {
     public koQuery: KnockoutObservable<string>;
     public searchFn: (query: string) => Promise<SuggestionType[]>;
     public rankingFn: (suggestion: SuggestionType) => number;
+    /** Two suggestions from two different searches are considered to be the
+     * same if they return the same key. */
     public keyFn: (suggestion: SuggestionType) => any;
     public suggestionClickedFn: (suggestion: SuggestionType) => void;
     public maxSuggestions: number;
@@ -90,7 +92,7 @@ export class AutocompleteService<SuggestionType> {
             this.suggestions.length);
     }
 
-    public getSelectedSuggestion() {
+    public getSelectedSuggestion(): SuggestionType {
         if (this.selectedSuggestionIx != null) {
             return this.suggestions[this.selectedSuggestionIx];
         } else {
