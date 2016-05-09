@@ -37,7 +37,6 @@ export class AxesLayer extends PlotLayer {
         ctx.strokeStyle = ctx.fillStyle =
             localStorage.getItem('dark') ? 'white' : 'black';
 
-        console.log(ctx.font);
         const fontFace = ' "Noto Sans", sans-serif';
         ctx.font = '10px' + fontFace;
 
