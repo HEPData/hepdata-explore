@@ -22,6 +22,7 @@ import {Filter} from "./filters/Filter";
 import {StateDump} from "./base/StateDump";
 import {stateStorage} from "./services/StateStorage";
 import {customUrlHash} from "./utils/customUrlHash";
+import {Option, Some, None} from "./base/Option";
 
 declare function stableStringify(thing: any): string;
 
@@ -264,8 +265,8 @@ export class AppViewModel {
         // function has been triggered, but there is no need to change the URL.
 
         // Moreover, if we did a pushState here, we would have undo but no redo.
-        if (urlHash != this.getCurrentHash()) {
-            history.pushState(null, null, '#' + urlHash);
+        if (urlHash != this.getCurrentHash().getOrDefault('')) {
+            history.pushState(null, undefined, '#' + urlHash);
             stateStorage.put(urlHash, stateDump);
         }
 
@@ -282,9 +283,13 @@ export class AppViewModel {
         this.rootFilter = Filter.load(stateDump.filter);
     }
 
-    public getCurrentHash(): string {
+    public getCurrentHash(): Option<string> {
         const match = regexStateId.exec(location.hash);
-        return match && match[1];
+        if (match) {
+            return new Some(match[1]);
+        } else {
+            return new None<string>();
+        }
     }
 
     public loadNewHash(hash: string) {
