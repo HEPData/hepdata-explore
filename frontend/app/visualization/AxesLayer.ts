@@ -40,7 +40,6 @@ export class AxesLayer extends PlotLayer {
         console.log(ctx.font);
         const fontFace = ' "Noto Sans", sans-serif';
         ctx.font = '10px' + fontFace;
-        console.log(ctx.font);
 
         const margin = this.plot.margins;
         const W = this.plot.width, H = this.plot.height;
