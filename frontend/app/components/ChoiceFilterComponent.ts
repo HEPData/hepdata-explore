@@ -106,11 +106,6 @@ class ChoiceFilterComponent {
     useSuggestion(suggestion: ChoiceSuggestion) {
         this.filter.value = suggestion.suggestedValue;
         this.valueTyped = suggestion.suggestedValue;
-
-        // This is cheating and it's wrong... but meanwhile I need a way to aggregate the graphs by something
-        if (this.filter.field == 'x_var') {
-            (<any>window).x_var = this.filter.value;
-        }
     }
 
     dispose() {
