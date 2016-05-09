@@ -111,6 +111,7 @@
 </script>
 
 <script id="newFilterSuggestionsBox" type="text/html">
+    <% if (getMatches().length > 0) { %>
     <div class="scroll-pane" style="max-height: 300px">
         <ul class="matches">
         <% _.each(getMatches(), function(result, $index) { %>
@@ -123,8 +124,8 @@
         <% }) %>
         </ul>
     </div>
-    <% if (getMatches().length == 0) { %>
-        <div>No filters found. Try with other words...</div>
+    <% } else { %>
+    <div>No filters found. Try with other words...</div>
     <% } %>
 </script>
 
