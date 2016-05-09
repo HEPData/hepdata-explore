@@ -11,7 +11,7 @@ Promise.config({
     cancellation: true,
 });
 
-export function asyncFetch(xhr: XMLHttpRequest, data = null): Promise<void> {
+export function asyncFetch(xhr: XMLHttpRequest, data: any = null): Promise<void> {
     return new Promise<void>(function (resolve, reject, onCancel) {
         xhr.onload = function () {
             if (xhr.status >= 200 && xhr.status < 300) {
