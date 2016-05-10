@@ -163,7 +163,10 @@ export class AutocompleteService<SuggestionType> {
     private _scrollPane: HTMLElement = null;
     private ensureSuggestionIsVisible(suggestion: SuggestionType) {
         const scrollPane = this._scrollPane;
-        assert(scrollPane != null);
+        if (!scrollPane) {
+            // No scroll pane specified, so nothing to scroll.
+            return;
+        }
 
         const element: HTMLElement = this._suggestionElements.get(suggestion);
         assert(element != null);
