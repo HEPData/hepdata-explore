@@ -327,12 +327,6 @@ ul.matches {
     margin: 0;
 }
 
-new-filter .matches a:hover {
-    text-decoration: none;
-    background: #4980D3;
-    color: white;
-}
-
 button.remove-filter:hover, button.remove-filter:focus {
     background: #F8F8F8;
     /* color: white; */
@@ -396,8 +390,12 @@ ul.suggestions {
     font-style: italic;
 }
 
-.suggestion:focus, .suggestion:hover {
+.choice-filter .suggestion:focus, .choice-filter .suggestion:hover {
     background: white;
+}
+
+.suggestion:focus, .suggestion:hover {
+    background: #F3F0DD;
 }
 
 .suggestion.selected {
