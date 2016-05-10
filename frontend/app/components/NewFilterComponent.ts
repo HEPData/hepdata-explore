@@ -27,6 +27,8 @@ export class NewFilterComponent {
         this.addFilterFromSearchResult = this.addFilterFromSearchResult.bind(this);
         this.handleSearchResultMouseDown = this.handleSearchResultMouseDown.bind(this);
 
+        ko.track(this);
+
         this.autocomplete = new AutocompleteService({
             koQuery: ko.computed(() => this.query),
             searchFn: (query: string) => {
@@ -41,8 +43,6 @@ export class NewFilterComponent {
             suggestionClickedFn: this.addFilterFromSearchResult,
             maxSuggestions: 100,
         });
-
-        ko.track(this);
     }
 
     addFilterFromSearchResult(searchResult: FilterIndexSearchResult) {

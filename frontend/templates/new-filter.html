@@ -1,7 +1,7 @@
 <form> <!-- data-bind="submit: addSelectedFilter"-->
     <hep-bubble-focus>
         <input data-bind="
-            textInput: query,
+            textInput: ko.getObservable($data, 'query'),
             hasFocus: ko.getObservable($data, 'focused'),
             event: {keydown: autocomplete.keyPressed}
         " placeholder="Add new filter...">
