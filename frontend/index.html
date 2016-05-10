@@ -114,7 +114,8 @@
 
 <script id="newFilterAutocomplete" type="text/html">
     <% if (autocomplete.suggestions.length > 0) { %>
-    <div class="scroll-pane" style="max-height: 300px">
+    <div class="scroll-pane" style="max-height: 300px"
+        data-bind="leak: autocomplete.leakScrollPaneHandler()">
         <ul class="matches">
         <% _.each(autocomplete.suggestions, function(suggestion, $index) { %>
             <li class="suggestion"
@@ -122,7 +123,8 @@
                     selected: ($index == autocomplete.selectedSuggestionIx)
                 }, event: {
                     mousedown: autocomplete.koMouseDownHandler(suggestion)
-                }" tabindex="0">
+                }, leak: autocomplete.leakSuggestionElementHandler(suggestion)"
+                tabindex="0">
                 <b data-bind="text: suggestion.match.name"></b>
                 <p data-bind="html: suggestion.match.description"></p>
             </li>

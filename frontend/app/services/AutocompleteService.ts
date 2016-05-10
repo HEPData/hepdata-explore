@@ -1,4 +1,4 @@
-import {assertInstance, assertDefined} from "../utils/assert";
+import {assertInstance, assertDefined, assert} from "../utils/assert";
 import {Option, Some, None} from "../base/Option";
 const KEY_ARROW_DOWN = 40;
 const KEY_ARROW_UP = 38;
@@ -35,6 +35,8 @@ export class AutocompleteService<SuggestionType> {
     public keyFn: (suggestion: SuggestionType) => any;
     public suggestionClickedFn: (suggestion: SuggestionType) => void;
     public maxSuggestions: number;
+
+    private _suggestionElements = new WeakMap<SuggestionType, HTMLElement>();
 
     constructor(options: AutocompleteOptions<SuggestionType>) {
         this.koQuery = options.koQuery;
@@ -87,11 +89,13 @@ export class AutocompleteService<SuggestionType> {
     private nextSuggestion() {
         this.selectedSuggestionIx = mod(this.selectedSuggestionIx + 1,
                 this.suggestions.length);
+        this.ensureSuggestionIsVisible(this.suggestions[this.selectedSuggestionIx]);
     }
 
     private prevSuggestion() {
         this.selectedSuggestionIx = mod(this.selectedSuggestionIx - 1,
             this.suggestions.length);
+        this.ensureSuggestionIsVisible(this.suggestions[this.selectedSuggestionIx]);
     }
 
     public getSelectedSuggestion(): Option<SuggestionType> {
@@ -141,5 +145,50 @@ export class AutocompleteService<SuggestionType> {
         if (selectedSuggestion.isSet()) {
             this.suggestionClickedFn(selectedSuggestion.get());
         }
+    }
+
+    private _leakSuggestionElement(suggestion: SuggestionType, element: HTMLElement): void {
+        this._suggestionElements.set(suggestion, element);
+    }
+
+    /** This function is intended to use as the value for the `leak` binding in
+     * the <li> object holding a suggestion.
+     */
+    public leakSuggestionElementHandler(suggestion: SuggestionType) {
+        return (element: HTMLElement) => {
+            this._leakSuggestionElement(suggestion, element);
+        };
+    }
+
+    private _scrollPane: HTMLElement = null;
+    private ensureSuggestionIsVisible(suggestion: SuggestionType) {
+        const scrollPane = this._scrollPane;
+        assert(scrollPane != null);
+
+        const element: HTMLElement = this._suggestionElements.get(suggestion);
+        assert(element != null);
+
+        // Same scroll policy as seen in IntelliJ: the pane should be scrolled
+        // just enough to make the element completely visible.
+
+        const viewportTop = scrollPane.scrollTop;
+        const viewportBottom = scrollPane.scrollTop + scrollPane.clientHeight;
+
+        const elementTop = element.offsetTop;
+        const elementBottom = element.offsetTop + element.clientHeight;
+
+        if (elementTop < viewportTop) {
+            // scroll up
+            scrollPane.scrollTop -= viewportTop - elementTop;
+        } else if (elementBottom > viewportBottom) {
+            // scroll down
+            scrollPane.scrollTop += elementBottom - viewportBottom;
+        }
+    }
+
+    public leakScrollPaneHandler() {
+        return (element: HTMLElement) => {
+            this._scrollPane = element;
+        };
     }
 }

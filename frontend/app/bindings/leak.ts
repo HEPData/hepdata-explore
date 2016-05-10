@@ -16,7 +16,6 @@ ko.bindingHandlers['leak'] = {
         const leakFunction: Function = valueAccessor();
         assertInstance(leakFunction, Function);
         try {
-            console.log('Leak function called');
             leakFunction.call(viewModel, element);
         } catch (err) {
             console.error('Error inside leak binding function: %s', err.message);
