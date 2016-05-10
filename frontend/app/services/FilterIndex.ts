@@ -52,6 +52,7 @@ class FilterIndex {
             const record = <FilterIndexRecord>recordDef;
             record.id = this.database.length;
             record.name = record.filterClass.getLongName();
+            console.log(record.name);
 
             this.database.push(record);
             this.indexText.add(_.defaults({
@@ -104,7 +105,7 @@ filterIndex.populate([
     {
         filterClass: SomeFilter,
         description: `Performs a logical <code>OR</code>. This compound filter matches a table if it matches <b>at least one</b> the filters inside it.`,
-        tags: ['all', 'and', 'compound'],
+        tags: ['some', 'or', 'compound'],
     },
     {
         filterClass: IndepVarFilter,
@@ -127,3 +128,5 @@ filterIndex.populate([
         tags: ['sqrt', 'sqrts', 'cmenergies'],
     },
 ]);
+
+(<any>window).filterIndex = filterIndex;
