@@ -117,8 +117,10 @@
     <div class="scroll-pane" style="max-height: 300px">
         <ul class="matches">
         <% _.each(autocomplete.suggestions, function(suggestion, $index) { %>
-            <li class="suggestion <%= ($index == autocomplete.selectedSuggestionIx) ? 'selected' : '' %>"
-                data-bind="event: {
+            <li class="suggestion"
+                data-bind="css: {
+                    selected: ($index == autocomplete.selectedSuggestionIx)
+                }, event: {
                     mousedown: autocomplete.koMouseDownHandler(suggestion)
                 }" tabindex="0">
                 <b data-bind="text: suggestion.match.name"></b>
