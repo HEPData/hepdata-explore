@@ -50,6 +50,7 @@ export class AutocompleteService<SuggestionType> {
         this.search(this.koQuery());
 
         this.keyPressed = this.keyPressed.bind(this);
+        this.acceptDefault = this.acceptDefault.bind(this);
         ko.track(this, ['suggestions', 'selectedSuggestionIx']);
     }
 
@@ -132,5 +133,13 @@ export class AutocompleteService<SuggestionType> {
         return (component: any, event: MouseEvent) => {
             this._suggestionMouseDown(suggestion, event);
         };
+    }
+
+    /** Intended to be used as form submit target */
+    public acceptDefault() {
+        const selectedSuggestion = this.getSelectedSuggestion();
+        if (selectedSuggestion.isSet()) {
+            this.suggestionClickedFn(selectedSuggestion.get());
+        }
     }
 }

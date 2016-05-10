@@ -1,4 +1,4 @@
-<form> <!-- data-bind="submit: addSelectedFilter"-->
+<form data-bind="event: {submit: autocomplete.acceptDefault}">
     <hep-bubble-focus>
         <input data-bind="
             textInput: ko.getObservable($data, 'query'),
