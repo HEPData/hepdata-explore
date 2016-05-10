@@ -52,7 +52,6 @@ class FilterIndex {
             const record = <FilterIndexRecord>recordDef;
             record.id = this.database.length;
             record.name = record.filterClass.getLongName();
-            console.log(record.name);
 
             this.database.push(record);
             this.indexText.add(_.defaults({
