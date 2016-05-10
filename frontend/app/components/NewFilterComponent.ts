@@ -4,6 +4,7 @@ import {assertHas} from "../utils/assert";
 import {FilterIndexSearchResult} from "../services/FilterIndex";
 import {filterIndex} from "../services/FilterIndex";
 import {KnockoutComponent} from "../base/KnockoutComponent";
+import {AutocompleteService} from "../services/AutocompleteService";
 
 @KnockoutComponent('new-filter', {
     template: { fromUrl: 'new-filter.html' },
@@ -11,29 +12,37 @@ import {KnockoutComponent} from "../base/KnockoutComponent";
 export class NewFilterComponent {
     parentFilter: CompoundFilter;
     query = '';
-    private _searchMatches: FilterIndexSearchResult[] = [];
 
     /** This observable property is used by the template to focus the text box
      * when the component is created.
      */
     focused = true;
+    autocomplete: AutocompleteService<FilterIndexSearchResult>;
 
     constructor(params:any) {
         assertHas(params, ['parentFilter']);
         this.parentFilter = params.parentFilter;
 
         // Knockout loses the this binding when invoking click callbacks
-        this.addSelectedFilter = this.addSelectedFilter.bind(this);
         this.addFilterFromSearchResult = this.addFilterFromSearchResult.bind(this);
         this.handleSearchResultMouseDown = this.handleSearchResultMouseDown.bind(this);
 
-        ko.track(this);
-    }
+        this.autocomplete = new AutocompleteService({
+            koQuery: ko.computed(() => this.query),
+            searchFn: (query: string) => {
+                if (query != '') {
+                    return Promise.resolve(filterIndex.search(query));
+                } else {
+                    return Promise.resolve(filterIndex.returnAll());
+                }
+            },
+            rankingFn: (suggestion) => suggestion.score,
+            keyFn: (suggestion) => suggestion.match.filterClass,
+            suggestionClickedFn: this.addFilterFromSearchResult,
+            maxSuggestions: 100,
+        });
 
-    addSelectedFilter() {
-        if (this._searchMatches.length > 0) {
-            this.addFilterFromSearchResult(this._searchMatches[0]);
-        }
+        ko.track(this);
     }
 
     addFilterFromSearchResult(searchResult: FilterIndexSearchResult) {
@@ -46,20 +55,6 @@ export class NewFilterComponent {
                                 event: MouseEvent) {
         if (event.button == 0) {
             this.addFilterFromSearchResult(searchResult);
-        }
-    }
-
-    search() {
-        const matches = filterIndex.search(this.query);
-        this._searchMatches = matches;
-        return this._searchMatches;
-    }
-
-    getMatches(): FilterIndexSearchResult[] {
-        if (this.query != '') {
-            return this.search();
-        } else {
-            return filterIndex.returnAll();
         }
     }
 

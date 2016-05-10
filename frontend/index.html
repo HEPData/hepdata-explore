@@ -96,12 +96,12 @@
 
 <div id="fake-footer">HEPData Explore</div>
 
-<script id="suggestionsBox" type="text/html">
+<script id="choiceFilterAutocomplete" type="text/html">
     <ul class="suggestions">
         <% _.each(autocomplete.suggestions, function(suggestion, $index) { %>
             <li class="suggestion <%= ($index == autocomplete.selectedSuggestionIx) ? 'selected' : '' %>"
                 data-bind="event: {
-                    mousedown: autocomplete.suggestionClickedFn.bind($data, suggestion)
+                    mousedown: autocomplete.koMouseDownHandler(suggestion)
                 }">
                 <div class="bar total" style="width: <%= (suggestion.freqDividedByModeFullDB * 100 + '%') %>"></div>
                 <div class="suggested-value"><%= suggestion.suggestedValue %></div>
@@ -112,17 +112,18 @@
     </ul>
 </script>
 
-<script id="newFilterSuggestionsBox" type="text/html">
-    <% if (getMatches().length > 0) { %>
+<script id="newFilterAutocomplete" type="text/html">
+    <% if (autocomplete.suggestions.length > 0) { %>
     <div class="scroll-pane" style="max-height: 300px">
         <ul class="matches">
-        <% _.each(getMatches(), function(result, $index) { %>
-            <li><a data-bind="event: {mousedown: function(d, event) {
-                    return handleSearchResultMouseDown(result, event);
-                }}" tabindex="0">
-                <b data-bind="text: result.match.name"></b>
-                <p data-bind="html: result.match.description"></p>
-            </a></li>
+        <% _.each(autocomplete.suggestions, function(suggestion, $index) { %>
+            <li class="suggestion <%= ($index == autocomplete.selectedSuggestionIx) ? 'selected' : '' %>"
+                data-bind="event: {
+                    mousedown: autocomplete.koMouseDownHandler(suggestion)
+                }" tabindex="0">
+                <b data-bind="text: suggestion.match.name"></b>
+                <p data-bind="html: suggestion.match.description"></p>
+            </li>
         <% }) %>
         </ul>
     </div>

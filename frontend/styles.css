@@ -244,12 +244,13 @@ he-app > filter-shell {
     width: 360px;
 }
 
-new-filter .matches a {
+.matches li {
     display: block;
     cursor: pointer;
     /*background-color: #E3E8DF;*/
     margin: 0;
     padding: 4px 4px;
+    color: #894b9d;
 }
 
 .gu-mirror {
@@ -317,7 +318,7 @@ ul.matches {
     margin-bottom: 0;
 }
 
-ul.matches > li {
+.choice-filter ul.matches > li {
     margin: 0;
     padding: 0;
 }
@@ -550,4 +551,8 @@ ul.suggestions {
 
 .scroll-pane {
     overflow-y: scroll;
+}
+
+img.bubble-tail {
+    vertical-align: top;
 }

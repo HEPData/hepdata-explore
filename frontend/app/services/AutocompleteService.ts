@@ -120,4 +120,17 @@ export class AutocompleteService<SuggestionType> {
             return true;
         }
     }
+
+    private _suggestionMouseDown(suggestion: SuggestionType, event: MouseEvent) {
+        if (event.button == 0) {
+            // Left click
+            this.suggestionClickedFn(suggestion);
+        }
+    }
+
+    public koMouseDownHandler(suggestion: SuggestionType) {
+        return (component: any, event: MouseEvent) => {
+            this._suggestionMouseDown(suggestion, event);
+        };
+    }
 }

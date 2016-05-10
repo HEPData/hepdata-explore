@@ -7,12 +7,15 @@ import {KnockoutComponent} from "../base/KnockoutComponent";
 })
 export class SuggestionsBoxComponent<SuggestionType> {
     autocomplete: AutocompleteService<SuggestionType>;
+    template: string;
 
     constructor(params:any) {
         assertHas(params, [
-            {name: 'autocomplete', type: AutocompleteService}
+            {name: 'autocomplete', type: AutocompleteService},
+            {name: 'template', type: String},
         ]);
         this.autocomplete = params.autocomplete;
+        this.template = params.template;
         ko.track(this);
     }
 
