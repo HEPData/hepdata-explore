@@ -398,7 +398,7 @@ ul.suggestions {
     background: #F3F0DD;
 }
 
-.suggestion.selected {
+.choice-filter .suggestion.selected, .suggestion.selected {
     background: #4980D3;
     color: white;
 }

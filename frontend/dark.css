@@ -12,7 +12,7 @@ div#fake-header {
     background: #B2B2B2;
 }
 
-.choice-filter .suggestion:focus, .choice-filter .suggestion:hover:not(:active) {
+.choice-filter .suggestion:focus, .choice-filter .suggestion:hover:not(.selected) {
     color: black;
 }
 
