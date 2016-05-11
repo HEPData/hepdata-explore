@@ -23,6 +23,7 @@ import {StateDump} from "./base/StateDump";
 import {stateStorage} from "./services/StateStorage";
 import {customUrlHash} from "./utils/customUrlHash";
 import {Option, Some, None} from "./base/Option";
+import "decorators/bind";
 
 declare function stableStringify(thing: any): string;
 
