@@ -323,5 +323,7 @@ export class AppViewModel {
             return this.rootFilter.replaceFilter(oldFilter, newFilter);
         }
     }
+    
+    
 }
 export const app = new AppViewModel();

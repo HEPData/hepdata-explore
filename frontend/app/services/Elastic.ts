@@ -6,6 +6,10 @@ import {
 import {assert, assertInstance, assertHas} from "../utils/assert";
 import {jsonPOST} from "../base/network";
 import {sum} from "../utils/map";
+import {Option} from "../base/Option";
+import SomeFilter = require("../filters/SomeFilter");
+import AllFilter = require("../filters/AllFilter");
+import {calculateComplementaryFilter} from "../utils/complementaryFilter";
 
 export interface CountAggregationBucket {
     name: string;
@@ -63,6 +67,59 @@ export class Elastic {
 
                 return tables;
             })
+    }
+
+    fetchCountByField(field: string, filter: Option<Filter>)
+        : Promise<CountAggregationBucket[]>
+    {
+        let elasticFilter: any = undefined;
+        if (filter.isSet()) {
+            elasticFilter = {
+                "nested": {
+                    "path": "tables",
+                    "query": filter.get().toElasticQuery(),
+                }
+            };
+        } else {
+            // Empty filter that matches anything
+            elasticFilter = {
+                "bool": {
+                    "must": []
+                }
+            }
+        }
+
+        return jsonPOST(this.elasticUrl + '/publication/_search', {
+            "size": 0,
+            "aggs": {
+                "tables_filtered": {
+                    "filter": elasticFilter,
+                    "aggs": {
+                        "tables": {
+                            "nested": {
+                                "path": Elastic.getPathForFieldPath(field)
+                            },
+                            "aggs": {
+                                "variables": {
+                                    "terms": {
+                                        "field": "tables." + field,
+                                        "size": 10000,
+                                    },
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }).then((results) => {
+            return _(results.aggregations.tables_filtered.tables.variables.buckets)
+                .map((bucket) => ({
+                    name: bucket.key,
+                    count: bucket.doc_count
+                }))
+                .sortBy(d => -d.count)
+                .value();
+        });
     }
     
     /**
@@ -193,35 +250,6 @@ export class Elastic {
         } else {
             return 'tables';
         }
-    }
-
-    fetchAllByField(field: string): Promise<CountAggregationBucket[]> {
-        return jsonPOST(this.elasticUrl + '/publication/_search', {
-            "size": 0,
-            "aggs": {
-                "tables": {
-                    "nested": {
-                        "path": Elastic.getPathForFieldPath(field)
-                    },
-                    "aggs": {
-                        "variables": {
-                            "terms": {
-                                "field": "tables." + field,
-                                "size": 10000,
-                            },
-                        }
-                    }
-                }
-            }
-        }).then((results) => {
-            return _(results.aggregations.tables.variables.buckets)
-                .map((bucket) => ({
-                    name: bucket.key,
-                    count: bucket.doc_count
-                }))
-                .sortBy(d => -d.count)
-                .value();
-        });
     }
 }
 

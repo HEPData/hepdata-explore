@@ -2,6 +2,8 @@ import ChoiceFilter = require("../filters/ChoiceFilter");
 import {elastic} from "../services/Elastic";
 import {AutocompleteService} from "../services/AutocompleteService";
 import {KnockoutComponent} from "../base/KnockoutComponent";
+import {app} from "../AppViewModel";
+import {calculateComplementaryFilter} from "../utils/complementaryFilter";
 
 interface ChoiceSuggestion {
     suggestedValue: string;
@@ -85,7 +87,8 @@ class ChoiceFilterComponent {
     }
 
     getAllPossibleValues(): Promise<ChoiceSuggestion[]> {
-        return elastic.fetchAllByField(this.filter.field)
+        const complementaryFilter = calculateComplementaryFilter(this.filter, app.rootFilter);
+        return elastic.fetchCountByField(this.filter.field, complementaryFilter)
             .then((buckets) => {
                 const maxCount = _.maxBy(buckets, b => b.count).count;
                 return buckets.map((bucket) => ({
