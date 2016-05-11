@@ -4,7 +4,7 @@ import {
     assertInstance, assertHas, assertDefined,
     assert
 } from "../utils/assert";
-import {KnockoutComponent} from "../base/KnockoutComponent";
+import {KnockoutComponent} from "../decorators/KnockoutComponent";
 
 @KnockoutComponent('filter-shell', {
     template: { fromUrl: 'filter-shell.html' },

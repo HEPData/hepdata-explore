@@ -3,7 +3,7 @@ import {Filter} from "../filters/Filter";
 import {assertHas} from "../utils/assert";
 import {FilterIndexSearchResult} from "../services/FilterIndex";
 import {filterIndex} from "../services/FilterIndex";
-import {KnockoutComponent} from "../base/KnockoutComponent";
+import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {AutocompleteService} from "../services/AutocompleteService";
 
 @KnockoutComponent('new-filter', {

@@ -1,7 +1,7 @@
 import ChoiceFilter = require("../filters/ChoiceFilter");
 import {elastic} from "../services/Elastic";
 import {AutocompleteService} from "../services/AutocompleteService";
-import {KnockoutComponent} from "../base/KnockoutComponent";
+import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {app} from "../AppViewModel";
 import {calculateComplementaryFilter} from "../utils/complementaryFilter";
 

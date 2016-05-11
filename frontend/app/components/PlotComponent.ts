@@ -1,7 +1,7 @@
 import {Plot} from "../visualization/Plot";
 import {assertHas} from "../utils/assert";
 import TableCache = require("../services/TableCache");
-import {KnockoutComponent} from "../base/KnockoutComponent";
+import {KnockoutComponent} from "../decorators/KnockoutComponent";
 
 @KnockoutComponent('hep-plot', {
     template: { fromUrl: 'plot.html' },

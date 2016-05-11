@@ -1,8 +1,7 @@
-import {assertHas, assertInstance, assert} from "../utils/assert";
-import {KnockoutComponent} from "../base/KnockoutComponent";
+import {assertHas, assert} from "../utils/assert";
+import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import "../base/MyFocusChange";
 import {focusedElement} from "../base/focusedElement";
-import {imap, map} from "../utils/map";
 
 interface Point {
     x: number;

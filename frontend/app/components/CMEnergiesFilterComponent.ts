@@ -1,7 +1,7 @@
 import ChoiceFilter = require("../filters/ChoiceFilter");
 import CMEnergiesFilter = require("../filters/CMEnergiesFilter");
 import {floatEquals} from "../utils/floatEquals";
-import {KnockoutComponent} from "../base/KnockoutComponent";
+import {KnockoutComponent} from "../decorators/KnockoutComponent";
 
 @KnockoutComponent('cmenergies-filter', {
     template: {fromUrl: 'cmenergies-filter.html'},

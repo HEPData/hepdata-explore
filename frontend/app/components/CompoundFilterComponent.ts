@@ -2,7 +2,7 @@ import CompoundFilter = require("../filters/CompoundFilter");
 import AllFilter = require("../filters/AllFilter");
 import SomeFilter = require("../filters/SomeFilter");
 import {app} from "../AppViewModel";
-import {KnockoutComponent} from "../base/KnockoutComponent";
+import {KnockoutComponent} from "../decorators/KnockoutComponent";
 
 // http://ejohn.org/blog/comparing-document-position/
 function htmlContains(a: HTMLElement, b: HTMLElement){

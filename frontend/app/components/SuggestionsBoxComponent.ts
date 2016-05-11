@@ -1,6 +1,6 @@
 import {AutocompleteService} from "../services/AutocompleteService";
 import {assertHas} from "../utils/assert";
-import {KnockoutComponent} from "../base/KnockoutComponent";
+import {KnockoutComponent} from "../decorators/KnockoutComponent";
 
 @KnockoutComponent('suggestions-box', {
     template: { fromUrl: 'suggestions-box.html' },

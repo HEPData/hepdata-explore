@@ -1,6 +1,6 @@
 import {PlotPool} from "../services/PlotPool";
 import {assertHas} from "../utils/assert";
-import {KnockoutComponent} from "../base/KnockoutComponent";
+import {KnockoutComponent} from "../decorators/KnockoutComponent";
 
 @KnockoutComponent('hep-plot-pool', {
     template: { fromUrl: 'plot-pool.html' },
