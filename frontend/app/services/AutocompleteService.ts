@@ -1,5 +1,6 @@
 import {assertInstance, assertDefined, assert} from "../utils/assert";
 import {Option, Some, None} from "../base/Option";
+import {bind} from "../decorators/bind";
 const KEY_ARROW_DOWN = 40;
 const KEY_ARROW_UP = 38;
 const KEY_TAB = 9;
@@ -51,8 +52,6 @@ export class AutocompleteService<SuggestionType> {
         });
         this.search(this.koQuery());
 
-        this.keyPressed = this.keyPressed.bind(this);
-        this.acceptDefault = this.acceptDefault.bind(this);
         ko.track(this, ['suggestions', 'selectedSuggestionIx']);
     }
 
@@ -106,6 +105,7 @@ export class AutocompleteService<SuggestionType> {
         }
     }
 
+    @bind()
     public keyPressed(component: any, event: KeyboardEvent) {
         // Both Shift+Tab and Ctrl+Tab go to the previous suggestion
         const modifier = event.shiftKey || event.ctrlKey;
@@ -140,6 +140,7 @@ export class AutocompleteService<SuggestionType> {
     }
 
     /** Intended to be used as form submit target */
+    @bind()
     public acceptDefault() {
         const selectedSuggestion = this.getSelectedSuggestion();
         if (selectedSuggestion.isSet()) {

@@ -4,6 +4,7 @@ import {AutocompleteService} from "../services/AutocompleteService";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {app} from "../AppViewModel";
 import {calculateComplementaryFilter} from "../utils/complementaryFilter";
+import {bind} from "../decorators/bind";
 
 interface ChoiceSuggestion {
     suggestedValue: string;
@@ -66,14 +67,15 @@ class ChoiceFilterComponent {
 
         this.autocomplete = new AutocompleteService<ChoiceSuggestion>({
             koQuery: ko.getObservable(this, 'valueTyped'),
-            searchFn: this.search.bind(this),
+            searchFn: this.search,
             rankingFn: (s: ChoiceSuggestion) => s.absoluteFrequencyFullDB,
             keyFn: (s: ChoiceSuggestion) => s.suggestedValue,
             maxSuggestions: 5,
-            suggestionClickedFn: this.useSuggestion.bind(this),
+            suggestionClickedFn: this.useSuggestion,
         });
     }
 
+    @bind()
     search(query: string): Promise<ChoiceSuggestion[]> {
         return this.allPossibleValuesPromise
             .then((allPossibleValues) => {
@@ -106,6 +108,7 @@ class ChoiceFilterComponent {
         }
     }
 
+    @bind()
     useSuggestion(suggestion: ChoiceSuggestion) {
         this.filter.value = suggestion.suggestedValue;
         this.valueTyped = suggestion.suggestedValue;

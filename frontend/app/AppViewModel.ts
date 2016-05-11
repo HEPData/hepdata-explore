@@ -24,6 +24,7 @@ import {stateStorage} from "./services/StateStorage";
 import {customUrlHash} from "./utils/customUrlHash";
 import {Option, Some, None} from "./base/Option";
 import "decorators/bind";
+import {bind} from "./decorators/bind";
 
 declare function stableStringify(thing: any): string;
 
@@ -61,9 +62,8 @@ export class AppViewModel {
         ko.track(this, ['processingState', 'firstLoad', 'rootFilter',
             'customPlotVisible']);
 
-        this.currentStateDump = ko.computed(this.dumpApplicationState, this);
-        this.currentStateDump.subscribe(this.updatedStateDump, this);
-        this.customPlotConfirm = this.customPlotConfirm.bind(this);
+        this.currentStateDump = ko.computed(this.dumpApplicationState);
+        this.currentStateDump.subscribe(this.updatedStateDump);
 
         this.loadData();
 
@@ -79,6 +79,7 @@ export class AppViewModel {
         return this.processingState == ProcessingState.Rendering;
     }
 
+    @bind()
     private dumpApplicationState(): string {
         const state: StateDump = {
             version: 1,
@@ -253,6 +254,7 @@ export class AppViewModel {
         }
     }
 
+    @bind()
     private updatedStateDump(stateDump: string)  {
         // Calculate a new URL hash and persist it to the server
         // asynchronously.
@@ -332,6 +334,7 @@ export class AppViewModel {
         this.customPlotVisible = true;
     }
 
+    @bind()
     public customPlotConfirm() {
         console.log('confirm');
         this.customPlotVisible = false;

@@ -5,6 +5,7 @@ import {FilterIndexSearchResult} from "../services/FilterIndex";
 import {filterIndex} from "../services/FilterIndex";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {AutocompleteService} from "../services/AutocompleteService";
+import {bind} from "../decorators/bind";
 
 @KnockoutComponent('new-filter', {
     template: { fromUrl: 'new-filter.html' },
@@ -22,10 +23,6 @@ export class NewFilterComponent {
     constructor(params:any) {
         assertHas(params, ['parentFilter']);
         this.parentFilter = params.parentFilter;
-
-        // Knockout loses the this binding when invoking click callbacks
-        this.addFilterFromSearchResult = this.addFilterFromSearchResult.bind(this);
-        this.handleSearchResultMouseDown = this.handleSearchResultMouseDown.bind(this);
 
         ko.track(this);
 
@@ -45,12 +42,14 @@ export class NewFilterComponent {
         });
     }
 
+    @bind()
     addFilterFromSearchResult(searchResult: FilterIndexSearchResult) {
         const filterClass = <any>searchResult.match.filterClass;
         this.parentFilter.children.push(<Filter>new filterClass());
         this.query = '';
     }
 
+    @bind()
     handleSearchResultMouseDown(searchResult: FilterIndexSearchResult,
                                 event: MouseEvent) {
         if (event.button == 0) {

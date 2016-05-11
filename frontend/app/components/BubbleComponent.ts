@@ -2,6 +2,7 @@ import {assertHas, assert} from "../utils/assert";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import "../base/MyFocusChange";
 import {focusedElement} from "../base/focusedElement";
+import {bind} from "../decorators/bind";
 
 interface Point {
     x: number;
@@ -73,7 +74,6 @@ export class BubbleComponent {
         this._bubbleElement = params.element;
 
         this.side = 'down';
-        this.scrollListener = this.scrollListener.bind(this);
 
         ko.track(this);
 
@@ -98,6 +98,7 @@ export class BubbleComponent {
     }
 
     private _ticking = false;
+    @bind()
     private scrollListener(e: Event) {
         if (!this._ticking) {
             window.requestAnimationFrame(() => {
