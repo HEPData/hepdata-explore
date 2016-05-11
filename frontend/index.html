@@ -24,6 +24,8 @@
     <script src="lib/stable-stringify.js"></script>
     <script src="lib/sha256.js"></script>
     <script src="lib/setImmediate.js"></script>
+    <script src="lib/bootstrap.js"></script>
+    <script src="lib/knockstrap.js"></script>
     <link rel="stylesheet" href="invenio.css">
     <link href='https://fonts.googleapis.com/css?family=Noto+Sans' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic' rel='stylesheet' type='text/css'>
@@ -50,8 +52,11 @@
         <li id="data-point-count">
             <span class="number-display">0</span> data points found.
         </li>
-        <li class="pull-right">
-            <a id="download-yaml" class="btn btn-primary" href="#">Download selection (YAML)</a>
+        <li class="pull-right crammed-button">
+            <a class="btn btn-primary" href="#">Download selection (YAML)</a>
+        </li>
+        <li class="pull-right crammed-button">
+            <button class="btn btn-primary" data-bind="click: addCustomPlotDialog">Custom plot</button>
         </li>
     </ul>
 </div>
@@ -95,6 +100,20 @@
 </div>
 
 <div id="fake-footer">HEPData Explore</div>
+
+<div data-bind="modal: {
+    visible: ko.getObservable($data, 'customPlotVisible'),
+    header: { data: { label: 'Custom plot' } },
+    body: { name: 'customPlot', data: { content: 'Hello' } },
+    footer: { data: {
+        action: customPlotConfirm,
+        primaryLabel: 'Add plot'
+    } }
+}"></div>
+
+<script id="customPlot" type="text/html">
+<%= 'hola' %>
+</script>
 
 <script id="choiceFilterAutocomplete" type="text/html">
     <ul class="suggestions">

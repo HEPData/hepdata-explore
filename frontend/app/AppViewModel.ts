@@ -48,6 +48,7 @@ export class AppViewModel {
     plotPool: PlotPool;
     // The 'loading' screen only appears on the first data load since the page started
     firstLoad = true;
+    customPlotVisible = true;
 
     constructor() {
         this.plotPool = new PlotPool(this.tableCache);
@@ -56,10 +57,12 @@ export class AppViewModel {
             // new DepVarFilter('D(N)/DPT (c/GEV)'),
             // new CMEnergiesFilter()
         ]);
-        ko.track(this, ['processingState', 'firstLoad', 'rootFilter']);
+        ko.track(this, ['processingState', 'firstLoad', 'rootFilter',
+            'customPlotVisible']);
 
         this.currentStateDump = ko.computed(this.dumpApplicationState, this);
         this.currentStateDump.subscribe(this.updatedStateDump, this);
+        this.customPlotConfirm = this.customPlotConfirm.bind(this);
 
         this.loadData();
 
@@ -324,6 +327,13 @@ export class AppViewModel {
         }
     }
     
-    
+    public addCustomPlotDialog() {
+        this.customPlotVisible = true;
+    }
+
+    public customPlotConfirm() {
+        console.log('confirm');
+        this.customPlotVisible = false;
+    }
 }
 export const app = new AppViewModel();

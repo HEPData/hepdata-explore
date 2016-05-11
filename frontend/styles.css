@@ -554,3 +554,12 @@ ul.suggestions {
 img.bubble-tail {
     vertical-align: top;
 }
+
+.crammed-button.pull-right {
+    padding: 5px 0px;
+    padding-right: 5px;
+}
+
+.crammed-button .btn {
+    padding: 4px;
+}
