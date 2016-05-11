@@ -12,6 +12,10 @@
   "dependencies": {
     "browser-sync": "^2.11.1",
     "express": "^4.13.4",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-typescript": "^2.13.4",
     "typescript": "^1.9.0-dev.20160428-1.0"
   },
   "devDependencies": {

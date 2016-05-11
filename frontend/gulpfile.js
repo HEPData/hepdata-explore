@@ -3,7 +3,9 @@ var sourcemaps = require('gulp-sourcemaps');
 var ts = require('gulp-typescript');
 var babel = require('gulp-babel');
 
-var tsProject = ts.createProject('./tsconfig.json');
+var tsProject = ts.createProject('./tsconfig.json', {
+  typescript: require('typescript')
+});
 
 gulp.task('default', function() {
   return gulp.src('app/**/*.ts')
