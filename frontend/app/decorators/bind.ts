@@ -12,7 +12,10 @@ export function bind() {
         return {
             configurable: false,
             get() {
-                return fn.bind(this);
+                var self = this;
+                return function() {
+                    return fn.apply(self, arguments);
+                }
             }
         }
     };
