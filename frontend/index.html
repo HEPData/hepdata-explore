@@ -103,8 +103,14 @@
 
 <div data-bind="modal: {
     visible: ko.getObservable($data, 'customPlotVisible'),
+    dialogCss: 'modal-lg',
     header: { data: { label: 'Custom plot' } },
-    body: { name: 'customPlot', data: { content: 'Hello' } },
+    body: {
+        name: 'customPlot',
+        data: ko.computed(function() {
+            return customPlotVM.getOrDefault({error: 'customPlotVM not set'});
+        })
+    },
     footer: { data: {
         action: customPlotConfirm,
         primaryLabel: 'Add plot'
@@ -112,7 +118,37 @@
 }"></div>
 
 <script id="customPlot" type="text/html">
-<%= 'hola' %>
+
+    <% if ('plot' in $data) { %>
+    <hep-plot params="
+        plot: plot,
+        tableCache: tableCache
+    " style="float: left"></hep-plot>
+
+    <div style="float: left">
+    <table>
+        <tr>
+            <th>x axis</th>
+            <td>
+                <select>
+                    <option>Indep. var.</option>
+                    <option>Dep. var.</option>
+                </select>
+                <input data-bind="value: plot.xVar">
+            </td>
+        </tr>
+        <tr>
+            <th>y axis</th>
+            <td>
+
+            </td>
+        </tr>
+    </table>
+    </div>
+
+    <div style="clear: both"></div>
+    <% } %>
+
 </script>
 
 <script id="choiceFilterAutocomplete" type="text/html">

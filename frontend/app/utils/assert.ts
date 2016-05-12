@@ -33,7 +33,7 @@ export function assertHas(object: Object,
             property = <PropertyDeclaration>_property;
         }
 
-        const value: any = object[property.name];
+        const value: any = ko.unwrap(object[property.name]);
         if (value === undefined) {
             throw new AssertionError('Missing property "' + property.name +
                     '" in object.');

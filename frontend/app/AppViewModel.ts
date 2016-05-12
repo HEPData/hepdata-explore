@@ -25,6 +25,7 @@ import {customUrlHash} from "./utils/customUrlHash";
 import {Option, Some, None} from "./base/Option";
 import "decorators/bind";
 import {bind} from "./decorators/bind";
+import {CustomPlotVM} from "./components/CustomPlotVM";
 
 declare function stableStringify(thing: any): string;
 
@@ -50,7 +51,9 @@ export class AppViewModel {
     plotPool: PlotPool;
     // The 'loading' screen only appears on the first data load since the page started
     firstLoad = true;
-    customPlotVisible = true;
+
+    customPlotVisible = false;
+    customPlotVM: Option<CustomPlotVM> = new None<CustomPlotVM>();
 
     constructor() {
         this.plotPool = new PlotPool(this.tableCache);
@@ -60,15 +63,19 @@ export class AppViewModel {
             // new CMEnergiesFilter()
         ]);
         ko.track(this, ['processingState', 'firstLoad', 'rootFilter',
-            'customPlotVisible']);
+            'customPlotVisible', 'customPlotVM']);
 
         this.currentStateDump = ko.computed(this.dumpApplicationState);
         this.currentStateDump.subscribe(this.updatedStateDump);
 
-        this.loadData();
+        // this.loadData();
 
         // TODO A bit quirky... should add a loading screen or something
-        this.loadNewHash(location.hash);
+        this.loadNewHash(location.hash)
+            .then(() => {
+                this.showEditPlotDialog(this.plotPool.plots[0]);
+                return null;
+            })
     }
 
     isLoading() {
@@ -94,8 +101,7 @@ export class AppViewModel {
         this.loadDataPromise.cancel();
         this.processingState = ProcessingState.Downloading;
 
-        this.loadDataPromise = elastic.fetchFilteredData(this.rootFilter);
-        this.loadDataPromise
+        this.loadDataPromise = elastic.fetchFilteredData(this.rootFilter)
             .then((tables: PublicationTable[]) => {
                 this.processingState = ProcessingState.Rendering;
 
@@ -115,7 +121,10 @@ export class AppViewModel {
 
                 this.processingState = ProcessingState.Done;
                 this.firstLoad = false;
-            })
+
+                return tables;
+            });
+        return this.loadDataPromise;
     }
 
     updateUnpinnedPlots() {
@@ -279,7 +288,7 @@ export class AppViewModel {
         // Query data with the new filters.
         // TODO do this only when filter has changed (in the future the
         // state dump will also have other modifiable information).
-        this.loadData();
+        this.loadDataPromise = this.loadData();
     }
 
     public loadStateDump(stateDump: StateDump) {
@@ -307,9 +316,10 @@ export class AppViewModel {
             return;
         }
         const id = match[1];
-        stateStorage.get(id)
+        return stateStorage.get(id)
             .then((stateDump) => {
                 this.loadStateDump(stateDump);
+                return this.loadDataPromise;
             });
     }
 
@@ -330,7 +340,8 @@ export class AppViewModel {
         }
     }
     
-    public addCustomPlotDialog() {
+    public showEditPlotDialog(plot: Plot) {
+        this.customPlotVM = new Some(new CustomPlotVM(plot, this.tableCache));
         this.customPlotVisible = true;
     }
 
@@ -338,6 +349,12 @@ export class AppViewModel {
     public customPlotConfirm() {
         console.log('confirm');
         this.customPlotVisible = false;
+        this.customPlotVM = new None<CustomPlotVM>();
+    }
+
+    @bind()
+    public addCustomPlotDialog() {
+        console.log('Not yet implemented');
     }
 }
 export const app = new AppViewModel();
