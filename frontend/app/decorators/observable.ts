@@ -1,7 +1,11 @@
 import {RuntimeError} from "../base/errors";
+import {registerObservable} from "./_koGetObservablePatch";
+
 export function observable() {
     return function(target: any, propertyKey: string): any
     {
+        registerObservable(target, propertyKey);
+
         // Substitute the property in the prototype with a "proxy" property that
         // the first time it's read or written instantiates an observable and
         // sets it as a property in the instance, overriding the aforementioned
