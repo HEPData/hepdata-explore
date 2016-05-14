@@ -130,7 +130,7 @@
         <tr>
             <th>x axis</th>
             <td class="text-nowrap">
-                <input data-bind="value: plot.xVar">
+                <input data-bind="value: xVar">
             </td>
         </tr>
         <tr>
@@ -138,10 +138,9 @@
             <td>
                 <% _.each(plot.yVars, function(yVar, i) { %>
                 <div class="text-nowrap">
-                    <input data-bind="value: plot.yVars[i]">
+                    <input data-bind="value: yVars[i]">
                 </div>
                 <% }) %>
-                <input data-bind="value: newXVar">
             </td>
         </tr>
     </table>

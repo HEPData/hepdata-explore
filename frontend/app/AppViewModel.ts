@@ -23,7 +23,6 @@ import {StateDump} from "./base/StateDump";
 import {stateStorage} from "./services/StateStorage";
 import {customUrlHash} from "./utils/customUrlHash";
 import {Option, Some, None} from "./base/Option";
-import "decorators/bind";
 import {bind} from "./decorators/bind";
 import {CustomPlotVM} from "./components/CustomPlotVM";
 
