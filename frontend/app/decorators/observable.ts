@@ -20,7 +20,7 @@ export function observable() {
                     configurable: true,
                     enumerable: true,
                     writable: true,
-                    value: undefined,
+                    value: value,
                 });
                 // Then we use ko.track() to turn it into a Knockout ES5 observable
                 ko.track(this, [propertyKey]);
@@ -38,6 +38,10 @@ class MyClass {
     @observable()
     public x = 1;
 
+    @observable()
+    public list = []; // MUST be initialized to an array, otherwise an ordinary
+    // ko.observable() would be used instead of a ko.observableArray()
+
     constructor() {
         console.log(this.x); // 1
     }
@@ -51,5 +55,14 @@ function test() {
     });
 
     instance.x = 2;
+
+    ko.getObservable(instance, 'list').subscribe((list) => {
+        console.log(list);
+    });
+    instance.list = [];
+    instance.list.push('a');
+    instance.list.push('b');
+    instance.list = ['c'];
+    instance.list.push('d');
 }
 // test();
