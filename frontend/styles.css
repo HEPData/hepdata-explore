@@ -563,3 +563,11 @@ img.bubble-tail {
 .crammed-button .btn {
     padding: 4px;
 }
+
+.custom-plot input {
+    color: black;
+}
+
+.custom-plot th {
+    vertical-align: top;
+}
