@@ -1,6 +1,7 @@
 import {Plot} from "../visualization/Plot";
 import TableCache = require("./TableCache");
 import {RuntimeError} from "../base/errors";
+import {observable} from "../decorators/observable";
 
 class ExhaustedPool extends RuntimeError {
     constructor() {
@@ -9,12 +10,12 @@ class ExhaustedPool extends RuntimeError {
 }
 
 export class PlotPool {
-    plots: Plot[];
+    @observable()
+    plots: Plot[] = [];
     tableCache: TableCache;
     maxPlots = 6;
 
     constructor(tableCache: TableCache) {
-        this.plots = [];
         this.tableCache = tableCache;
 
         for (let i = 0; i < this.maxPlots; i++) {

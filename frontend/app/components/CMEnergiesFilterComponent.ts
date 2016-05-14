@@ -2,33 +2,37 @@ import ChoiceFilter = require("../filters/ChoiceFilter");
 import CMEnergiesFilter = require("../filters/CMEnergiesFilter");
 import {floatEquals} from "../utils/floatEquals";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
+import {observable} from "../decorators/observable";
 
 @KnockoutComponent('cmenergies-filter', {
     template: {fromUrl: 'cmenergies-filter.html'},
 })
 export class CMEnergiesFilterComponent {
+    @observable()
     filter: CMEnergiesFilter;
 
+    @observable()
     minTyped: string = '10.5';
+    @observable()
     maxTyped: string = '';
 
     /** This observable property is used by the template to focus the text box
      * when the component is created.
      */
+    @observable()
     focused = true;
 
     protected _disposables: KnockoutSubscription[] = [];
 
     constructor(params: any) {
         this.filter = params.filter;
-        ko.track(this, ['filter', 'minTyped', 'maxTyped']);
 
         this.linkNumber('minTyped', 'min');
         this.linkNumber('maxTyped', 'max');
     }
 
     linkNumber(componentField: string, filterField: string) {
-        // Two way binding
+        // Two way binding, with validation
         const updateComponent = (filterValue: number) => {
             if (filterValue == null && this[componentField] != '') {
                 this[componentField] = '';

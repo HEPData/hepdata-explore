@@ -1,6 +1,7 @@
 import {assertInstance, assertDefined, assert} from "../utils/assert";
 import {Option, Some, None} from "../base/Option";
 import {bind} from "../decorators/bind";
+import {observable} from "../decorators/observable";
 const KEY_ARROW_DOWN = 40;
 const KEY_ARROW_UP = 38;
 const KEY_TAB = 9;
@@ -51,11 +52,11 @@ export class AutocompleteService<SuggestionType> {
             this.search(query);
         });
         this.search(this.koQuery());
-
-        ko.track(this, ['suggestions', 'selectedSuggestionIx']);
     }
 
+    @observable()
     public suggestions: SuggestionType[] = [];
+    @observable()
     public selectedSuggestionIx = 0;
 
     private search(query: string): Promise<SuggestionType[]> {

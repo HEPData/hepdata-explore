@@ -1,12 +1,15 @@
 import {AutocompleteService} from "../services/AutocompleteService";
 import {assertHas} from "../utils/assert";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
+import {observable} from "../decorators/observable";
 
 @KnockoutComponent('suggestions-box', {
     template: { fromUrl: 'suggestions-box.html' },
 })
 export class SuggestionsBoxComponent<SuggestionType> {
+    @observable()
     autocomplete: AutocompleteService<SuggestionType>;
+    @observable()
     template: string;
 
     constructor(params:any) {
@@ -16,7 +19,6 @@ export class SuggestionsBoxComponent<SuggestionType> {
         ]);
         this.autocomplete = params.autocomplete;
         this.template = params.template;
-        ko.track(this);
     }
 
     dispose() {

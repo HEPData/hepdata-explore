@@ -3,6 +3,8 @@ import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import "../base/MyFocusChange";
 import {focusedElement} from "../base/focusedElement";
 import {bind} from "../decorators/bind";
+import {observable} from "../decorators/observable";
+import {computedObservable} from "../decorators/computedObservable";
 
 interface Point {
     x: number;
@@ -40,16 +42,22 @@ function findScrollableParents(element: HTMLElement, foundList: HTMLElement[] = 
 })
 export class BubbleComponent {
     /** Indicates on which side of the element the bubble will pop up. */
+    @observable()
     side: 'up' | 'down' = 'down';
 
+    @observable()
     maxHeight = 200;
+    @observable()
     width = 300;
 
     /** The template receives CSS position here */
+    @observable()
     styleTop: string = null;
+    @observable()
     styleLeft: string = null;
 
-    visible: KnockoutComputed<boolean> = ko.computed(() => {
+    @computedObservable()
+    get visible(): boolean {
         const element = focusedElement();
         const bubbleRoot = findBubbleFocusAncestor(element);
         if (!bubbleRoot) {
@@ -58,7 +66,7 @@ export class BubbleComponent {
             // Check that *this* bubble element is inside the bubble root.
             return $(bubbleRoot).find(this._bubbleElement).length == 1;
         }
-    });
+    };
 
     private _scrollableParents: HTMLElement[] = [];
 
@@ -74,8 +82,6 @@ export class BubbleComponent {
         this._bubbleElement = params.element;
 
         this.side = 'down';
-
-        ko.track(this);
 
         ko.getObservable(this, 'visible').subscribe((visible: boolean) => {
             if (visible) {

@@ -2,13 +2,21 @@ import {PublicationTable} from "../base/dataFormat";
 import DslParam = require("../base/DslParam");
 import {Filter} from "./Filter";
 import {registerFilterClass} from "./filterRegistry";
+import {observable} from "../decorators/observable";
 
 @registerFilterClass
 class CMEnergiesFilter extends Filter {
-    constructor(public min: number = null, public max: number = null) {
+    @observable()
+    min: number;
+
+    @observable()
+    max: number;
+
+    constructor(min: number = null, max: number = null) {
         super();
+        this.min = min;
+        this.max = max;
         this.registerSerializableFields(['min', 'max']);
-        ko.track(this, ['min', 'max']);
     }
 
     static getLongName() {

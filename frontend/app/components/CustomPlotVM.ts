@@ -1,9 +1,12 @@
 import {Plot} from "../visualization/Plot";
 import TableCache = require("../services/TableCache");
 import {AutocompleteService} from "../services/AutocompleteService";
+import {observable} from "../decorators/observable";
 
 export class CustomPlotVM {
+    @observable()
     xVar: string = this.plot.xVar;
+    @observable()
     yVars: string[] = _.clone(this.plot.yVars);
 
     // xVarCompletion = new AutocompleteService({
@@ -11,7 +14,6 @@ export class CustomPlotVM {
     // });
 
     constructor(public plot: Plot, public tableCache: TableCache) {
-        ko.track(this);
     }
 
     deleteYVar(index: number) {

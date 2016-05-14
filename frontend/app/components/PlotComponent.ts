@@ -4,12 +4,15 @@ import TableCache = require("../services/TableCache");
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {bind} from "../decorators/bind";
 import {app} from "../AppViewModel";
+import {observable} from "../decorators/observable";
 
 @KnockoutComponent('hep-plot', {
     template: { fromUrl: 'plot.html' },
 })
 export class PlotComponent {
+    @observable()
     plot: Plot;
+    @observable()
     tableCache: TableCache;
 
     constructor(params: any) {
@@ -19,10 +22,7 @@ export class PlotComponent {
         ]);
 
         this.plot = params.plot;
-        this.tableCache = params.tableCache;
-        // params arrive as observables, which are transformed into properties
-        // by ko.track()
-        ko.track(this);
+        this.tableCache = ko.unwrap(params.tableCache);
     }
     
     @bind()

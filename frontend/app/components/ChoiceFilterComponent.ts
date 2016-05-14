@@ -5,6 +5,7 @@ import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {app} from "../AppViewModel";
 import {calculateComplementaryFilter} from "../utils/complementaryFilter";
 import {bind} from "../decorators/bind";
+import {observable} from "../decorators/observable";
 
 interface ChoiceSuggestion {
     suggestedValue: string;
@@ -30,9 +31,11 @@ lunr.tokenizer.registerFunction(variableTokenizer, 'variableTokenizer');
     template: { fromUrl: 'choice-filter.html' },
 })
 class ChoiceFilterComponent {
+    @observable()
     filter: ChoiceFilter;
     autocomplete: AutocompleteService<ChoiceSuggestion>;
 
+    @observable()
     valueTyped: string = '';
     allPossibleValuesPromise: Promise<ChoiceSuggestion[]>;
     possibleValuesIndex: lunr.Index;
@@ -40,12 +43,12 @@ class ChoiceFilterComponent {
     /** This observable property is used by the template to focus the text box
      * when the component is created.
      */
+    @observable()
     focused = true;
 
     constructor(params: any) {
         this.filter = params.filter;
         this.valueTyped = this.filter.value;
-        ko.track(this, ['filter', 'valueTyped', 'focused']);
 
         this.possibleValuesIndex = lunr(function() {
             this.field('value');

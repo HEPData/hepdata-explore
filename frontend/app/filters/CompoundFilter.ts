@@ -1,13 +1,14 @@
 import {Filter} from "./Filter";
+import {observable} from "../decorators/observable";
 
 abstract class CompoundFilter extends Filter {
+    @observable()
     children: Filter[];
 
-    constructor(children: Filter[] = null) {
+    constructor(children: Filter[] = []) {
         super();
         this.registerSerializableFields(['children']);
-        this.children = children || [];
-        ko.track(this);
+        this.children = children;
     }
 
     isRemoveAllowed() {

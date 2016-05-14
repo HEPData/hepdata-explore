@@ -25,6 +25,8 @@ import {customUrlHash} from "./utils/customUrlHash";
 import {Option, Some, None} from "./base/Option";
 import {bind} from "./decorators/bind";
 import {CustomPlotVM} from "./components/CustomPlotVM";
+import {observable} from "./decorators/observable";
+import "decorators/computedObservable";
 
 declare function stableStringify(thing: any): string;
 
@@ -43,15 +45,27 @@ enum ProcessingState {
 const regexStateId = /^#([\w1-9]+)$/;
 
 export class AppViewModel {
+    @observable()
     rootFilter: Filter;
+
     currentStateDump: KnockoutComputed<string>
+
+    @observable()
     processingState: ProcessingState = ProcessingState.Done;
+
     tableCache = new TableCache;
+
+    @observable()
     plotPool: PlotPool;
+
     // The 'loading' screen only appears on the first data load since the page started
+    @observable()
     firstLoad = true;
 
+    @observable()
     customPlotVisible = false;
+
+    @observable()
     customPlotVM: Option<CustomPlotVM> = new None<CustomPlotVM>();
 
     constructor() {
@@ -61,8 +75,6 @@ export class AppViewModel {
             // new DepVarFilter('D(N)/DPT (c/GEV)'),
             // new CMEnergiesFilter()
         ]);
-        ko.track(this, ['processingState', 'firstLoad', 'rootFilter',
-            'customPlotVisible', 'customPlotVM']);
 
         this.currentStateDump = ko.computed(this.dumpApplicationState);
         this.currentStateDump.subscribe(this.updatedStateDump);
@@ -72,7 +84,7 @@ export class AppViewModel {
         // TODO A bit quirky... should add a loading screen or something
         this.loadNewHash(location.hash)
             .then(() => {
-                this.showEditPlotDialog(this.plotPool.plots[0]);
+                // this.showEditPlotDialog(this.plotPool.plots[0]);
                 return null;
             })
     }

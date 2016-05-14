@@ -3,6 +3,8 @@ import AllFilter = require("../filters/AllFilter");
 import SomeFilter = require("../filters/SomeFilter");
 import {app} from "../AppViewModel";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
+import {observable} from "../decorators/observable";
+import {computedObservable} from "../decorators/computedObservable";
 
 // http://ejohn.org/blog/comparing-document-position/
 function htmlContains(a: HTMLElement, b: HTMLElement){
@@ -24,18 +26,19 @@ function insideElementOfClass(element: HTMLElement, className: string) {
     template: { fromUrl: 'compound-filter.html' },
 })
 export class CompoundFilterComponent {
+    @observable()
     filter: CompoundFilter;
 
     constructor(params:any) {
         this.filter = params.filter;
-
-        ko.track(this);
     }
 
+    @computedObservable()
     get flagText() {
         return this.filter.getFlagText();
     }
 
+    @computedObservable()
     get flagClasses() {
         return ['flag', this.filter.getFlagClass()].join(' ');
     }

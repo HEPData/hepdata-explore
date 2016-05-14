@@ -1,11 +1,18 @@
 import {DataPoint, PublicationTable} from "../base/dataFormat";
 import {Filter} from "./Filter";
+import {observable} from "../decorators/observable";
 
 class ChoiceFilter extends Filter {
-    constructor(public field: string = '', public value = '') {
+    @observable()
+    public field: string;
+    @observable()
+    public value: any;
+    
+    constructor(field: string = '', value = '') {
         super();
+        this.field = field;
+        this.value = value;
         this.registerSerializableFields(['field', 'value']);
-        ko.track(this);
     }
 
     static getLongName() {

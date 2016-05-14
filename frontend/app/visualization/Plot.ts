@@ -5,6 +5,7 @@ import {RuntimeError} from "../base/errors";
 import {PlotLayer} from "./PlotLayer";
 import {assertDefined} from "../utils/assert";
 import {ScatterLayer} from "./ScatterLayer";
+import {observable} from "../decorators/observable";
 
 export interface Margins {
     top: number;
@@ -56,12 +57,14 @@ export function findColIndexOrNull(variableName: string, table: PublicationTable
 
 export class Plot {
     /** Plot is a pooled class. True if this instance is being used. */
+    @observable()
     alive: boolean = false;
     /** An element created to hold several canvas stacked on top of each other. */
     canvasOnion: HTMLDivElement;
     /** Needed to extract data for plots. */
     tableCache: TableCache;
     /** Non pinned plots may be removed from the interface when search terms are modified. */
+    @observable()
     pinned: boolean = false;
 
     width: number = 300;
@@ -73,10 +76,14 @@ export class Plot {
         left: 40
     };
 
+    @observable()
     xVar: string = null;
+    @observable()
     yVars: string[] = [];
 
+    @observable()
     xScaleType: ScaleType = null;
+    @observable()
     yScaleType: ScaleType = null;
     xScale: ScaleFunction;
     yScale: ScaleFunction;
@@ -101,9 +108,6 @@ export class Plot {
         this.addLayer(this.scatterLayer);
         this.axesLayer = new AxesLayer(this);
         this.addLayer(this.axesLayer);
-
-        ko.track(this, ['alive', 'pinned', 'xVar', 'yVars',
-            'xScaleType', 'yScaleType']);
     }
 
     private addLayer(layer: PlotLayer) {
