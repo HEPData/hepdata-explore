@@ -17,6 +17,10 @@ export function observable() {
                 throw new RuntimeError("Observable property read before assigned.");
             },
             set(value: any) {
+                if (ko.isObservable(value)) {
+                    throw new RuntimeError("Assigning an observable to another observable is not supported.");
+                }
+
                 // We create the observable property in two steps.
                 // First, we create a POJO property in the instance, initialized
                 // to undefined.
