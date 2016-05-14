@@ -1,12 +1,7 @@
 import {RuntimeError} from "../base/errors";
 export function observable() {
-    return function(... args: any[]): any //target: any, propertyKey: string, descriptor: PropertyDescriptor)
-        // : PropertyDescriptor
+    return function(target: any, propertyKey: string): any
     {
-        let target = args[0];
-        let propertyKey = args[1];
-        let descriptor = args[2];
-
         // Substitute the property in the prototype with a "proxy" property that
         // the first time it's read or written instantiates an observable and
         // sets it as a property in the instance, overriding the aforementioned
