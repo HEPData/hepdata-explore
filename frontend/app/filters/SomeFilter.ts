@@ -11,7 +11,8 @@ class SomeFilter extends CompoundFilter {
     toElasticQuery(): any {
         return {
             "bool": {
-                "should": _.map(this.children, (child: Filter) => child.toElasticQuery()),
+                "should": _.map(this.getUsableChildren(),
+                    (child: Filter) => child.toElasticQuery()),
                 "minimum_should_match": 1,
             }
         }
@@ -23,7 +24,7 @@ class SomeFilter extends CompoundFilter {
             return true;
         }
         for (let childFilter of this.children) {
-            if (childFilter.filterTable(table) == true) {
+            if (childFilter.isUsable() && childFilter.filterTable(table) == true) {
                 return true;
             }
         }

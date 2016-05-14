@@ -57,7 +57,7 @@ export class Elastic {
 
                 for (let publication of publications) {
                     for (let table of publication.tables) {
-                        if (rootFilter.filterTable(table)) {
+                        if (!rootFilter.isUsable() || rootFilter.filterTable(table)) {
                             table.publication = publication;
                             this.addRangeProperties(table.data_points);
                             tables.push(table);

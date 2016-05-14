@@ -8,7 +8,7 @@ class ChoiceFilter extends Filter {
     @observable()
     public value: any;
     
-    constructor(field: string = '', value = '') {
+    constructor(field = '', value = '') {
         super();
         this.field = field;
         this.value = value;
@@ -28,6 +28,9 @@ class ChoiceFilter extends Filter {
     }
 
     filterTable(table: PublicationTable): boolean {
+        if (this.field.includes('indep')) {
+            debugger;
+        }
         return table[this.field] == this.value;
     }
 
@@ -36,6 +39,10 @@ class ChoiceFilter extends Filter {
             name: 'choice-filter',
             params: { filter: this }
         }
+    }
+
+    isUsable() {
+        return this.value != '';
     }
 }
 export = ChoiceFilter;

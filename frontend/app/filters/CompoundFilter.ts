@@ -42,5 +42,9 @@ abstract class CompoundFilter extends Filter {
         }
         return false;
     }
+
+    public getUsableChildren() {
+        return _.filter(this.children, (c: Filter) => c.isUsable());
+    }
 }
 export = CompoundFilter;

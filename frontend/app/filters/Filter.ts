@@ -20,6 +20,17 @@ export abstract class Filter {
         return (<typeof Filter>this.constructor).getLongName();
     }
 
+    /** Not usable filters are ignored when the search is performed.
+     *
+     * A filter is usually set as not usable when it has just been created and
+     * the user has not set their parameters, so they are empty and using them
+     * would (in some filters, e.g. DepVar) make the search return zero results.
+     * @returns {boolean}
+     */
+    isUsable(): boolean {
+        return true;
+    }
+
     abstract toElasticQuery(): any;
 
     abstract getComponent(): ComponentRef;

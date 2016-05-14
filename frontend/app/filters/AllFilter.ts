@@ -11,7 +11,8 @@ class AllFilter extends CompoundFilter {
     toElasticQuery(): any {
         return {
             "bool": {
-                "must": _.map(this.children, (child: Filter) => child.toElasticQuery()),
+                "must": _.map(this.getUsableChildren(),
+                    (child: Filter) => child.toElasticQuery()),
             }
         }
     }
@@ -19,7 +20,7 @@ class AllFilter extends CompoundFilter {
     filterTable(table: PublicationTable): boolean {
         // Accept the data point if it matches all the children filters
         for (let childFilter of this.children) {
-            if (childFilter.filterTable(table) == false) {
+            if (childFilter.isUsable() && childFilter.filterTable(table) == false) {
                 return false;
             }
         }
