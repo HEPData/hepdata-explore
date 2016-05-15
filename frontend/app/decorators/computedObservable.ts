@@ -2,7 +2,11 @@ import {observable} from "./observable";
 import {assertInstance} from "../utils/assert";
 import {ComputedProperties, registerObservable} from "./_koGetObservablePatch";
 
-export function computedObservable() {
+export interface ComputedObservableOptions {
+    pure: boolean;
+}
+
+export function computedObservable(options: ComputedObservableOptions = {pure: true}) {
     return function(target: any, propertyKey: string, descriptor: PropertyDescriptor): any
     {
         const fn = descriptor.get;
@@ -18,7 +22,9 @@ export function computedObservable() {
                     configurable: true,
                     enumerable: true,
                     writable: true,
-                    value: ko.computed(fn, this),
+                    value: options.pure
+                        ? ko.pureComputed(fn, this)
+                        : ko.computed(fn, this),
                 });
                 ko.track(this, [propertyKey]);
                 return this[propertyKey];
