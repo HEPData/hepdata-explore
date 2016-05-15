@@ -16,5 +16,5 @@ ko.underscoreTemplateEngine.prototype = ko.utils.extend(new ko.templateEngine(),
     return "<%= " + script + " %>";
   }
 });
-ko.setTemplateEngine(new ko.underscoreTemplateEngine());
+// ko.setTemplateEngine(new ko.underscoreTemplateEngine());
 /* ---- End integration of Underscore template engine with Knockout ---- */

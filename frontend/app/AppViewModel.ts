@@ -84,7 +84,7 @@ export class AppViewModel {
         // TODO A bit quirky... should add a loading screen or something
         this.loadNewHash(location.hash)
             .then(() => {
-                this.showEditPlotDialog(this.plotPool.plots[0]);
+                // this.showEditPlotDialog(this.plotPool.plots[0]);
                 return null;
             })
     }
