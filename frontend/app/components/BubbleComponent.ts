@@ -80,6 +80,9 @@ export class BubbleComponent {
             {name: 'element', type: HTMLElement},
         ]);
         this._bubbleElement = params.element;
+        if (params.width) {
+            this.width = params.width;
+        }
 
         this.side = 'down';
 
