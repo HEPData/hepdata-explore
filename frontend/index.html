@@ -122,11 +122,31 @@
     } }
 }"></div>
 
-<script id="variableAutocompleteB" type="text/html">
-<pre data-bind="text: JSON.stringify($data)"></pre>
-</script>
 <script id="variableAutocomplete" type="text/html">
+    <div class="scroll-pane" style="max-height: 300px"
+        data-bind="
+            if: autocomplete.suggestions.length > 0,
+            leak: autocomplete.leakScrollPaneHandler()
+        ">
+        <ul class="matches" data-bind="foreach: autocomplete.suggestions">
+            <li class="suggestion"
+                data-bind="
+                    css: {
+                        selected: ($index() == $parent.autocomplete.selectedSuggestionIx)
+                    },
+                    event: {
+                        mousedown: $parent.autocomplete.koMouseDownHandler($data)
+                    },
+                    leak: $parent.autocomplete.leakSuggestionElementHandler($data)
+                " tabindex="0">
+                <b data-bind="text: name"></b>
+            </li>
+        </ul>
+    </div>
 
+    <div data-bind="if: autocomplete.suggestions.length == 0">
+        No variables found. Try with other words...
+    </div>
 </script>
 
 <script id="customPlot" type="text/html">
