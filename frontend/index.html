@@ -143,8 +143,24 @@
                 <tr>
                     <th>x axis</th>
                     <td class="text-nowrap">
-                        <pre data-bind="text: log(Object.keys($data))"></pre>
+                        <hep-bubble-focus>
 
+                            <input data-bind="
+                                textInput: ko.getObservable(xVar, 'fieldValue'),
+                                event: {keydown: autocompleteXVar.keyPressed},
+                                hasFocus: true,
+                            ">
+                            <hep-bubble params="element: $element">
+                                <div data-bind="template: {
+                                    name: 'variableAutocomplete',
+                                    data: {
+                                        autocomplete: $parent.autocompleteXVar,
+                                        maxHeight: 120,
+                                    }
+                                }"></div>
+                            </hep-bubble>
+
+                        </hep-bubble-focus>
                     </td>
                 </tr>
                 <tr>
