@@ -71,7 +71,7 @@ export class CustomPlotVM {
     // Dummy computed used to track when xVar or yVars are modified.
     @computedObservable()
     private get _yVarsChanged() {
-        this.xVar;
+        this.xVar.cleanValue;
         this.yVars;
         for (let item of this.yVars) {
             item.cleanValue;
