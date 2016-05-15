@@ -6,6 +6,7 @@ import {PlotLayer} from "./PlotLayer";
 import {assertDefined} from "../utils/assert";
 import {ScatterLayer} from "./ScatterLayer";
 import {observable} from "../decorators/observable";
+import {computedObservable} from "../decorators/computedObservable";
 
 export interface Margins {
     top: number;
@@ -107,7 +108,6 @@ export class Plot {
     xScale: ScaleFunction;
     yScale: ScaleFunction;
 
-    tablesByYVar: Map<string, PublicationTable[]>;
     dataMinX: number;
     dataMaxX: number;
     dataMinY: number;
@@ -119,6 +119,14 @@ export class Plot {
     axesLayer: AxesLayer;
     scatterLayer: ScatterLayer;
 
+    @computedObservable()
+    private get _configChanged() {
+        this.config.xVar;
+        this.config.yVars;
+        return ++this._counter;
+    }
+    private _counter = 0;
+
     constructor(tableCache: TableCache, config: PlotConfig = null) {
         this.tableCache = tableCache;
         this.config = config || new PlotConfig();
@@ -128,6 +136,13 @@ export class Plot {
         this.addLayer(this.scatterLayer);
         this.axesLayer = new AxesLayer(this);
         this.addLayer(this.axesLayer);
+
+        // Listen for config changes.
+        ko.getObservable(this, '_configChanged').subscribe(() => {
+            if (this.alive) {
+                this.loadTables();
+            }
+        })
     }
 
     clone() {
@@ -139,14 +154,9 @@ export class Plot {
     }
 
     spawn(xVar: string, yVars: string[]): this {
-        this.alive = true;
         this.config.xVar = xVar;
         this.config.yVars = yVars;
-
-        this.tablesByYVar = new Map(
-            _.map(this.config.yVars, (yVar): [string, PublicationTable[]] =>
-                [yVar, this.tableCache.getTablesWithVariables(xVar, yVar)])
-        );
+        this.alive = true;
 
         this.loadTables();
         return this;
@@ -169,9 +179,15 @@ export class Plot {
     }
 
     public loadTables() {
+        const xVar = this.config.xVar;
+        const tablesByYVar: Map<string, PublicationTable[]> = new Map(
+            _.map(this.config.yVars, (yVar): [string, PublicationTable[]] =>
+                [yVar, this.tableCache.getTablesWithVariables(xVar, yVar)])
+        );
+
         // Collect all tables having data going to be plotted
         let allTables: PublicationTable[] = [];
-        for (let tables of Array.from(this.tablesByYVar.values())) {
+        for (let tables of Array.from(tablesByYVar.values())) {
             allTables = allTables.concat(tables);
         }
         this.countTables = allTables.length;

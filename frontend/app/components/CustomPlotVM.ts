@@ -73,7 +73,6 @@ export class CustomPlotVM {
     }
 
     updatePlot() {
-        console.log('updplot');
         if (this.isXVarClean() && this.plot.config.xVar != this.xVar) {
             this.plot.config.xVar = this.xVar;
         }
