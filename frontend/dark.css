@@ -25,4 +25,6 @@ input {
 .plot-box {
     border: 1px solid gray;
     box-shadow: 1px 1px 1px #414141;
+    background: #2C2C2C;
+    color: white;
 }
