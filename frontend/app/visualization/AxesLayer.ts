@@ -98,9 +98,9 @@ export class AxesLayer extends PlotLayer {
         // draw X label
         {
             const axisXCenter = margin.left + (w / 2);
-            const textW = ctx.measureText(this.plot.xVar).width;
+            const textW = ctx.measureText(this.plot.config.xVar).width;
             ctx.font = '14px' + fontFace;
-            ctx.fillText(this.plot.xVar, axisXCenter - textW / 2, margin.top + h + 30);
+            ctx.fillText(this.plot.config.xVar, axisXCenter - textW / 2, margin.top + h + 30);
         }
     }
 }

@@ -5,7 +5,7 @@
         x: <span data-bind="text: plot.xScaleType"></span>
         y: <span data-bind="text: plot.yScaleType"></span>
     </div>
-    <ul data-bind="foreach: plot.yVars">
+    <ul data-bind="foreach: plot.config.yVars">
         <li>
             <span data-bind="text: $data"></span>
         </li>

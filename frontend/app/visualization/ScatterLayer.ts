@@ -64,13 +64,13 @@ export class ScatterLayer extends PlotLayer {
         const plot = this.plot;
         const xScale = plot.xScale;
         const yScale = plot.yScale;
-        const xVar = plot.xVar;
+        const xVar = plot.config.xVar;
         var colorScale = d3.scale.category10();
 
         const points = this.points;
         points.length = 0;
 
-        for (let yVar of plot.yVars) {
+        for (let yVar of plot.config.yVars) {
             const tables = plot.tableCache.getTablesWithVariables(xVar, yVar);
             for (let table of tables) {
                 const colX = findColIndex(xVar, table);

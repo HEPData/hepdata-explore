@@ -55,17 +55,41 @@ export function findColIndexOrNull(variableName: string, table: PublicationTable
     return null; // Variable name not found
 }
 
+/** These properties here:
+ * - are configurable by the user
+ * - conform the serialized representation of the plot
+ * -
+ * */
+export class PlotConfig {
+    /** Non pinned plots may be removed from the interface when search terms are modified. */
+    @observable()
+    pinned: boolean = false;
+
+    @observable()
+    xVar: string = null;
+    @observable()
+    yVars: string[] = [];
+
+    clone() {
+        const c = new PlotConfig();
+        c.pinned = this.pinned;
+        c.xVar = this.xVar;
+        c.yVars = _.clone(this.yVars);
+        return c;
+    }
+}
+
 export class Plot {
+    config: PlotConfig;
+
     /** Plot is a pooled class. True if this instance is being used. */
     @observable()
     alive: boolean = false;
+
     /** An element created to hold several canvas stacked on top of each other. */
     canvasOnion: HTMLDivElement;
     /** Needed to extract data for plots. */
     tableCache: TableCache;
-    /** Non pinned plots may be removed from the interface when search terms are modified. */
-    @observable()
-    pinned: boolean = false;
 
     width: number = 300;
     height: number = 300;
@@ -75,11 +99,6 @@ export class Plot {
         bottom: 32,
         left: 40
     };
-
-    @observable()
-    xVar: string = null;
-    @observable()
-    yVars: string[] = [];
 
     @observable()
     xScaleType: ScaleType = null;
@@ -100,8 +119,9 @@ export class Plot {
     axesLayer: AxesLayer;
     scatterLayer: ScatterLayer;
 
-    constructor(tableCache: TableCache) {
+    constructor(tableCache: TableCache, config: PlotConfig = null) {
         this.tableCache = tableCache;
+        this.config = config || new PlotConfig();
         this.canvasOnion = document.createElement('div');
 
         this.scatterLayer = new ScatterLayer(this);
@@ -110,17 +130,21 @@ export class Plot {
         this.addLayer(this.axesLayer);
     }
 
+    clone() {
+        return new Plot(this.tableCache, this.config.clone());
+    }
+
     private addLayer(layer: PlotLayer) {
         this.canvasOnion.insertBefore(layer.canvas, null);
     }
 
     spawn(xVar: string, yVars: string[]): this {
         this.alive = true;
-        this.xVar = xVar;
-        this.yVars = yVars;
+        this.config.xVar = xVar;
+        this.config.yVars = yVars;
 
         this.tablesByYVar = new Map(
-            _.map(this.yVars, (yVar): [string, PublicationTable[]] =>
+            _.map(this.config.yVars, (yVar): [string, PublicationTable[]] =>
                 [yVar, this.tableCache.getTablesWithVariables(xVar, yVar)])
         );
 
@@ -183,9 +207,9 @@ export class Plot {
         let dataMinY = Infinity;
         let dataMaxY = -Infinity;
         
-        for (let yVar of this.yVars) {
+        for (let yVar of this.config.yVars) {
             for (let table of allTables) {
-                const xCol = findColIndex(this.xVar, table);
+                const xCol = findColIndex(this.config.xVar, table);
                 const yCol = findColIndexOrNull(yVar, table);
                 if (yCol == null) {
                     // This table does not have this yVar, but may have other y
