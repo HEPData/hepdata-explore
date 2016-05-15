@@ -136,7 +136,7 @@
                     },
                     leak: autocomplete.leakSuggestionElementHandler(suggestion)
                 " tabindex="0">
-                <b data-bind="text: suggestion.match.name"></b>
+                <b data-bind="text: suggestion.name"></b>
             </li>
             <% }) %>
         </ul>
@@ -159,6 +159,8 @@
         <tr>
             <th>x axis</th>
             <td class="text-nowrap">
+                <!-- breaks if this <pre> is removed. unknown reason -->
+                <pre><%= JSON.stringify(autocompleteXVar.suggestions) %></pre>
 
                 <hep-bubble-focus>
 
@@ -167,7 +169,7 @@
                         event: {keydown: autocompleteXVar.keyPressed},
                         hasFocus: true,
                     ">
-                    <hep-bubble params="element: print($element)">
+                    <hep-bubble params="element: $element">
                         <div data-bind="template: {
                             name: 'variableAutocomplete',
                             data: {
