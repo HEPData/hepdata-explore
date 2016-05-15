@@ -5,6 +5,7 @@ import {observable} from "../decorators/observable";
 const KEY_ARROW_DOWN = 40;
 const KEY_ARROW_UP = 38;
 const KEY_TAB = 9;
+const KEY_ENTER = 13;
 
 /** Simple integer modulo for JavaScript so that
  *   mod(8, 8) = 0
@@ -106,6 +107,10 @@ export class AutocompleteService<SuggestionType> {
         }
     }
 
+    /**
+     * Reusable key event handler. Handles selection with Tab and arrow keys.
+     * Returns false iif a matching event is handled.
+     */
     @bind()
     public keyPressed(component: any, event: KeyboardEvent) {
         // Both Shift+Tab and Ctrl+Tab go to the previous suggestion
@@ -124,6 +129,19 @@ export class AutocompleteService<SuggestionType> {
             // Enter key is also bubbled, triggering submit event, which is
             // handled elsewhere.
             return true;
+        }
+    }
+
+    /** Like keyPressed(), but also handles the enter key instead of relying in
+     * form submit.
+     */
+    @bind()
+    public keyPressedHandleEnter(component: any, event: KeyboardEvent) {
+        if (event.keyCode == KEY_ENTER) {
+            this.acceptDefault();
+            return false;
+        } else {
+            return this.keyPressed(component, event);
         }
     }
 

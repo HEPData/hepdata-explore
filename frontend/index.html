@@ -166,7 +166,7 @@
 
                             <input data-bind="
                                 textInput: ko.getObservable(xVar, 'fieldValue'),
-                                event: {keydown: autocompleteXVar.keyPressed},
+                                event: {keydown: autocompleteXVar.keyPressedHandleEnter},
                                 hasFocus: true,
                             ">
                             <hep-bubble params="element: $element, width: 500">

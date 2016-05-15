@@ -63,6 +63,7 @@ export class CustomPlotVM {
         keyFn: (s: VariableChoice) => s.name,
         maxSuggestions: 5,
         suggestionClickedFn: (xVar: VariableChoice) => {
+            this.xVar.fieldValue = xVar.name;
             this.xVar.cleanValue = xVar.name;
         },
     });
