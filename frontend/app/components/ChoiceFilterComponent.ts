@@ -6,26 +6,13 @@ import {app} from "../AppViewModel";
 import {calculateComplementaryFilter} from "../utils/complementaryFilter";
 import {bind} from "../decorators/bind";
 import {observable} from "../decorators/observable";
+import {variableTokenizer} from "../utils/variableTokenizer";
 
 interface ChoiceSuggestion {
     suggestedValue: string;
     freqDividedByModeFullDB: number;
     absoluteFrequencyFullDB: number;
 }
-
-/* Lunr variable tokenizer */
-const variableSeparator = /\W+/;
-function variableTokenizer(obj: any) {
-    if (!arguments.length || obj == null || obj == undefined) {
-        return [];
-    } 
-    if (Array.isArray(obj)) {
-        return obj.map(t => lunr.utils.asString(t).toLowerCase())
-    }
-
-    return obj.toString().trim().toLowerCase().split(variableSeparator)
-}
-lunr.tokenizer.registerFunction(variableTokenizer, 'variableTokenizer');
 
 @KnockoutComponent('choice-filter', {
     template: { fromUrl: 'choice-filter.html' },

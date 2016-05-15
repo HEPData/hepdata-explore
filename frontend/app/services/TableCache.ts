@@ -51,6 +51,17 @@ class TableCache {
                     variableNames.indexOf(yVar) != -1;
         });
     }
+
+    public getAllVariableNames(): Set<string> {
+        const ret = new Set<string>();
+        for (let varName of this.tablesByDepVar.keys()) {
+            ret.add(varName);
+        }
+        for (let varName of this.tablesByIndepVar.keys()) {
+            ret.add(varName);
+        }
+        return ret;
+    }
 }
 
 export = TableCache;

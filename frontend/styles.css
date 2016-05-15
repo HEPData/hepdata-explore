@@ -571,3 +571,20 @@ img.bubble-tail {
 .custom-plot th {
     vertical-align: top;
 }
+
+/* CSS transforms break fixed positioning, so I avoid them in order not to
+ break bubbles.*/
+.modal.in .modal-dialog {
+    -webkit-transform: none !important;
+    -moz-transform: none !important;
+    -ms-transform: none !important;
+    -o-transform: none !important;
+    transform: none !important;
+}
+.modal.fade .modal-dialog {
+    -webkit-transform: none !important;
+    -moz-transform: none !important;
+    -ms-transform: none !important;
+    -o-transform: none !important;
+    transform: none !important;
+}
