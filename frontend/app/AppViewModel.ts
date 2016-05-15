@@ -84,7 +84,7 @@ export class AppViewModel {
         // TODO A bit quirky... should add a loading screen or something
         this.loadNewHash(location.hash)
             .then(() => {
-                // this.showEditPlotDialog(this.plotPool.plots[0]);
+                this.showEditPlotDialog(this.plotPool.plots[0]);
                 return null;
             })
     }
@@ -318,13 +318,13 @@ export class AppViewModel {
         }
     }
 
-    public loadNewHash(hash: string) {
+    public loadNewHash(hash: string): Promise<PublicationTable[]> {
         const match = regexStateId.exec(hash);
         if (!match) {
             if (hash != '' && hash != '#') {
                 console.warn('No match on URL hash: ' + hash);
             }
-            return;
+            return this.loadDataPromise;
         }
         const id = match[1];
         return stateStorage.get(id)

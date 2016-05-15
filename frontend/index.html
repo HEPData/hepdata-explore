@@ -38,6 +38,11 @@
                 href: 'dark.css',
             }));
         }
+
+        function log(thing) {
+            console.log.apply(console, arguments);
+            return thing;
+        }
     </script>
 </head>
 <body>
@@ -126,6 +131,35 @@
 
 <script id="customPlot" type="text/html">
 
+    <div data-bind="if: !('error' in $data)">
+        <hep-plot style="float: left" params="
+            plot: plot,
+            tableCache: tableCache
+        "></hep-plot>
+
+
+        <div style="float: left">
+            <table>
+                <tr>
+                    <th>x axis</th>
+                    <td class="text-nowrap">
+                        <pre data-bind="text: log(Object.keys($data))"></pre>
+
+                    </td>
+                </tr>
+                <tr>
+                    <th>y axis</th>
+                    <td data-bind="foreach: yVars">
+                        <div class="text-nowrap">
+                            <input data-bind="value: cleanValue">
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="clear: both"></div>
+    </div>
 
 </script>
 

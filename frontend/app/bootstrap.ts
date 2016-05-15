@@ -13,8 +13,3 @@ window.onhashchange = function () {
 export = app;
 
 ko.applyBindings(app);
-
-(<any>window).print = function print(first: any, ...rest: any[]) {
-    console.log(first, ...rest);
-    return first;
-};
