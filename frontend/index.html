@@ -130,7 +130,23 @@
 </script>
 
 <script id="choiceFilterAutocomplete" type="text/html">
-
+    <ul class="suggestions" data-bind="foreach: autocomplete.suggestions">
+        <li class="suggestion"
+            data-bind="
+                css: {
+                    selected: ($index() == $parent.autocomplete.selectedSuggestionIx)
+                },
+                event: {
+                    mousedown: $parent.autocomplete.koMouseDownHandler($data)
+                }">
+            <div class="bar total" data-bind="style: {
+                width: (freqDividedByModeFullDB * 100 + '%')
+            }"></div>
+            <div class="suggested-value" data-bind="text: suggestedValue"></div>
+            <div class="absolute-freq" data-bind="text: recordCountFormat(absoluteFrequencyFullDB)"></div>
+            <div style="clear: both"></div>
+        </li>
+    </ul>
 </script>
 
 <script id="newFilterAutocomplete" type="text/html">
