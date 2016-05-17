@@ -55,26 +55,24 @@ export class AppViewModel {
     customPlotVM: Option<CustomPlotVM> = new None<CustomPlotVM>();
 
     @computedObservable()
-    get applicationState(): StateDump {
+    get appState(): StateDump {
         return {
             version: 1,
             filter: this.rootFilter ? this.rootFilter.dump() : null,
         };
     }
 
-    private appState: Rx.Observable<StateDump>;
-
     constructor() {
         this.plotPool = new PlotPool(this.tableCache);
 
-        this.applicationState;
-        this.appState = (<KnockoutObservable<StateDump>>
-            ko.getObservable(this, 'applicationState'))
+        const appState$ = (<KnockoutObservable<StateDump>>
+            ko.getObservable(this, 'appState'))
             .toObservableWithReplyLatest();
 
-        const locationHash = rxObservableFromHash();
+        const locationHash$ = rxObservableFromHash();
+
         // For every hash we get in the URL bar
-        locationHash
+        locationHash$
             // Keep those that are valid
             .filter(AppViewModel.isValidHash)
             // Fetch their associated state from the state server
@@ -85,8 +83,8 @@ export class AppViewModel {
             // Load them in the application
             .forEach(this.loadStateDump);
 
-        locationHash
-            // Take the first hash the user hash when the page is loaded
+        locationHash$
+            // Take the first hash the user has when the page is loaded
             .take(1)
             // If it's an empty or invalid hash, load a default state
             .forEach((hash) => {
@@ -96,7 +94,7 @@ export class AppViewModel {
             });
 
         // For every state of the application
-        this.appState
+        appState$
             // Serialize it
             .map(stableStringify)
             // If this state is different from the previous one
@@ -112,7 +110,7 @@ export class AppViewModel {
             });
 
         // For every state of the application
-        this.appState
+        appState$
             // If it has set filter
             .filter((it) => it.filter != null)
             // And the filter has changed from the last time
