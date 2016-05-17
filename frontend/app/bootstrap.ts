@@ -4,10 +4,6 @@
 // });
 
 import {app} from "./AppViewModel";
-window.onhashchange = function () {
-    console.log('User changed hash: ' + location.hash);
-    app.loadNewHash(location.hash);
-};
 
 (<any>window).app = app;
 export = app;

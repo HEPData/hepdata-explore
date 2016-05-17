@@ -25,6 +25,9 @@
     <script src="lib/setImmediate.js"></script>
     <script src="lib/bootstrap.js"></script>
     <script src="lib/knockstrap.js"></script>
+    <script src="lib/rx.all.js"></script>
+    <script src="lib/rx.dom.js"></script>
+    <script src="lib/knockout.rx.js"></script>
     <link rel="stylesheet" href="invenio.css">
     <link href='https://fonts.googleapis.com/css?family=Noto+Sans' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic' rel='stylesheet' type='text/css'>
@@ -67,7 +70,7 @@
 
 <div class="explore-body">
 
-    <div class="sidebar">
+    <div class="sidebar" data-bind="if: rootFilter != null">
 
         <filter-shell params="{filter: rootFilter}"></filter-shell>
 
@@ -75,7 +78,7 @@
 
 
     <div class="visualization-box">
-        <div id="visualization" data-bind="visible: !firstLoad || !isLoading()">
+        <div id="visualization" data-bind="visible: true">
             <div id="variable-charts">
                 <hep-plot-pool params="
                     plotPool: plotPool,
@@ -83,20 +86,20 @@
                 "></hep-plot-pool>
             </div>
         </div>
-        <div id="visualization-loading" data-bind="visible: firstLoad && isLoading()">
+        <div id="visualization-loading" data-bind="visible: false">
             <div class="loading-box">
                 <h2>Please wait...</h2>
-                <div>
-                    <i id="loading-downloading"
-                       class="fa fa-arrow-right loading-arrow"></i>
-                    Downloading data
-                </div>
-                <div>
-                    <i id="loading-processing"
-                       class="fa fa-arrow-right loading-arrow"
-                       data-bind="style: {visibility: isRendering() ? 'visible' : 'hidden'}"></i>
-                    Rendering data
-                </div>
+                <!--<div>-->
+                    <!--<i id="loading-downloading"-->
+                       <!--class="fa fa-arrow-right loading-arrow"></i>-->
+                    <!--Downloading data-->
+                <!--</div>-->
+                <!--<div>-->
+                    <!--<i id="loading-processing"-->
+                       <!--class="fa fa-arrow-right loading-arrow"-->
+                       <!--data-bind="style: {visibility: isRendering() ? 'visible' : 'hidden'}"></i>-->
+                    <!--Rendering data-->
+                <!--</div>-->
             </div>
         </div>
     </div>

@@ -27,6 +27,9 @@ import {bind} from "./decorators/bind";
 import {CustomPlotVM} from "./components/CustomPlotVM";
 import {observable} from "./decorators/observable";
 import "decorators/computedObservable";
+import {computedObservable} from "./decorators/computedObservable";
+import {rxObservableFromPromise} from "./rx/rxObservableFromPromise";
+import {rxObservableFromHash, getCurrentHash} from "./rx/rxObservableFromHash";
 
 declare function stableStringify(thing: any): string;
 
@@ -36,31 +39,14 @@ function screenUpdated() {
     });
 }
 
-enum ProcessingState {
-    Done,
-    Downloading,
-    Rendering,
-}
-
-const regexStateId = /^#([\w1-9]+)$/;
-
 export class AppViewModel {
     @observable()
-    rootFilter: Filter;
-
-    currentStateDump: KnockoutComputed<string>
-
-    @observable()
-    processingState: ProcessingState = ProcessingState.Done;
+    rootFilter: Filter = null;
 
     tableCache = new TableCache;
 
     @observable()
     plotPool: PlotPool;
-
-    // The 'loading' screen only appears on the first data load since the page started
-    @observable()
-    firstLoad = true;
 
     @observable()
     customPlotVisible = false;
@@ -68,60 +54,75 @@ export class AppViewModel {
     @observable()
     customPlotVM: Option<CustomPlotVM> = new None<CustomPlotVM>();
 
+    @computedObservable()
+    get applicationState(): StateDump {
+        return {
+            version: 1,
+            filter: this.rootFilter ? this.rootFilter.dump() : null,
+        };
+    }
+
+    private appState: Rx.Observable<StateDump>;
+
     constructor() {
         this.plotPool = new PlotPool(this.tableCache);
-        this.rootFilter = new AllFilter([
-            new IndepVarFilter('PT (GEV)'),
-            // new DepVarFilter('D(N)/DPT (c/GEV)'),
-            // new CMEnergiesFilter()
-        ]);
 
-        this.currentStateDump = ko.computed(this.dumpApplicationState);
-        this.currentStateDump.subscribe(this.updatedStateDump);
+        this.appState = (<KnockoutObservable<StateDump>>
+            ko.getObservable(this, 'applicationState')).toObservable();
 
-        // this.loadData();
+        const locationHash = rxObservableFromHash();
+        // For every hash we get in the URL bar
+        locationHash
+            // Keep those that are valid
+            .filter(AppViewModel.isValidHash)
+            // Fetch their associated state from the state server
+            .map(this.fetchStateDumpFromHash)
+            .map(rxObservableFromPromise)
+            // Discard old responses received out of order
+            .switch()
+            // Load them in the application
+            .forEach(this.loadStateDump);
 
-        // TODO A bit quirky... should add a loading screen or something
-        this.loadNewHash(location.hash)
-            .then(() => {
-                this.showEditPlotDialog(this.plotPool.plots[0]);
-                return null;
-            })
-    }
+        locationHash
+            // Take the first hash the user hash when the page is loaded
+            .take(1)
+            // If it's an empty or invalid hash, load a default state
+            .forEach((hash) => {
+                if (!AppViewModel.isValidHash(hash)) {
+                    this.loadStateDump(AppViewModel.getDefaultState());
+                }
+            });
 
-    isLoading() {
-        return this.processingState != ProcessingState.Done;
-    }
+        // For every state of the application
+        this.appState
+                .do(console.log.bind(console))
+            // Serialize it
+            .map(stableStringify)
+            // If this state is different from the previous one
+            .distinctUntilChanged()
+            // Calculate a new URL hash from this state dump
+            .map((stateDump: string) => [stateDump, customUrlHash(stateDump)])
+            // If the hash differs from the current one
+            .filter(([stateDump, hash]) => hash != getCurrentHash())
+            // Update the browser history and persist the new state to the server
+            .forEach(([stateDump, hash]) => {
+                history.pushState(null, undefined, '#' + hash);
+                stateStorage.put(hash, stateDump);
+            });
 
-    isRendering() {
-        return this.processingState == ProcessingState.Rendering;
-    }
-
-    @bind()
-    private dumpApplicationState(): string {
-        const state: StateDump = {
-            version: 1,
-            filter: this.rootFilter.dump()
-        };
-        return stableStringify(state);
-    }
-
-    private loadDataPromise: Promise<PublicationTable[]> = Promise.resolve(null);
-
-    private loadData() {
-        this.loadDataPromise.cancel();
-        this.processingState = ProcessingState.Downloading;
-
-        this.loadDataPromise = elastic.fetchFilteredData(this.rootFilter)
-            .then((tables: PublicationTable[]) => {
-                this.processingState = ProcessingState.Rendering;
-
-                // Wait one frame for the screen to update
-                return screenUpdated()
-                // Continue with the next step
-                    .then(() => tables);
-            })
-            .then((tables: PublicationTable[]) => {
+        // For every state of the application
+        this.appState
+            // If the filter has changed
+            .map((it)=>it.filter)
+            .distinctUntilChanged(stableStringify)
+            // Run the search on the server
+            .map(Filter.load)
+            .map(elastic.fetchFilteredData)
+            .map(rxObservableFromPromise)
+            // Get the latest response
+            .switch()
+            // Replace the tables and update the plots
+            .forEach((tables: PublicationTable[]) => {
                 var t1 = performance.now();
 
                 this.tableCache.replaceAllTables(tables);
@@ -129,13 +130,7 @@ export class AppViewModel {
 
                 var t2 = performance.now();
                 console.log("Data indexed in %.2f ms.", t2 - t1);
-
-                this.processingState = ProcessingState.Done;
-                this.firstLoad = false;
-
-                return tables;
             });
-        return this.loadDataPromise;
     }
 
     updateUnpinnedPlots() {
@@ -275,33 +270,6 @@ export class AppViewModel {
     }
 
     @bind()
-    private updatedStateDump(stateDump: string)  {
-        // Calculate a new URL hash and persist it to the server
-        // asynchronously.
-        //
-        // We set the urlHash *before* it exists in the server. Hopefully
-        // by the time the user has shared a link the store request will
-        // have succeed.
-
-        const urlHash = customUrlHash(stateDump);
-
-        // skip this if the URL hash already matches the application state (e.g.
-        // after clicking back: loadNewHash() has already been called to fetch
-        // the pertinent data, and as a consequence of it modifying filters this
-        // function has been triggered, but there is no need to change the URL.
-
-        // Moreover, if we did a pushState here, we would have undo but no redo.
-        if (urlHash != this.getCurrentHash().getOrDefault('')) {
-            history.pushState(null, undefined, '#' + urlHash);
-            stateStorage.put(urlHash, stateDump);
-        }
-
-        // Query data with the new filters.
-        // TODO do this only when filter has changed (in the future the
-        // state dump will also have other modifiable information).
-        this.loadDataPromise = this.loadData();
-    }
-
     public loadStateDump(stateDump: StateDump) {
         if (stateDump.version != 1) {
             console.warn('Unknown state dump version: ' + stateDump.version);
@@ -309,29 +277,27 @@ export class AppViewModel {
         this.rootFilter = Filter.load(stateDump.filter);
     }
 
-    public getCurrentHash(): Option<string> {
-        const match = regexStateId.exec(location.hash);
-        if (match) {
-            return new Some(match[1]);
-        } else {
-            return new None<string>();
-        }
+    private static regexStateId = /^([\w1-9]+)$/;
+
+    private static isValidHash(hash): boolean {
+        return !!AppViewModel.regexStateId.exec(hash);
     }
 
-    public loadNewHash(hash: string): Promise<PublicationTable[]> {
-        const match = regexStateId.exec(hash);
-        if (!match) {
-            if (hash != '' && hash != '#') {
-                console.warn('No match on URL hash: ' + hash);
-            }
-            return this.loadDataPromise;
-        }
+    private static getDefaultState(): StateDump {
+        return {
+            version: 1,
+            filter: new AllFilter([
+                new IndepVarFilter('PT (GEV)'),
+            ]).dump(),
+        };
+    }
+
+    @bind()
+    private fetchStateDumpFromHash(hash: string): Promise<StateDump> {
+        const match = AppViewModel.regexStateId.exec(hash);
+        assert(match != null);
         const id = match[1];
-        return stateStorage.get(id)
-            .then((stateDump) => {
-                this.loadStateDump(stateDump);
-                return this.loadDataPromise;
-            });
+        return stateStorage.get(id);
     }
 
     /** Deeply explores the filter tree in search of `oldFilter`. If found,

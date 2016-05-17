@@ -13,9 +13,11 @@
     "jquery": "registry:dt/jquery#1.10.0+20160303223636",
     "knockout": "registry:dt/knockout#3.2.0+20150312193415",
     "knockout.es5": "registry:dt/knockout.es5#0.0.0+20141027175319",
+    "knockout.rx": "registry:dt/knockout.rx#1.0.0+20160317120654",
     "lodash": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/lodash/lodash.d.ts",
     "lunr": "registry:dt/lunr#0.5.4+20140720101328",
     "rx": "registry:dt/rx#0.0.0+20160317120654",
+    "rx-dom": "registry:dt/rx-dom#2.5.3+20160412155140",
     "rx-lite": "registry:dt/rx-lite#0.0.0+20160316171810",
     "rx.async": "registry:dt/rx.async#2.2.28+20160317120654"
   }

@@ -10,6 +10,7 @@ import {Option} from "../base/Option";
 import SomeFilter = require("../filters/SomeFilter");
 import AllFilter = require("../filters/AllFilter");
 import {calculateComplementaryFilter} from "../utils/complementaryFilter";
+import {bind} from "../decorators/bind";
 
 export interface CountAggregationBucket {
     name: string;
@@ -38,6 +39,7 @@ export class Elastic {
         }
     }
 
+    @bind()
     fetchFilteredData(rootFilter: Filter): Promise<PublicationTable[]> {
         const requestData = {
             "size": 100,
