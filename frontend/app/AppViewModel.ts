@@ -67,8 +67,10 @@ export class AppViewModel {
     constructor() {
         this.plotPool = new PlotPool(this.tableCache);
 
+        this.applicationState;
         this.appState = (<KnockoutObservable<StateDump>>
-            ko.getObservable(this, 'applicationState')).toObservable();
+            ko.getObservable(this, 'applicationState'))
+            .toObservableWithReplyLatest();
 
         const locationHash = rxObservableFromHash();
         // For every hash we get in the URL bar
@@ -95,7 +97,6 @@ export class AppViewModel {
 
         // For every state of the application
         this.appState
-                .do(console.log.bind(console))
             // Serialize it
             .map(stableStringify)
             // If this state is different from the previous one
@@ -112,8 +113,10 @@ export class AppViewModel {
 
         // For every state of the application
         this.appState
-            // If the filter has changed
-            .map((it)=>it.filter)
+            // If it has set filter
+            .filter((it) => it.filter != null)
+            // And the filter has changed from the last time
+            .map((it) => it.filter)
             .distinctUntilChanged(stableStringify)
             // Run the search on the server
             .map(Filter.load)
@@ -121,7 +124,8 @@ export class AppViewModel {
             .map(rxObservableFromPromise)
             // Get the latest response
             .switch()
-            // Replace the tables and update the plots
+            // Replace the tables with the ones received from the server and
+            // update the plots
             .forEach((tables: PublicationTable[]) => {
                 var t1 = performance.now();
 
