@@ -30,6 +30,7 @@ import "decorators/computedObservable";
 import {computedObservable} from "./decorators/computedObservable";
 import {rxObservableFromPromise} from "./rx/rxObservableFromPromise";
 import {rxObservableFromHash, getCurrentHash} from "./rx/rxObservableFromHash";
+import "rx/setLoadingOperator";
 
 declare function stableStringify(thing: any): string;
 
@@ -53,6 +54,9 @@ export class AppViewModel {
 
     @observable()
     customPlotVM: Option<CustomPlotVM> = new None<CustomPlotVM>();
+
+    @observable()
+    loadingNewData = false;
 
     @computedObservable()
     get appState(): StateDump {
@@ -78,8 +82,8 @@ export class AppViewModel {
             // Fetch their associated state from the state server
             .map(this.fetchStateDumpFromHash)
             .map(rxObservableFromPromise)
-            // Discard old responses received out of order
             .switch()
+            // Discard old responses received out of order
             // Load them in the application
             .forEach(this.loadStateDump);
 
@@ -120,6 +124,7 @@ export class AppViewModel {
             .map(Filter.load)
             .map(elastic.fetchFilteredData)
             .map(rxObservableFromPromise)
+            .setLoading((loading) => {this.loadingNewData = loading; console.log(loading);})
             // Get the latest response
             .switch()
             // Replace the tables with the ones received from the server and

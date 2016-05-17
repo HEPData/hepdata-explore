@@ -62,6 +62,9 @@
             <span class="number-display" data-bind="text: publicationCount"></span>
             publications.
         </li>
+        <li data-bind="visible: loadingNewData">
+            Loading...
+        </li>
         <li class="pull-right crammed-button">
             <a class="btn btn-primary" href="#">Download selection (YAML)</a>
         </li>
