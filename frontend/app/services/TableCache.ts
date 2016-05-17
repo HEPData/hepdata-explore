@@ -1,7 +1,9 @@
 import {PublicationTable} from "../base/dataFormat";
 import {RuntimeError} from "../base/errors";
+import {observable} from "../decorators/observable";
 
 class TableCache {
+    @observable()
     public allTables: PublicationTable[];
 
     tablesByIndepVar: Map<string, PublicationTable[]>;

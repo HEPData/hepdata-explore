@@ -57,7 +57,10 @@
     <ul>
         <li id="topbar-title">Data Query Engine</li>
         <li id="data-point-count">
-            <span class="number-display">0</span> data points found.
+            <span class="number-display" data-bind="text: tableCount"></span>
+            tables found in
+            <span class="number-display" data-bind="text: publicationCount"></span>
+            publications.
         </li>
         <li class="pull-right crammed-button">
             <a class="btn btn-primary" href="#">Download selection (YAML)</a>

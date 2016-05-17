@@ -335,5 +335,16 @@ export class AppViewModel {
     public addCustomPlotDialog() {
         console.log('Not yet implemented');
     }
+
+    @computedObservable()
+    get tableCount() {
+        return this.tableCache.allTables.length;
+    }
+
+    @computedObservable()
+    get publicationCount() {
+        return _.uniqBy(this.tableCache.allTables,
+            (t) => t.publication.inspire_record).length;
+    }
 }
 export const app = new AppViewModel();
