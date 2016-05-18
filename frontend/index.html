@@ -171,18 +171,17 @@
                 <tr>
                     <th>x axis</th>
                     <td class="text-nowrap">
-                        <hep-bubble-focus>
-
+                        <hep-bubble-focus data-bind="with: xVar">
                             <input data-bind="
-                                textInput: ko.getObservable(xVar, 'fieldValue'),
-                                event: {keydown: autocompleteXVar.keyPressedHandleEnter},
+                                textInput: ko.getObservable($data, 'fieldValue'),
+                                event: {keydown: autocomplete.keyPressedHandleEnter},
                                 hasFocus: true,
                             ">
                             <hep-bubble params="element: $element, width: 500">
                                 <div data-bind="template: {
                                     name: 'variableAutocomplete',
                                     data: {
-                                        autocomplete: $parent.autocompleteXVar,
+                                        autocomplete: $parent.autocomplete,
                                         maxHeight: 120,
                                     }
                                 }"></div>
@@ -195,7 +194,23 @@
                     <th>y axis</th>
                     <td data-bind="foreach: yVars">
                         <div class="text-nowrap">
-                            <input data-bind="value: cleanValue">
+                            <hep-bubble-focus>
+                                <input data-bind="
+                                    textInput: ko.getObservable($data, 'fieldValue'),
+                                    event: {keydown: autocomplete.keyPressedHandleEnter},
+                                    hasFocus: true,
+                                ">
+                                <hep-bubble params="element: $element, width: 500">
+                                    <div data-bind="template: {
+                                        name: 'variableAutocomplete',
+                                        data: {
+                                            autocomplete: $parent.autocomplete,
+                                            maxHeight: 120,
+                                        }
+                                    }"></div>
+                                </hep-bubble>
+
+                            </hep-bubble-focus>
                         </div>
                     </td>
                 </tr>

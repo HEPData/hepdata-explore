@@ -7,6 +7,13 @@ import {computedObservable} from "../decorators/computedObservable";
 import {variableTokenizer} from "../utils/variableTokenizer";
 import {bind} from "../decorators/bind";
 
+
+export class VariableChoice {
+    position: number;
+    name: string;
+}
+
+
 export class VariableVM {
     /**
      * Contains the value that is in the bound input field and is updated
@@ -22,51 +29,48 @@ export class VariableVM {
     @observable()
     cleanValue: string;
 
-    /**
-     * This is not as crazy as it looks like. It's actually used like this:
-     * new VariableViewModel({fieldValue: '', cleanValue: ''})
-     */
-    constructor(values: VariableVM) {
-        for (let k in values) {
-            this[k] = values[k];
-        }
+    autocomplete: AutocompleteService<VariableChoice>;
+
+    constructor(opts: {
+        initialValue: string,
+        searchFn: (query: string) => Promise<VariableChoice[]>
+    }) {
+        this.fieldValue = this.cleanValue = opts.initialValue;
+
+        this.autocomplete = new AutocompleteService<VariableChoice>({
+            koQuery: ko.getObservable(this, 'fieldValue'),
+            searchFn: opts.searchFn,
+            rankingFn: (s: VariableChoice) => -s.name.length,
+            keyFn: (s: VariableChoice) => s.name,
+            maxSuggestions: 100,
+            suggestionClickedFn: (suggestion: VariableChoice) => {
+                this.fieldValue = suggestion.name;
+                this.cleanValue = suggestion.name;
+            },
+        });
     }
+
+
 }
 
-export class VariableChoice {
-    position: number;
-    name: string;
-}
 
 export class CustomPlotVM {
     @observable()
     xVar: VariableVM = new VariableVM({
-        fieldValue: this.plot.config.xVar,
-        cleanValue: this.plot.config.xVar,
+        initialValue: this.plot.config.xVar,
+        searchFn: this.getXCompletion,
     });
 
     @observable()
     yVars: VariableVM[] = map(this.plot.config.yVars,
         (varName) => new VariableVM({
-            fieldValue: varName,
-            cleanValue: varName,
+            initialValue: varName,
+            searchFn: this.getYCompletion,
         }))
         .concat([new VariableVM({
-            fieldValue: '',
-            cleanValue: '',
+            initialValue: '',
+            searchFn: this.getYCompletion,
         })]);
-
-    autocompleteXVar = new AutocompleteService<VariableChoice>({
-        koQuery: ko.getObservable(this.xVar, 'fieldValue'),
-        searchFn: this.getXCompletion,
-        rankingFn: (s: VariableChoice) => -s.name.length,
-        keyFn: (s: VariableChoice) => s.name,
-        maxSuggestions: 100,
-        suggestionClickedFn: (xVar: VariableChoice) => {
-            this.xVar.fieldValue = xVar.name;
-            this.xVar.cleanValue = xVar.name;
-        },
-    });
 
     // Dummy computed used to track when xVar or yVars are modified.
     @computedObservable()
@@ -159,7 +163,29 @@ export class CustomPlotVM {
     }
 
     @bind()
-    getYCompletion(query: string) {
+    getYCompletion(query: string): Promise<VariableChoice[]> {
+        const allVariables = Array.from(this.tableCache.getAllVariableNames());
 
+        const allVariablesIndex = lunr(function () {
+            this.field('value');
+            this.ref('index');
+            this.tokenizer(variableTokenizer);
+        });
+        allVariablesIndex.pipeline.remove(lunr.stopWordFilter);
+
+        allVariables.forEach((value, index) => {
+            allVariablesIndex.add({
+                value: value,
+                index: index,
+            });
+        });
+
+        const results = allVariablesIndex.search(query)
+            .map((result, index) => ({
+                position: index,
+                name: allVariables[result.ref],
+            }));
+
+        return Promise.resolve(results);
     }
 }
