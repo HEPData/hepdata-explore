@@ -19,6 +19,7 @@
     "rx": "registry:dt/rx#0.0.0+20160317120654",
     "rx-dom": "registry:dt/rx-dom#2.5.3+20160412155140",
     "rx-lite": "registry:dt/rx-lite#0.0.0+20160316171810",
-    "rx.async": "registry:dt/rx.async#2.2.28+20160317120654"
+    "rx.async": "registry:dt/rx.async#2.2.28+20160317120654",
+    "rx.binding-lite": "registry:dt/rx.binding-lite#0.0.0+20160316171810"
   }
 }

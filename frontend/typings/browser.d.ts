@@ -14,4 +14,5 @@
 /// <reference path="browser/ambient/rx-dom/index.d.ts" />
 /// <reference path="browser/ambient/rx-lite/index.d.ts" />
 /// <reference path="browser/ambient/rx.async/index.d.ts" />
+/// <reference path="browser/ambient/rx.binding-lite/index.d.ts" />
 /// <reference path="browser/ambient/rx/index.d.ts" />

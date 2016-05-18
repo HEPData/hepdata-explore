@@ -1,4 +1,5 @@
 import noop = Rx.helpers.noop;
+import Observable = Rx.Observable;
 
 declare namespace Rx {
     export interface Observable<T> {
@@ -6,32 +7,42 @@ declare namespace Rx {
     }
 }
 
-Rx.Observable.prototype.setLoading = function setLoading<T>(loadingHandler: (loading: boolean) => void) {
-    const source$ = <Rx.Observable<Rx.Observable<T>>>this;
-
-    const loadingStatus$ = new Rx.Subject<boolean>();
-    loadingStatus$.onNext(false);
-
+function setLoading<T>(
+    source: Rx.Observable<Rx.Observable<T>>,
+    loadingHandler: (loading: boolean) => void
+) : Rx.Observable<Rx.Observable<T>>
+{
     let latestRequestNumber = 0;
-    let observableToRequestNumber = new WeakMap<Rx.Observable<T>,number>();
 
-    source$.subscribe(function onNext(request: Rx.Observable<T>) {
-        // A request have been sent
-        const requestNumber = ++latestRequestNumber;
-        observableToRequestNumber.set(request, requestNumber);
-        loadingStatus$.onNext(true);
-
-        function onCompletedOrError() {
-            loadingStatus$.onNext(latestRequestNumber > requestNumber);
-        }
-        request.subscribe(noop, onCompletedOrError, onCompletedOrError);
-    }, Rx.helpers.defaultError, function onCompleted() {
-        loadingStatus$.onCompleted();
-    });
+    const loadingStatus$ = new Rx.ReplaySubject<boolean>();
+    loadingStatus$.onNext(false);
 
     loadingStatus$
         .distinctUntilChanged()
-        .forEach(loadingHandler);
+        .subscribe(loadingHandler);
 
-    return source$;
+    return Rx.Observable.create<Observable<T>>((subscriber) => {
+        return source.subscribe(
+            (request) => {
+                const requestNumber = ++latestRequestNumber;
+                loadingStatus$.onNext(true);
+
+                subscriber.onNext(Rx.Observable.create<T>(nestedSubscriber => {
+                    return request.subscribe(
+                        (value) => nestedSubscriber.onNext(value),
+                        (err) => nestedSubscriber.onError(err),
+                        () => {
+                            loadingStatus$.onNext(latestRequestNumber > requestNumber);
+                            nestedSubscriber.onCompleted();
+                        }
+                    )
+                }));
+            },
+            (err) => subscriber.onError(err),
+            () => subscriber.onCompleted()
+        )
+    })
+}
+Rx.Observable.prototype.setLoading = function(loadingHandler: (loading: boolean) => void) {
+    return setLoading(this, loadingHandler);
 };
