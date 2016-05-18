@@ -14,25 +14,28 @@ function setLoading<T>(
 {
     let latestRequestNumber = 0;
 
-    const loadingStatus$ = new Rx.ReplaySubject<boolean>();
-    loadingStatus$.onNext(false);
-
-    loadingStatus$
-        .distinctUntilChanged()
-        .subscribe(loadingHandler);
+    let loadingStatus = false;
+    loadingHandler(loadingStatus);
 
     return Rx.Observable.create<Observable<T>>((subscriber) => {
         return source.subscribe(
             (request) => {
                 const requestNumber = ++latestRequestNumber;
-                loadingStatus$.onNext(true);
+                if (loadingStatus == false) {
+                    loadingStatus = true;
+                    loadingHandler(loadingStatus);
+                }
 
                 subscriber.onNext(Rx.Observable.create<T>(nestedSubscriber => {
                     return request.subscribe(
                         (value) => nestedSubscriber.onNext(value),
                         (err) => nestedSubscriber.onError(err),
                         () => {
-                            loadingStatus$.onNext(latestRequestNumber > requestNumber);
+                            const newLoadingStatus = latestRequestNumber > requestNumber;
+                            if (newLoadingStatus != loadingStatus) {
+                                loadingStatus = newLoadingStatus;
+                                loadingHandler(loadingStatus);
+                            }
                             nestedSubscriber.onCompleted();
                         }
                     )
