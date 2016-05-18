@@ -59,9 +59,9 @@ export class CustomPlotVM {
     autocompleteXVar = new AutocompleteService<VariableChoice>({
         koQuery: ko.getObservable(this.xVar, 'fieldValue'),
         searchFn: this.getXCompletion,
-        rankingFn: (s: VariableChoice) => s.position,
+        rankingFn: (s: VariableChoice) => -s.name.length,
         keyFn: (s: VariableChoice) => s.name,
-        maxSuggestions: 5,
+        maxSuggestions: 100,
         suggestionClickedFn: (xVar: VariableChoice) => {
             this.xVar.fieldValue = xVar.name;
             this.xVar.cleanValue = xVar.name;
