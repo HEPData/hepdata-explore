@@ -49,8 +49,6 @@ export class VariableVM {
             },
         });
     }
-
-
 }
 
 
@@ -83,10 +81,6 @@ export class CustomPlotVM {
         return ++this._counter;
     }
     private _counter = 0;
-
-    // xVarCompletion = new AutocompleteService({
-    //    koQuery:
-    // });
 
     constructor(public plot: Plot, public tableCache: TableCache) {
         ko.getObservable(this, '_yVarsChanged').subscribe(() => {
