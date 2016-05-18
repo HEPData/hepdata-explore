@@ -124,7 +124,7 @@ export class AppViewModel {
             .map(Filter.load)
             .map(elastic.fetchFilteredData)
             .map(rxObservableFromPromise)
-            .setLoading((loading) => {this.loadingNewData = loading; console.log(loading);})
+            .setLoading((loading) => {this.loadingNewData = loading})
             // Get the latest response
             .switch()
             // Replace the tables with the ones received from the server and
