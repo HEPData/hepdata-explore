@@ -131,7 +131,7 @@
 }"></div>
 
 <script id="variableAutocomplete" type="text/html">
-    <div class="scroll-pane" style="max-height: 300px"
+    <div class="scroll-pane" style="max-height: 300px" tabindex="-1"
         data-bind="
             if: autocomplete.suggestions.length > 0,
             leak: autocomplete.leakScrollPaneHandler()
@@ -146,7 +146,7 @@
                         mousedown: $parent.autocomplete.koMouseDownHandler($data)
                     },
                     leak: $parent.autocomplete.leakSuggestionElementHandler($data)
-                " tabindex="0">
+                ">
                 <b data-bind="text: name"></b>
             </li>
         </ul>
@@ -228,7 +228,7 @@
 </script>
 
 <script id="newFilterAutocomplete" type="text/html">
-    <div class="scroll-pane" style="max-height: 300px"
+    <div class="scroll-pane" style="max-height: 300px" tabindex="-1"
         data-bind="
             if: autocomplete.suggestions.length > 0,
             leak: autocomplete.leakScrollPaneHandler()
@@ -243,7 +243,7 @@
                         mousedown: $parent.autocomplete.koMouseDownHandler($data)
                     },
                     leak: $parent.autocomplete.leakSuggestionElementHandler($data)
-                " tabindex="0">
+                ">
                 <b data-bind="text: match.name"></b>
                 <p data-bind="html: match.description"></p>
             </li>

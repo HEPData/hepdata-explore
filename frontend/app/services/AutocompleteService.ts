@@ -116,12 +116,10 @@ export class AutocompleteService<SuggestionType> {
         // Both Shift+Tab and Ctrl+Tab go to the previous suggestion
         const modifier = event.shiftKey || event.ctrlKey;
 
-        if (event.keyCode == KEY_ARROW_DOWN ||
-            (event.keyCode == KEY_TAB && !modifier)) {
+        if (event.keyCode == KEY_ARROW_DOWN) {
             this.nextSuggestion();
             return false;
-        } else if (event.keyCode == KEY_ARROW_UP ||
-            (event.keyCode == KEY_TAB && modifier)) {
+        } else if (event.keyCode == KEY_ARROW_UP) {
             this.prevSuggestion();
             return false;
         } else {
