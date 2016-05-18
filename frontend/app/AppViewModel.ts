@@ -113,6 +113,7 @@ export class AppViewModel {
                 stateStorage.put(hash, stateDump);
             });
 
+        let debugOpenEditPlot = true;
         // For every state of the application
         appState$
             // If it has set filter
@@ -137,6 +138,11 @@ export class AppViewModel {
 
                 var t2 = performance.now();
                 console.log("Data indexed in %.2f ms.", t2 - t1);
+
+                if (debugOpenEditPlot) {
+                    debugOpenEditPlot = false;
+                    this.showEditPlotDialog(this.plotPool.plots[0]);
+                }
             });
     }
 
