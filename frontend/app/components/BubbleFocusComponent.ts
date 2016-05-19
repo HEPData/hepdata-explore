@@ -21,8 +21,12 @@ export class BubbleFocusComponent {
     public bubbleKeyHandler(nextHandler: (component: any, ev: KeyboardEvent) => boolean|undefined) {
         return (component: any, ev: KeyboardEvent) => {
             if (this._bubble) {
-                this._bubble.keyHook(ev);
-                return nextHandler(component, ev);
+                const bubbleNext = this._bubble.keyHook(ev);
+                if (bubbleNext) {
+                    return nextHandler(component, ev);
+                } else {
+                    return false;
+                }
             }
         }
     }

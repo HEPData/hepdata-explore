@@ -167,11 +167,16 @@ export class BubbleComponent {
     }
 
     public keyHook(ev: KeyboardEvent) {
-        if (ev.keyCode == KeyCode.Escape || ev.keyCode == KeyCode.Return) {
+        if (ev.keyCode == KeyCode.Escape) {
+            this.$bubbleEvents.onNext(BubbleEvent.EscOrReturn);
+            // Don't bubble (avoid closing modal dialog) [TODO does not work]
+            return false;
+        } else if (ev.keyCode == KeyCode.Return) {
             this.$bubbleEvents.onNext(BubbleEvent.EscOrReturn);
         } else if (ev.char != '') {
             this.$bubbleEvents.onNext(BubbleEvent.CharKey);
         }
+        return true;
     }
 
     private _ticking = false;
