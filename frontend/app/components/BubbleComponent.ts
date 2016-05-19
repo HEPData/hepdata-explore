@@ -110,7 +110,7 @@ export class BubbleComponent {
         });
 
     @computedObservable()
-    get visible(): boolean {
+    get focused(): boolean {
         const element = focusedElement();
         const bubbleRoot = findBubbleFocusAncestor(element);
         if (!bubbleRoot) {
@@ -140,8 +140,10 @@ export class BubbleComponent {
 
         this.side = 'down';
 
-        ko.getObservable(this, 'visible').subscribe((visible: boolean) => {
-            if (visible) {
+        ko.getObservable(this, 'focused').subscribe((focused: boolean) => {
+            this.$bubbleEvents.onNext(focused ? BubbleEvent.FOCUS : BubbleEvent.BLUR);
+
+            if (focused) {
                 const bubbleRoot = findBubbleFocusAncestor(document.activeElement);
                 this._linkedElement = this.findInputField(bubbleRoot);
                 assert(this._linkedElement != null, 'Input field not found');
@@ -158,6 +160,12 @@ export class BubbleComponent {
                 this._scrollableParents = [];
             }
         });
+    }
+
+    public keyHandler(nextHandler: (ev: KeyboardEvent) => boolean|undefined) {
+        return (ev: KeyboardEvent) => {
+            return nextHandler(ev);
+        }
     }
 
     private _ticking = false;
