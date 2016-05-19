@@ -11,7 +11,6 @@ export class BubbleFocusComponent {
     private _bubble: BubbleComponent = null;
 
     constructor(params: any) {
-
     }
 
     public setBubbleComponent(bubble: BubbleComponent) {
@@ -19,11 +18,11 @@ export class BubbleFocusComponent {
         this._bubble = bubble;
     }
 
-    public keyHandler(nextHandler: (ev: KeyboardEvent) => boolean|undefined) {
-        return (ev: KeyboardEvent) => {
+    public bubbleKeyHandler(nextHandler: (component: any, ev: KeyboardEvent) => boolean|undefined) {
+        return (component: any, ev: KeyboardEvent) => {
             if (this._bubble) {
                 this._bubble.keyHandler(ev);
-                return nextHandler(ev);
+                return nextHandler(component, ev);
             }
         }
     }
