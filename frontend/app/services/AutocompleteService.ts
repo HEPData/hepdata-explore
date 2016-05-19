@@ -122,6 +122,10 @@ export class AutocompleteService<SuggestionType> {
         } else if (event.keyCode == KEY_ARROW_UP) {
             this.prevSuggestion();
             return false;
+        } else if (!modifier && (event.keyCode == KEY_TAB)) {
+            this.acceptSelected();
+            // Keep bubbling so the focus jumps to the next field
+            return true;
         } else {
             // Bubble the event so the characters are added to the text box.
             // Enter key is also bubbled, triggering submit event, which is
@@ -136,7 +140,7 @@ export class AutocompleteService<SuggestionType> {
     @bind()
     public keyPressedHandleEnter(component: any, event: KeyboardEvent) {
         if (event.keyCode == KEY_ENTER) {
-            this.acceptDefault();
+            this.acceptSelected();
             return false;
         } else {
             return this.keyPressed(component, event);
@@ -158,7 +162,7 @@ export class AutocompleteService<SuggestionType> {
 
     /** Intended to be used as form submit target */
     @bind()
-    public acceptDefault() {
+    public acceptSelected() {
         const selectedSuggestion = this.getSelectedSuggestion();
         if (selectedSuggestion.isSet()) {
             this.suggestionClickedFn(selectedSuggestion.get());
