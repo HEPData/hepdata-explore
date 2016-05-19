@@ -6,6 +6,7 @@ import {bind} from "../decorators/bind";
 import {observable} from "../decorators/observable";
 import {computedObservable} from "../decorators/computedObservable";
 import {BubbleFocusComponent} from "./BubbleFocusComponent";
+import {KeyCode} from "../utils/KeyCode";
 
 interface Point {
     x: number;
@@ -53,16 +54,16 @@ function findScrollableParents(element: HTMLElement, foundList: HTMLElement[] = 
  *      SELECTED_NO_BUBBLE -------+
  */
 enum BubbleState {
-    UNSELECTED,
-    SELECTED_WITH_BUBBLE,
-    SELECTED_NO_BUBBLE,
+    Unselected,
+    SelectedWithBubble,
+    SelectedNoBubble,
 }
 
 enum BubbleEvent {
-    FOCUS,
-    BLUR,
-    CHAR_KEY,
-    ESC_OR_RETURN,
+    Focus,
+    Blur,
+    CharKey,
+    EscOrReturn,
 }
 
 @KnockoutComponent('hep-bubble', {
@@ -88,24 +89,24 @@ export class BubbleComponent {
 
     private bubbleState$ = this.$bubbleEvents
         .scan((prevState, event) => {
-            if (prevState != BubbleState.UNSELECTED &&
-                event == BubbleEvent.BLUR) {
-                return BubbleState.UNSELECTED;
+            if (event == BubbleEvent.Blur) {
+                return BubbleState.Unselected;
             }
-            if (prevState == BubbleState.UNSELECTED &&
-                event == BubbleEvent.FOCUS) {
-                return BubbleState.SELECTED_WITH_BUBBLE;
+            if (prevState == BubbleState.Unselected &&
+                event == BubbleEvent.Focus) {
+                return BubbleState.SelectedWithBubble;
             }
-            if (prevState == BubbleState.SELECTED_WITH_BUBBLE &&
-                event == BubbleEvent.ESC_OR_RETURN) {
-                return BubbleState.SELECTED_NO_BUBBLE;
+            if (prevState == BubbleState.SelectedWithBubble &&
+                event == BubbleEvent.EscOrReturn) {
+                return BubbleState.SelectedNoBubble;
             }
-            if (prevState == BubbleState.SELECTED_NO_BUBBLE &&
-                event == BubbleEvent.CHAR_KEY) {
-                return BubbleState.SELECTED_WITH_BUBBLE;
+            if (prevState == BubbleState.SelectedNoBubble &&
+                event == BubbleEvent.CharKey) {
+                return BubbleState.SelectedWithBubble;
             }
             return prevState;
-        }, BubbleState.UNSELECTED)
+        }, BubbleState.Unselected)
+        .distinctUntilChanged()
         .forEach(function (x) {
             console.log(x);
         });
@@ -144,7 +145,7 @@ export class BubbleComponent {
         this.side = 'down';
 
         ko.getObservable(this, 'focused').subscribe((focused: boolean) => {
-            this.$bubbleEvents.onNext(focused ? BubbleEvent.FOCUS : BubbleEvent.BLUR);
+            this.$bubbleEvents.onNext(focused ? BubbleEvent.Focus : BubbleEvent.Blur);
 
             if (focused) {
                 const bubbleRoot = findBubbleFocusAncestor(document.activeElement);
@@ -165,8 +166,12 @@ export class BubbleComponent {
         });
     }
 
-    public keyHandler(ev: KeyboardEvent) {
-        console.log(ev);
+    public keyHook(ev: KeyboardEvent) {
+        if (ev.keyCode == KeyCode.Escape || ev.keyCode == KeyCode.Return) {
+            this.$bubbleEvents.onNext(BubbleEvent.EscOrReturn);
+        } else if (ev.char != '') {
+            this.$bubbleEvents.onNext(BubbleEvent.CharKey);
+        }
     }
 
     private _ticking = false;

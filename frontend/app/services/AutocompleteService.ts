@@ -2,10 +2,7 @@ import {assertInstance, assertDefined, assert} from "../utils/assert";
 import {Option, Some, None} from "../base/Option";
 import {bind} from "../decorators/bind";
 import {observable} from "../decorators/observable";
-const KEY_ARROW_DOWN = 40;
-const KEY_ARROW_UP = 38;
-const KEY_TAB = 9;
-const KEY_ENTER = 13;
+import {KeyCode} from "../utils/KeyCode";
 
 /** Simple integer modulo for JavaScript so that
  *   mod(8, 8) = 0
@@ -116,13 +113,13 @@ export class AutocompleteService<SuggestionType> {
         // Both Shift+Tab and Ctrl+Tab go to the previous suggestion
         const modifier = event.shiftKey || event.ctrlKey;
 
-        if (event.keyCode == KEY_ARROW_DOWN) {
+        if (event.keyCode == KeyCode.ArrowDown) {
             this.nextSuggestion();
             return false;
-        } else if (event.keyCode == KEY_ARROW_UP) {
+        } else if (event.keyCode == KeyCode.ArrowUp) {
             this.prevSuggestion();
             return false;
-        } else if (!modifier && (event.keyCode == KEY_TAB)) {
+        } else if (!modifier && (event.keyCode == KeyCode.Tab)) {
             this.acceptSelected();
             // Keep bubbling so the focus jumps to the next field
             return true;
@@ -139,7 +136,7 @@ export class AutocompleteService<SuggestionType> {
      */
     @bind()
     public keyPressedHandleEnter(component: any, event: KeyboardEvent) {
-        if (event.keyCode == KEY_ENTER) {
+        if (event.keyCode == KeyCode.Return) {
             this.acceptSelected();
             return false;
         } else {
