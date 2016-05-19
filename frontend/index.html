@@ -175,7 +175,7 @@
                             <input data-bind="
                                 textInput: ko.getObservable($data, 'fieldValue'),
                                 event: {keydown: autocomplete.keyPressedHandleEnter},
-                                hasFocus: true,
+                                hasFocus: ko.getObservable($data, 'focused'),
                             ">
                             <hep-bubble params="element: $element, width: 500">
                                 <div data-bind="template: {
@@ -198,7 +198,7 @@
                                 <input data-bind="
                                     textInput: ko.getObservable($data, 'fieldValue'),
                                     event: {keydown: autocomplete.keyPressedHandleEnter},
-                                    hasFocus: true,
+                                    hasFocus: ko.getObservable($data, 'focused')
                                 ">
                                 <hep-bubble params="element: $element, width: 500">
                                     <div data-bind="template: {

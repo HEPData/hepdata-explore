@@ -6,6 +6,7 @@ import {map} from "../utils/map";
 import {computedObservable} from "../decorators/computedObservable";
 import {variableTokenizer} from "../utils/variableTokenizer";
 import {bind} from "../decorators/bind";
+import IDisposable = Rx.IDisposable;
 
 
 export class VariableChoice {
@@ -28,6 +29,9 @@ export class VariableVM {
      */
     @observable()
     cleanValue: string;
+
+    @observable()
+    focused: boolean = false;
 
     autocomplete: AutocompleteService<VariableChoice>;
 
@@ -72,20 +76,56 @@ export class CustomPlotVM {
 
     // Dummy computed used to track when xVar or yVars are modified.
     @computedObservable()
-    private get _yVarsChanged() {
+    private get _cleanValuesChanged() {
         this.xVar.cleanValue;
-        this.yVars;
         for (let item of this.yVars) {
             item.cleanValue;
         }
-        return ++this._counter;
+        return ++this._counterCleanValues;
     }
-    private _counter = 0;
+    private _counterCleanValues = 0;
+
+    @computedObservable()
+    private get _fieldValuesChanged() {
+        this.xVar.fieldValue;
+        this.xVar.focused;
+        for (let item of this.yVars) {
+            item.fieldValue;
+            item.focused;
+        }
+        return ++this._counterFieldValues;
+    }
+    private _counterFieldValues = 0;
+
+    private _disposables: IDisposable[] = [];
 
     constructor(public plot: Plot, public tableCache: TableCache) {
-        ko.getObservable(this, '_yVarsChanged').subscribe(() => {
-            this.updatePlot();
-        });
+        this._disposables.push(
+            ko.getObservable(this, '_cleanValuesChanged').subscribe(() => {
+                this.updatePlot();
+            }));
+
+        this._disposables.push(
+            ko.getObservable(this, '_fieldValuesChanged').subscribe(() => {
+                this.updateVariableFields();
+            }));
+    }
+
+    updateVariableFields() {
+        for (var i = 0; i < this.yVars.length - 1; i++) {
+            const yVar = this.yVars[i];
+            if (yVar.fieldValue == '' && !yVar.focused) {
+                this.yVars.splice(i--, 1);
+            }
+        }
+
+        const lastYVar = this.yVars[this.yVars.length - 1];
+        if (lastYVar.fieldValue != '') {
+            this.yVars.push(new VariableVM({
+                initialValue: '',
+                searchFn: this.getYCompletion,
+            }));
+        }
     }
 
     deleteYVar(index: number) {
