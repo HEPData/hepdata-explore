@@ -170,18 +170,18 @@
             <table>
                 <tr>
                     <th>x axis</th>
-                    <td class="text-nowrap">
-                        <hep-bubble-focus data-bind="with: xVar">
+                    <td class="text-nowrap" data-bind="with: xVar">
+                        <hep-bubble-focus>
                             <input data-bind="
-                                textInput: ko.getObservable($data, 'fieldValue'),
-                                event: {keydown: autocomplete.keyPressedHandleEnter},
-                                hasFocus: ko.getObservable($data, 'focused'),
+                                textInput: ko.getObservable($parent, 'fieldValue'),
+                                event: {keydown: $parent.autocomplete.keyPressedHandleEnter},
+                                hasFocus: ko.getObservable($parent, 'focused'),
                             ">
-                            <hep-bubble params="element: $element, width: 500">
+                            <hep-bubble params="element: $element, bubbleFocus: $data, width: 500">
                                 <div data-bind="template: {
                                     name: 'variableAutocomplete',
                                     data: {
-                                        autocomplete: $parent.autocomplete,
+                                        autocomplete: $parents[1].autocomplete,
                                         maxHeight: 120,
                                     }
                                 }"></div>
@@ -196,15 +196,15 @@
                         <div class="text-nowrap">
                             <hep-bubble-focus>
                                 <input data-bind="
-                                    textInput: ko.getObservable($data, 'fieldValue'),
-                                    event: {keydown: autocomplete.keyPressedHandleEnter},
-                                    hasFocus: ko.getObservable($data, 'focused')
+                                    textInput: ko.getObservable($parent, 'fieldValue'),
+                                    event: {keydown: $parent.autocomplete.keyPressedHandleEnter},
+                                    hasFocus: ko.getObservable($parent, 'focused')
                                 ">
-                                <hep-bubble params="element: $element, width: 500">
+                                <hep-bubble params="element: $element, bubbleFocus: $data, width: 500">
                                     <div data-bind="template: {
                                         name: 'variableAutocomplete',
                                         data: {
-                                            autocomplete: $parent.autocomplete,
+                                            autocomplete: $parents[1].autocomplete,
                                             maxHeight: 120,
                                         }
                                     }"></div>

@@ -1,15 +1,15 @@
 <form data-bind="event: {submit: autocomplete.acceptSelected}">
     <hep-bubble-focus>
         <input data-bind="
-            textInput: ko.getObservable($data, 'query'),
-            hasFocus: ko.getObservable($data, 'focused'),
-            event: {keydown: autocomplete.keyPressed}
+            textInput: ko.getObservable($parent, 'query'),
+            hasFocus: ko.getObservable($parent, 'focused'),
+            event: {keydown: $parent.autocomplete.keyPressed}
         " placeholder="Add new filter...">
-        <hep-bubble params="element: $element">
+        <hep-bubble params="element: $element, bubbleFocus: $data">
             <!-- ko template: {
                 name: 'newFilterAutocomplete',
                 data: {
-                    autocomplete: $parent.autocomplete,
+                    autocomplete: $parents[1].autocomplete,
                     maxHeight: maxHeight,
                 }
             } --><!-- /ko -->

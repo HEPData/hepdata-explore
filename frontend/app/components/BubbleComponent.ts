@@ -5,6 +5,7 @@ import {focusedElement} from "../base/focusedElement";
 import {bind} from "../decorators/bind";
 import {observable} from "../decorators/observable";
 import {computedObservable} from "../decorators/computedObservable";
+import {BubbleFocusComponent} from "./BubbleFocusComponent";
 
 interface Point {
     x: number;
@@ -131,11 +132,13 @@ export class BubbleComponent {
     constructor(params: any) {
         assertHas(params, [
             {name: 'element', type: HTMLElement},
+            {name: 'bubbleFocus', type: BubbleFocusComponent},
         ]);
         this._bubbleElement = params.element;
         if (params.width) {
             this.width = params.width;
         }
+        (<BubbleFocusComponent>params.bubbleFocus).setBubbleComponent(this);
         (<any>window).a = this;
 
         this.side = 'down';
@@ -162,10 +165,8 @@ export class BubbleComponent {
         });
     }
 
-    public keyHandler(nextHandler: (ev: KeyboardEvent) => boolean|undefined) {
-        return (ev: KeyboardEvent) => {
-            return nextHandler(ev);
-        }
+    public keyHandler(ev: KeyboardEvent) {
+        console.log(ev);
     }
 
     private _ticking = false;

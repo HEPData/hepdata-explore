@@ -7,3 +7,4 @@ import "./PlotComponent";
 import "./PlotPoolComponent";
 import "./CMEnergiesFilterComponent";
 import "./BubbleComponent";
+import "./BubbleFocusComponent";
