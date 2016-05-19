@@ -37,6 +37,33 @@ function findScrollableParents(element: HTMLElement, foundList: HTMLElement[] = 
     }
 }
 
+/**
+ * The bubble widget lives in one of three states that change in response to
+ * UI events:
+ *
+ *          UNSELECTED <----------+
+ *           ^      |             |
+ *      blur |      | focus       |
+ *           |      v             |
+ *     SELECTED_WITH_BUBBLE       | blur
+ *           ^      |             |
+ *  char key |      | esc/return  |
+ *           |      v             |
+ *      SELECTED_NO_BUBBLE -------+
+ */
+enum BubbleState {
+    UNSELECTED,
+    SELECTED_WITH_BUBBLE,
+    SELECTED_NO_BUBBLE,
+}
+
+enum BubbleEvent {
+    FOCUS,
+    BLUR,
+    CHAR_KEY,
+    ESC_OR_RETURN,
+}
+
 @KnockoutComponent('hep-bubble', {
     template: {fromUrl: 'bubble.html'},
 })
@@ -55,6 +82,32 @@ export class BubbleComponent {
     styleTop: string = null;
     @observable()
     styleLeft: string = null;
+
+    private $bubbleEvents = new Rx.Subject<BubbleEvent>();
+
+    private bubbleState$ = this.$bubbleEvents
+        .scan((prevState, event) => {
+            if (prevState != BubbleState.UNSELECTED &&
+                event == BubbleEvent.BLUR) {
+                return BubbleState.UNSELECTED;
+            }
+            if (prevState == BubbleState.UNSELECTED &&
+                event == BubbleEvent.FOCUS) {
+                return BubbleState.SELECTED_WITH_BUBBLE;
+            }
+            if (prevState == BubbleState.SELECTED_WITH_BUBBLE &&
+                event == BubbleEvent.ESC_OR_RETURN) {
+                return BubbleState.SELECTED_NO_BUBBLE;
+            }
+            if (prevState == BubbleState.SELECTED_NO_BUBBLE &&
+                event == BubbleEvent.CHAR_KEY) {
+                return BubbleState.SELECTED_WITH_BUBBLE;
+            }
+            return prevState;
+        }, BubbleState.UNSELECTED)
+        .forEach(function (x) {
+            console.log(x);
+        });
 
     @computedObservable()
     get visible(): boolean {
@@ -83,6 +136,7 @@ export class BubbleComponent {
         if (params.width) {
             this.width = params.width;
         }
+        (<any>window).a = this;
 
         this.side = 'down';
 
