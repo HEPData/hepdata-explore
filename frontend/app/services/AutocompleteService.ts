@@ -173,7 +173,8 @@ export class AutocompleteService<SuggestionType> {
         this._suggestionElements.set(suggestion, element);
     }
 
-    /** This function is intended to use as the value for the `leak` binding in
+    /**
+     * This function is intended to use as the value for the `leak` binding in
      * the <li> object holding a suggestion.
      */
     public leakSuggestionElementHandler(suggestion: SuggestionType) {
@@ -183,6 +184,10 @@ export class AutocompleteService<SuggestionType> {
     }
 
     private _scrollPane: HTMLElement = null;
+    /**
+     * Scrolls the completion pane to make sure the currently selected
+     * suggestion is visible.
+     */
     private ensureSuggestionIsVisible(suggestion: SuggestionType) {
         const scrollPane = this._scrollPane;
         if (!scrollPane) {
