@@ -15,7 +15,7 @@ import {DataPoint, PublicationTable} from "./base/dataFormat";
 import TableCache = require("./services/TableCache");
 import {PlotPool} from "./services/PlotPool";
 import {Plot} from "./visualization/Plot";
-import {assertHas, assert} from "./utils/assert";
+import {assertHas, assert, AssertionError} from "./utils/assert";
 import {map, imap, sum, union, range} from "./utils/map";
 import CMEnergiesFilter = require("./filters/CMEnergiesFilter");
 import {Filter} from "./filters/Filter";
@@ -42,7 +42,7 @@ function screenUpdated() {
 
 export class AppViewModel {
     @observable()
-    rootFilter: Filter = null;
+    rootFilter: Filter|null = null;
 
     tableCache = new TableCache;
 
@@ -104,7 +104,8 @@ export class AppViewModel {
             // If this state is different from the previous one
             .distinctUntilChanged()
             // Calculate a new URL hash from this state dump
-            .map((stateDump: string) => [stateDump, customUrlHash(stateDump)])
+            .map((stateDump: string) => <[string,string]>
+                [stateDump, customUrlHash(stateDump)])
             // If the hash differs from the current one
             .filter(([stateDump, hash]) => hash != getCurrentHash())
             // Update the browser history and persist the new state to the server
@@ -287,7 +288,11 @@ export class AppViewModel {
         if (stateDump.version != 1) {
             console.warn('Unknown state dump version: ' + stateDump.version);
         }
-        this.rootFilter = Filter.load(stateDump.filter);
+        if (stateDump.filter) {
+            this.rootFilter = Filter.load(stateDump.filter);
+        } else {
+            this.rootFilter = null;
+        }
     }
 
     private static regexStateId = /^([\w1-9]+)$/;
@@ -308,7 +313,7 @@ export class AppViewModel {
     @bind()
     private fetchStateDumpFromHash(hash: string): Promise<StateDump> {
         const match = AppViewModel.regexStateId.exec(hash);
-        assert(match != null);
+        if (match == null) throw new AssertionError();
         const id = match[1];
         return stateStorage.get(id);
     }
@@ -322,6 +327,8 @@ export class AppViewModel {
      * @param newFilter
      */
     public replaceFilter(oldFilter: Filter, newFilter: Filter): boolean {
+        if (this.rootFilter == null) throw new AssertionError();
+
         if (this.rootFilter === oldFilter) {
             this.rootFilter = newFilter;
             return true;

@@ -1,4 +1,4 @@
-import {assertHas, assert} from "../utils/assert";
+import {assertHas, assert, AssertionError} from "../utils/assert";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import "../base/MyFocusChange";
 import {focusedElement} from "../base/focusedElement";
@@ -13,7 +13,7 @@ interface Point {
     y: number;
 }
 
-function findBubbleFocusAncestor(element: Element): HTMLElement {
+function findBubbleFocusAncestor(element: Element|null): HTMLElement|null {
     if (element == null) {
         return null;
     } else if (element.tagName.toLowerCase() == 'hep-bubble-focus') {
@@ -27,7 +27,7 @@ function hasBubbleFocusAncestor(element: Element) {
     return findBubbleFocusAncestor(element) != null;
 }
 
-function findScrollableParents(element: HTMLElement, foundList: HTMLElement[] = []): HTMLElement[] {
+function findScrollableParents(element: HTMLElement|null, foundList: HTMLElement[] = []): HTMLElement[] {
     if (element == null) {
         return foundList;
     } else {
@@ -81,9 +81,9 @@ export class BubbleComponent {
 
     /** The template receives CSS position here */
     @observable()
-    styleTop: string = null;
+    styleTop: string|null = null;
     @observable()
-    styleLeft: string = null;
+    styleLeft: string|null = null;
 
     private $bubbleEvents = new Rx.Subject<BubbleEvent>();
 
@@ -128,7 +128,7 @@ export class BubbleComponent {
     private _bubbleElement: HTMLElement;
 
     /** The element (usually an <input>) the bubble will appear near to. */
-    private _linkedElement: HTMLElement = null;
+    private _linkedElement: HTMLElement|null = null;
 
     constructor(params: any) {
         assertHas(params, [
@@ -149,6 +149,9 @@ export class BubbleComponent {
 
             if (focused) {
                 const bubbleRoot = findBubbleFocusAncestor(document.activeElement);
+                if (bubbleRoot == null) {
+                    throw new AssertionError();
+                }
                 this._linkedElement = this.findInputField(bubbleRoot);
                 assert(this._linkedElement != null, 'Input field not found');
                 this.calculatePosition();
@@ -192,14 +195,14 @@ export class BubbleComponent {
     }
 
     private findInputField(bubbleFocusRoot: Element) {
-        return <HTMLElement>bubbleFocusRoot.querySelector('input');
+        return <HTMLElement|null>bubbleFocusRoot.querySelector('input');
     }
 
     private calculatePosition() {
         // getBoundingClientRect() returns a rectangle with the offsets of the
         // element's margins measured from the respective borders of the
         // viewport.
-        const elementRect = this._linkedElement.getBoundingClientRect();
+        const elementRect = this._linkedElement!.getBoundingClientRect();
         const tailX = elementRect.left + elementRect.width / 2;
 
         this.calculateSide();
@@ -218,7 +221,7 @@ export class BubbleComponent {
     }
 
     private calculateSide() {
-        const elementRect = this._linkedElement.getBoundingClientRect();
+        const elementRect = this._linkedElement!.getBoundingClientRect();
 
         const spaceAbove = elementRect.top;
         const spaceBelow = document.documentElement.clientHeight - elementRect.bottom;

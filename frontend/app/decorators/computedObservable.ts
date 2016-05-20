@@ -7,7 +7,7 @@ export interface ComputedObservableOptions {
 }
 
 export function computedObservable(options: ComputedObservableOptions = {pure: true}) {
-    return function(target: any, propertyKey: string, descriptor: PropertyDescriptor): any
+    return function(target: any, propertyKey: string, descriptor: any): any
     {
         const fn = descriptor.get;
         assertInstance(fn, Function);

@@ -1,7 +1,7 @@
 import {Filter} from "../filters/Filter";
 import {Option,Some,None} from "../base/Option";
 import CompoundFilter = require("../filters/CompoundFilter");
-import {assert} from "./assert";
+import {assert, AssertionError} from "./assert";
 
 interface TreeNode {
     filter: Filter;
@@ -30,8 +30,8 @@ export class FilterTree {
     }
 
     public getParentOf(filter: Filter): Option<Filter> {
-        const node: TreeNode = this.nodes.get(filter);
-        assert(node != null);
+        const node = this.nodes.get(filter);
+        if (node == null) throw new AssertionError();
 
         return node.parent;
     }

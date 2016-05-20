@@ -8,7 +8,7 @@ import {BubbleComponent} from "./BubbleComponent";
     `,
 })
 export class BubbleFocusComponent {
-    private _bubble: BubbleComponent = null;
+    private _bubble: BubbleComponent|null = null;
 
     constructor(params: any) {
     }

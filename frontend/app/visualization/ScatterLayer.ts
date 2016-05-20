@@ -1,6 +1,6 @@
 import {PlotLayer} from "./PlotLayer";
 import {Plot, findColIndex, findColIndexOrNull} from "./Plot";
-import {assert} from "../utils/assert";
+import {assert, ensure} from "../utils/assert";
 
 export interface CanvasScatterPoint {
     x: number;
@@ -64,7 +64,7 @@ export class ScatterLayer extends PlotLayer {
         const plot = this.plot;
         const xScale = plot.xScale;
         const yScale = plot.yScale;
-        const xVar = plot.config.xVar;
+        const xVar = ensure(plot.config.xVar);
         var colorScale = d3.scale.category10();
 
         const points = this.points;
@@ -78,20 +78,23 @@ export class ScatterLayer extends PlotLayer {
                 if (colY == null) {
                     // This table does not have this yVar, but may have other y
                     // variables.
+                    continue;
                 }
                 const color = colorScale(yVar + '-' + table.table_num + '-' + table.publication.inspire_record);
 
                 for (let row of table.data_points) {
-                    if (row[colX].value == null || row[colY].value == null) {
+                    const x = row[colX].value;
+                    const y = row[colY].value;
+                    if (x == null || y == null) {
                         // Don't add points for undefined data
                         continue;
                     }
 
                     const point: CanvasScatterPoint = {
-                        x: xScale(row[colX].value),
-                        y: yScale(row[colY].value),
-                        low: yScale(row[colY].value - row[colY].error_down),
-                        high: yScale(row[colY].value + row[colY].error_up),
+                        x: xScale(x),
+                        y: yScale(y),
+                        low: yScale(y - row[colY].error_down),
+                        high: yScale(y + row[colY].error_up),
                         color: color,
                     };
                     assert(!isNaN(point.low));

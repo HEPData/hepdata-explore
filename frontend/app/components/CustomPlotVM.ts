@@ -36,10 +36,10 @@ export class VariableVM {
     autocomplete: AutocompleteService<VariableChoice>;
 
     constructor(opts: {
-        initialValue: string,
+        initialValue: string|null,
         searchFn: (query: string) => Promise<VariableChoice[]>
     }) {
-        this.fieldValue = this.cleanValue = opts.initialValue;
+        this.fieldValue = this.cleanValue = opts.initialValue || '';
 
         this.autocomplete = new AutocompleteService<VariableChoice>({
             koQuery: ko.getObservable(this, 'fieldValue'),

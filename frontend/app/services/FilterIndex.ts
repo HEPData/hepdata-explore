@@ -83,7 +83,7 @@ class FilterIndex {
     public returnAll(): FilterIndexSearchResult[] {
         return this.database.map(record => ({
             match: record,
-            score: null,
+            score: 0,
         }));
     }
 

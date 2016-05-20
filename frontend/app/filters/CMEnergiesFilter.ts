@@ -7,12 +7,12 @@ import {observable} from "../decorators/observable";
 @registerFilterClass
 class CMEnergiesFilter extends Filter {
     @observable()
-    min: number;
+    min: number|null;
 
     @observable()
-    max: number;
+    max: number|null;
 
-    constructor(min: number = null, max: number = null) {
+    constructor(min: number|null = null, max: number|null = null) {
         super();
         this.min = min;
         this.max = max;

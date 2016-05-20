@@ -3,6 +3,7 @@ import ComponentRef = require("../base/ComponentRef");
 import {DataPoint, PublicationTable} from "../base/dataFormat";
 import {filterRegistry} from "./filterRegistry";
 import {assert, assertInstance} from "../utils/assert";
+import {RuntimeError} from "../base/errors";
 
 export interface FilterDump {
     type: string,
@@ -109,7 +110,8 @@ export abstract class Filter {
     /** Deserializes a filter. */
     public static load(dump: FilterDump) {
         const constructor = filterRegistry.get(dump.type);
-        assert(constructor != null, 'Could not find constructor for ' + dump.type);
+        if (!constructor)
+            throw new RuntimeError('Could not find constructor for ' + dump.type);
 
         const instance = new constructor();
         instance.loadParameters(dump.params);

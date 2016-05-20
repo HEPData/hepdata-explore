@@ -1,4 +1,7 @@
-import {assertInstance, assertDefined, assert} from "../utils/assert";
+import {
+    assertInstance, assertDefined, assert,
+    AssertionError
+} from "../utils/assert";
 import {Option, Some, None} from "../base/Option";
 import {bind} from "../decorators/bind";
 import {observable} from "../decorators/observable";
@@ -180,7 +183,7 @@ export class AutocompleteService<SuggestionType> {
         };
     }
 
-    private _scrollPane: HTMLElement = null;
+    private _scrollPane: HTMLElement|null = null;
     /**
      * Scrolls the completion pane to make sure the currently selected
      * suggestion is visible.
@@ -192,8 +195,8 @@ export class AutocompleteService<SuggestionType> {
             return;
         }
 
-        const element: HTMLElement = this._suggestionElements.get(suggestion);
-        assert(element != null);
+        const element = this._suggestionElements.get(suggestion);
+        if (!element) throw new AssertionError();
 
         // Same scroll policy as seen in IntelliJ: the pane should be scrolled
         // just enough to make the element completely visible.

@@ -3,7 +3,10 @@ import {
     DataPoint, Publication, DataPointError,
     DataPointColumn, PublicationTable, isSymmetricError
 } from "../base/dataFormat";
-import {assert, assertInstance, assertHas} from "../utils/assert";
+import {
+    assert, assertInstance, assertHas,
+    AssertionError
+} from "../utils/assert";
 import {jsonPOST} from "../base/network";
 import {sum} from "../utils/map";
 import {Option} from "../base/Option";
@@ -161,12 +164,12 @@ export class Elastic {
         function sumErrors(column: DataPointColumn) {
             if (column.value == null) {
                 // No value, no error
-                column.error_up = column.error_down = null;
+                column.error_up = column.error_down = 2;
             } else if ('low' in column) {
                 // Just use the range as computed error
-                assertInstance(column.low, Number);
-                assertInstance(column.high, Number);
-                assertInstance(column.value, Number);
+                if (typeof column.low != 'number') throw new AssertionError();
+                if (typeof column.high != 'number') throw new AssertionError();
+                if (typeof column.value != 'number') throw new AssertionError();
 
                 // assert(column.high >= column.low);
                 // ... except the data is not that clean! (the commented out
@@ -227,7 +230,7 @@ export class Elastic {
 
                 // Some columns may be completely void. Set them as a explicit
                 // null, not a doubtful undefined.
-                if (column.value == undefined) {
+                if (column.value === undefined) {
                     column.value = null;
                 }
 

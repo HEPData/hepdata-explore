@@ -7,6 +7,7 @@ import {calculateComplementaryFilter} from "../utils/complementaryFilter";
 import {bind} from "../decorators/bind";
 import {observable} from "../decorators/observable";
 import {variableTokenizer} from "../utils/variableTokenizer";
+import {ensure} from "../utils/assert";
 
 interface ChoiceSuggestion {
     suggestedValue: string;
@@ -79,7 +80,8 @@ class ChoiceFilterComponent {
     }
 
     getAllPossibleValues(): Promise<ChoiceSuggestion[]> {
-        const complementaryFilter = calculateComplementaryFilter(this.filter, app.rootFilter);
+        const complementaryFilter = calculateComplementaryFilter(this.filter,
+            ensure(app.rootFilter));
         return elastic.fetchCountByField(this.filter.field, complementaryFilter)
             .then((buckets) => {
                 const maxCount = _.maxBy(buckets, b => b.count).count;

@@ -3,7 +3,7 @@ import TableCache = require("../services/TableCache");
 import {PublicationTable} from "../base/dataFormat";
 import {RuntimeError} from "../base/errors";
 import {PlotLayer} from "./PlotLayer";
-import {assertDefined} from "../utils/assert";
+import {assertDefined, AssertionError, ensure} from "../utils/assert";
 import {ScatterLayer} from "./ScatterLayer";
 import {observable} from "../decorators/observable";
 import {computedObservable} from "../decorators/computedObservable";
@@ -40,7 +40,7 @@ export function findColIndex(variableName: string, table: PublicationTable) {
 
 export type ScaleType = "lin" | "log";
 
-export function findColIndexOrNull(variableName: string, table: PublicationTable) {
+export function findColIndexOrNull(variableName: string, table: PublicationTable): number|null {
     const colIndep = table.indep_vars.findIndex(
         (variable) => variable.name == variableName);
     if (colIndep != -1) {
@@ -67,7 +67,7 @@ export class PlotConfig {
     pinned: boolean = false;
 
     @observable()
-    xVar: string = null;
+    xVar: string|null = null;
     @observable()
     yVars: string[] = [];
 
@@ -102,9 +102,9 @@ export class Plot {
     };
 
     @observable()
-    xScaleType: ScaleType = null;
+    xScaleType: ScaleType|null = null;
     @observable()
-    yScaleType: ScaleType = null;
+    yScaleType: ScaleType|null = null;
     xScale: ScaleFunction;
     yScale: ScaleFunction;
 
@@ -127,7 +127,7 @@ export class Plot {
     }
     private _counter = 0;
 
-    constructor(tableCache: TableCache, config: PlotConfig = null) {
+    constructor(tableCache: TableCache, config?: PlotConfig) {
         this.tableCache = tableCache;
         this.config = config || new PlotConfig();
         this.canvasOnion = document.createElement('div');
@@ -150,7 +150,7 @@ export class Plot {
     }
 
     private addLayer(layer: PlotLayer) {
-        this.canvasOnion.insertBefore(layer.canvas, null);
+        this.canvasOnion.insertBefore(layer.canvas, null!);
     }
 
     spawn(xVar: string, yVars: string[]): this {
@@ -179,7 +179,7 @@ export class Plot {
     }
 
     public loadTables() {
-        const xVar = this.config.xVar;
+        const xVar = ensure(this.config.xVar);
         const tablesByYVar: Map<string, PublicationTable[]> = new Map(
             _.map(this.config.yVars, (yVar): [string, PublicationTable[]] =>
                 [yVar, this.tableCache.getTablesWithVariables(xVar, yVar)])
@@ -222,10 +222,11 @@ export class Plot {
         let dataMaxX = -Infinity;
         let dataMinY = Infinity;
         let dataMaxY = -Infinity;
+        const xVar = ensure(this.config.xVar);
         
         for (let yVar of this.config.yVars) {
             for (let table of allTables) {
-                const xCol = findColIndex(this.config.xVar, table);
+                const xCol = findColIndex(xVar, table);
                 const yCol = findColIndexOrNull(yVar, table);
                 if (yCol == null) {
                     // This table does not have this yVar, but may have other y
@@ -235,7 +236,8 @@ export class Plot {
 
                 for (let dataPoint of table.data_points) {
                     const x = dataPoint[xCol].value;
-                    assertDefined(x);
+                    if (x == null) throw new AssertionError();
+
                     if (isFinite(x) && x > dataMaxX) {
                         dataMaxX = x;
                     }
@@ -244,6 +246,8 @@ export class Plot {
                     }
 
                     const y = dataPoint[yCol].value;
+                    if (y == null) throw new AssertionError();
+
                     if (isFinite(y) && y > dataMaxY) {
                         dataMaxY = y;
                     }

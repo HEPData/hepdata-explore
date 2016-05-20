@@ -1,5 +1,6 @@
 import {PlotLayer} from "./PlotLayer";
 import {Plot} from "./Plot";
+import {ensure} from "../utils/assert";
 
 function yottaAndBeyondFormat(normalFormat: (n: number) => string) {
     return (n: number) => {
@@ -57,8 +58,8 @@ export class AxesLayer extends PlotLayer {
         ctx.font = '8px' + fontFace;
 
         // Draw X ticks
-        let pastTickEnd = null;
-        const xTickFormat = yottaAndBeyondFormat(this.plot.xScale.tickFormat(null, 's'));
+        let pastTickEnd: number|null = null;
+        const xTickFormat = yottaAndBeyondFormat(this.plot.xScale.tickFormat(undefined, 's'));
         for (let tickValue of this.plot.xScale.ticks()) {
             const tickX = Math.round(this.plot.xScale(tickValue));
 
@@ -80,7 +81,7 @@ export class AxesLayer extends PlotLayer {
         }
 
         // Draw Y ticks
-        const yTickFormat = yottaAndBeyondFormat(this.plot.yScale.tickFormat(null, 's'));
+        const yTickFormat = yottaAndBeyondFormat(this.plot.yScale.tickFormat(undefined, 's'));
         for (let tickValue of this.plot.yScale.ticks()) {
             const tickY = Math.round(this.plot.yScale(tickValue));
 
@@ -97,10 +98,11 @@ export class AxesLayer extends PlotLayer {
 
         // draw X label
         {
+            const xVar = ensure(this.plot.config.xVar);
             const axisXCenter = margin.left + (w / 2);
-            const textW = ctx.measureText(this.plot.config.xVar).width;
+            const textW = ctx.measureText(xVar).width;
             ctx.font = '14px' + fontFace;
-            ctx.fillText(this.plot.config.xVar, axisXCenter - textW / 2, margin.top + h + 30);
+            ctx.fillText(xVar, axisXCenter - textW / 2, margin.top + h + 30);
         }
     }
 }

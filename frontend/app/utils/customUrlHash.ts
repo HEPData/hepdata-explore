@@ -38,6 +38,6 @@ function hashString(input: string): string {
     return rawHash;
 }
 
-export function customUrlHash(input: string) {
+export function customUrlHash(input: string): string {
     return numberToUrlString(hashToUrlNumber(hashString(input)));
 }

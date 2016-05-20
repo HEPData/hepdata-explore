@@ -3,6 +3,9 @@ import typeOf = require('./typeOf');
 import {RuntimeError} from '../base/errors';
 
 export class AssertionError extends RuntimeError {
+    constructor(message: string = 'Assertion error') {
+        super(message);
+    }
 }
 
 export interface PropertyDeclaration {
@@ -57,5 +60,14 @@ export function assertInstance(value: any, type: any) {
 export function assertDefined(value: any) {
     if (value === undefined) {
         throw new AssertionError('Value is undefined');
+    }
+}
+
+export function ensure<T>(value: T|null|undefined): T {
+    if (value != null) {
+        return <T>value;
+    } else {
+        const typeFound = (value === null ? 'null' : 'undefined');
+        throw new AssertionError('Unexpected ' + typeFound);
     }
 }

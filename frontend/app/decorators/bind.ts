@@ -1,10 +1,10 @@
 import {assertInstance} from "../utils/assert";
 
 export function bind() {
-    return function(target: any, propertyKey: string, descriptor: PropertyDescriptor)
+    return function(target: any, propertyKey: string, descriptor: any)
         : PropertyDescriptor
     {
-        const fn = descriptor.value;
+        const fn = <Function>descriptor.value;
         assertInstance(fn, Function);
 
         // Substitute the function value with a property that returns a bound method.

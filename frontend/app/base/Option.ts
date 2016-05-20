@@ -1,5 +1,5 @@
 export abstract class Option<T> {
-    protected _value: T;
+    protected _value: T|null;
 
     getOrDefault(defaultValue: T): T {
         return (this._value != null ? this._value : defaultValue);
@@ -20,7 +20,7 @@ export class Some<T> extends Option<T> {
     }
     
     get(): T {
-        return this._value;
+        return <T>this._value;
     }
 }
 

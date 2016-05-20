@@ -7,7 +7,7 @@ var templateFromUrlLoader = {
                 // We need an array of DOM nodes, not a string.
                 // We can use the default loader to convert to the
                 // required format.
-                ko.components.defaultLoader.loadTemplate(name, markupString, callback);
+                ko.components.defaultLoader.loadTemplate!(name, markupString, callback);
             });
         } else {
             // Unrecognized config format. Let another loader handle it.

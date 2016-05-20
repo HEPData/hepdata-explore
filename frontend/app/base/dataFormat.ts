@@ -44,17 +44,17 @@ export interface PublicationTable {
 export type DataPoint = DataPointColumn[];
 
 export interface DataPointColumn {
-    value: number;
+    value: number|null;
 
     // Raw error/range values
-    errors: DataPointError[]; // may be undefined
-    low: number; // may be undefined
-    high: number; // may be undefined
+    errors?: DataPointError[];
+    low?: number;
+    high?: number;
 
     // Computed simple error (ranges are interpreted as errors too)
     // Both are guaranteed to be positive.
-    error_up: number;
-    error_down: number;
+    error_up: number|null;
+    error_down: number|null;
 }
 
 

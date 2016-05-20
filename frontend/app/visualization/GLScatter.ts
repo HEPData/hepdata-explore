@@ -1,4 +1,5 @@
 import {DataPoint} from "../base/dataFormat";
+import {ensure} from "../utils/assert";
 
 export function ShaderError(message) {
     this.name = 'ShaderError';
@@ -171,7 +172,7 @@ export class GLScatter {
     gl: WebGLRenderingContext;
     private canvas2d: HTMLCanvasElement;
 
-    dataPointProgram: WebGLProgram;
+    dataPointProgram: WebGLProgram|null;
     dataPointVertexBuffer: WebGLBuffer;
     dataPointFloats: Float32Array;
     dataPointAttrs: {
@@ -182,7 +183,7 @@ export class GLScatter {
         uTransform: WebGLUniformLocation;
     };
 
-    simpleTextureProgram: WebGLProgram;
+    simpleTextureProgram: WebGLProgram|null;
     simpleTextureAttrs: {
         aVertexPosition: number;
         aTextureCoord: number;
@@ -249,7 +250,7 @@ export class GLScatter {
         // gl.depthFunc(gl.LEQUAL);
 
         // Load shaders
-        function shaderAttribute(program: WebGLProgram, attributeName: string) {
+        function shaderAttribute(program: WebGLProgram|null, attributeName: string) {
             const attrib = gl.getAttribLocation(program, attributeName);
             if (attrib == -1) {
                 console.warn('Missing attribute ' + attributeName);
@@ -266,8 +267,8 @@ export class GLScatter {
             aRectPosition: shaderAttribute(this.dataPointProgram, 'aRectPosition'),
             aDataPoint: shaderAttribute(this.dataPointProgram, 'aDataPoint'),
             aColor: shaderAttribute(this.dataPointProgram, 'aColor'),
-            uPlotSizePx: gl.getUniformLocation(this.dataPointProgram, 'uPlotSizePx'),
-            uTransform: gl.getUniformLocation(this.dataPointProgram, 'uTransform'),
+            uPlotSizePx: ensure(gl.getUniformLocation(this.dataPointProgram, 'uPlotSizePx')),
+            uTransform: ensure(gl.getUniformLocation(this.dataPointProgram, 'uTransform')),
         };
 
         this.simpleTextureProgram = this.compileProgram(
@@ -340,7 +341,7 @@ export class GLScatter {
         const gl = this.gl;
         const data = this.data;
 
-        this.dataPointVertexBuffer = gl.createBuffer();
+        this.dataPointVertexBuffer = ensure(gl.createBuffer());
         gl.bindBuffer(gl.ARRAY_BUFFER, this.dataPointVertexBuffer);
 
         /**
@@ -417,7 +418,7 @@ export class GLScatter {
         }
     }
 
-    compileProgram(vertShaderSource: string, fragShaderSource): WebGLProgram {
+    compileProgram(vertShaderSource: string, fragShaderSource): WebGLProgram|null {
         const gl = this.gl;
 
         const program = gl.createProgram();
@@ -435,7 +436,7 @@ export class GLScatter {
         return program;
     }
 
-    compileShader(source: string, shaderType: number): WebGLShader {
+    compileShader(source: string, shaderType: number): WebGLShader|null {
         const gl = this.gl;
 
         const shader = gl.createShader(shaderType);
@@ -513,7 +514,7 @@ export class GLScatter {
         ctx.font = '8px sans';
 
         // Draw X ticks
-        let pastTickEnd = null;
+        let pastTickEnd: number|null = null;
         for (let tickValue of this.xScale.ticks()) {
             const tickXRelPosition = this.xScale(tickValue);
             const tickX = Math.round(margin.left + w * tickXRelPosition);
