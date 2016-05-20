@@ -236,7 +236,11 @@ export class Plot {
 
                 for (let dataPoint of table.data_points) {
                     const x = dataPoint[xCol].value;
-                    if (x == null) throw new AssertionError();
+                    const y = dataPoint[yCol].value;
+                    if (x == null || y == null) {
+                        // Skip empty data points
+                        continue;
+                    }
 
                     if (isFinite(x) && x > dataMaxX) {
                         dataMaxX = x;
@@ -244,9 +248,6 @@ export class Plot {
                     if (isFinite(x) && x < dataMinX) {
                         dataMinX = x;
                     }
-
-                    const y = dataPoint[yCol].value;
-                    if (y == null) throw new AssertionError();
 
                     if (isFinite(y) && y > dataMaxY) {
                         dataMaxY = y;
