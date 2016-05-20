@@ -1,5 +1,5 @@
 var templateFromUrlLoader = {
-    loadTemplate: function(name, templateConfig, callback) {
+    loadTemplate: function(name: string, templateConfig: any, callback: any) {
         if (templateConfig.fromUrl) {
             // Uses jQuery's ajax facility to load the markup from a file
             var fullUrl = '/templates/' + templateConfig.fromUrl;

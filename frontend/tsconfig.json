@@ -5,7 +5,8 @@
     "sourceMap": true,
     "outDir": "build/",
     "experimentalDecorators": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "noImplicitAny": true
   },
   "exclude": [
     "node_modules",

@@ -297,7 +297,7 @@ export class AppViewModel {
 
     private static regexStateId = /^([\w1-9]+)$/;
 
-    private static isValidHash(hash): boolean {
+    private static isValidHash(hash: string): boolean {
         return !!AppViewModel.regexStateId.exec(hash);
     }
 

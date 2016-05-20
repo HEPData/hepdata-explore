@@ -32,30 +32,37 @@ export class CMEnergiesFilterComponent {
     }
 
     linkNumber(componentField: string, filterField: string) {
+        const filter = <{[key: string]: number|null}>(<any>this.filter);
+        const component = <{[key: string]: string}>(<any>this); 
+        
         // Two way binding, with validation
-        const updateComponent = (filterValue: number) => {
-            if (filterValue == null && this[componentField] != '') {
-                this[componentField] = '';
-            } else if (filterValue != null && !floatEquals(parseFloat(this[componentField]), filterValue)) {
-                this[componentField] = filterValue.toFixed(1);
+        const updateComponent = (filterValue: number|null) => {
+            if (filterValue == null && component[componentField] != '') {
+                component[componentField] = '';
+            } else if (filterValue != null && !floatEquals(parseFloat(component[componentField]), filterValue)) {
+                component[componentField] = filterValue.toFixed(1);
             }
         };
 
-        const filterToComponent = ko.getObservable(this.filter, filterField)
+        const filterToComponent = ko.getObservable(filter, filterField)
             .subscribe(updateComponent);
 
         const componentToFilter = ko.getObservable(this, componentField).subscribe(
             (typedValue: string) => {
                 const numberValue = parseFloat(typedValue);
-                if (!isNaN(numberValue) && !floatEquals(numberValue, this.filter[filterField])) {
-                    this.filter[filterField] = numberValue;
-                } else if (typedValue == '') {
-                    this.filter[filterField] = null;
+                const oldFilterValue = filter[filterField];
+                
+                if (typedValue == '') {
+                    filter[filterField] = null;
+                } else if (!isNaN(numberValue) && oldFilterValue != null
+                    && !floatEquals(numberValue, oldFilterValue))
+                {
+                    filter[filterField] = numberValue;
                 }
             }
         );
 
-        updateComponent(this.filter[filterField]);
+        updateComponent(filter[filterField]);
         this._disposables.push(filterToComponent);
         this._disposables.push(componentToFilter);
     }

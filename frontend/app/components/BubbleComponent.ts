@@ -32,7 +32,7 @@ function findScrollableParents(element: HTMLElement|null, foundList: HTMLElement
         return foundList;
     } else {
         const style = window.getComputedStyle(element);
-        if (style['overflow-y'] == 'scroll' || style['overflow'] == 'scroll') {
+        if (style.overflowY == 'scroll' || style.overflow == 'scroll') {
             foundList.push(element);
         }
         return findScrollableParents(<HTMLElement>element.parentElement, foundList);

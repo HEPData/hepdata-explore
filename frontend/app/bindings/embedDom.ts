@@ -15,7 +15,7 @@ import {assertInstance} from "../utils/assert";
  *  <div data-bind="embedDom: myDiv"></div>
  */
 ko.bindingHandlers['embedDom'] = {
-    init: function (element: HTMLElement, valueAccessor, allBindings, viewModel, bindingContext) {
+    init: function (element: HTMLElement, valueAccessor: Function) {
         const embeddable: HTMLElement = valueAccessor();
         assertInstance(embeddable, HTMLElement);
         try {
