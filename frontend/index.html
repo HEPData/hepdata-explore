@@ -121,7 +121,7 @@
     body: {
         name: 'customPlot',
         data: ko.computed(function() {
-            return customPlotVM.getOrDefault({error: 'customPlotVM not set'});
+            return customPlotVM || {error: 'customPlotVM not set'};
         })
     },
     footer: { data: {

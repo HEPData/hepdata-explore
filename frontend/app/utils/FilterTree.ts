@@ -1,21 +1,20 @@
 import {Filter} from "../filters/Filter";
-import {Option,Some,None} from "../base/Option";
 import CompoundFilter = require("../filters/CompoundFilter");
 import {assert, AssertionError} from "./assert";
 
 interface TreeNode {
     filter: Filter;
-    parent: Option<Filter>;
+    parent: Filter|null;
 }
 
 export class FilterTree {
     private nodes = new Map<Filter, TreeNode>();
 
     constructor(rootFilter: Filter) {
-        this.exploreFilter(rootFilter, new None<Filter>())
+        this.exploreFilter(rootFilter, null)
     }
 
-    private exploreFilter(filter: Filter, parent: Option<Filter>) {
+    private exploreFilter(filter: Filter, parent: Filter|null) {
         const node: TreeNode = {
             filter: filter,
             parent: parent,
@@ -24,12 +23,12 @@ export class FilterTree {
 
         if (filter instanceof CompoundFilter) {
             for (let child of filter.children) {
-                this.exploreFilter(child, new Some(filter));
+                this.exploreFilter(child, filter);
             }
         }
     }
 
-    public getParentOf(filter: Filter): Option<Filter> {
+    public getParentOf(filter: Filter): Filter|null {
         const node = this.nodes.get(filter);
         if (node == null) throw new AssertionError();
 

@@ -2,7 +2,6 @@ import {
     assertInstance, assertDefined, assert,
     AssertionError
 } from "../utils/assert";
-import {Option, Some, None} from "../base/Option";
 import {bind} from "../decorators/bind";
 import {observable} from "../decorators/observable";
 import {KeyCode} from "../utils/KeyCode";
@@ -99,11 +98,11 @@ export class AutocompleteService<SuggestionType> {
         this.ensureSuggestionIsVisible(this.suggestions[this.selectedSuggestionIx]);
     }
 
-    public getSelectedSuggestion(): Option<SuggestionType> {
+    public getSelectedSuggestion(): SuggestionType|null {
         if (this.selectedSuggestionIx != null) {
-            return new Some(this.suggestions[this.selectedSuggestionIx]);
+            return this.suggestions[this.selectedSuggestionIx];
         } else {
-            return new None<SuggestionType>();
+            return null;
         }
     }
 
@@ -164,8 +163,8 @@ export class AutocompleteService<SuggestionType> {
     @bind()
     public acceptSelected() {
         const selectedSuggestion = this.getSelectedSuggestion();
-        if (selectedSuggestion.isSet()) {
-            this.suggestionClickedFn(selectedSuggestion.get());
+        if (selectedSuggestion) {
+            this.suggestionClickedFn(selectedSuggestion);
         }
     }
 

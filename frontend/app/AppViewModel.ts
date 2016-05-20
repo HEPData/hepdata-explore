@@ -22,7 +22,6 @@ import {Filter} from "./filters/Filter";
 import {StateDump} from "./base/StateDump";
 import {stateStorage} from "./services/StateStorage";
 import {customUrlHash} from "./utils/customUrlHash";
-import {Option, Some, None} from "./base/Option";
 import {bind} from "./decorators/bind";
 import {CustomPlotVM} from "./components/CustomPlotVM";
 import {observable} from "./decorators/observable";
@@ -53,7 +52,7 @@ export class AppViewModel {
     customPlotVisible = false;
 
     @observable()
-    customPlotVM: Option<CustomPlotVM> = new None<CustomPlotVM>();
+    customPlotVM: CustomPlotVM|null = null;
 
     @observable()
     loadingNewData = false;
@@ -338,7 +337,7 @@ export class AppViewModel {
     }
     
     public showEditPlotDialog(plot: Plot) {
-        this.customPlotVM = new Some(new CustomPlotVM(plot, this.tableCache));
+        this.customPlotVM = new CustomPlotVM(plot, this.tableCache);
         this.customPlotVisible = true;
     }
 
@@ -346,7 +345,7 @@ export class AppViewModel {
     public customPlotConfirm() {
         console.log('confirm');
         this.customPlotVisible = false;
-        this.customPlotVM = new None<CustomPlotVM>();
+        this.customPlotVM = null;
     }
 
     @bind()

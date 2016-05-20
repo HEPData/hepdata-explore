@@ -95,8 +95,8 @@ class ChoiceFilterComponent {
 
     useSelectedValue() {
         const selection = this.autocomplete.getSelectedSuggestion();
-        if (selection.isSet()) {
-            this.useSuggestion(selection.get());
+        if (selection) {
+            this.useSuggestion(selection);
         }
     }
 

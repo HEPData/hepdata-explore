@@ -9,7 +9,6 @@ import {
 } from "../utils/assert";
 import {jsonPOST} from "../base/network";
 import {sum} from "../utils/map";
-import {Option} from "../base/Option";
 import SomeFilter = require("../filters/SomeFilter");
 import AllFilter = require("../filters/AllFilter");
 import {calculateComplementaryFilter} from "../utils/complementaryFilter";
@@ -74,15 +73,15 @@ export class Elastic {
             })
     }
 
-    fetchCountByField(field: string, filter: Option<Filter>)
+    fetchCountByField(field: string, filter: Filter|null)
         : Promise<CountAggregationBucket[]>
     {
         let elasticFilter: any = undefined;
-        if (filter.isSet()) {
+        if (filter) {
             elasticFilter = {
                 "nested": {
                     "path": "tables",
-                    "query": filter.get().toElasticQuery(),
+                    "query": filter.toElasticQuery(),
                 }
             };
         } else {
