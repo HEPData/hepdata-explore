@@ -19,7 +19,7 @@ export function assert(value: boolean, message: string = 'Assertion failed') {
     }
 }
 
-export function assertHas(object: Object,
+export function assertHas(object: any,
                           properties: (PropertyDeclaration|string)[])
 {
     if (object === undefined) {

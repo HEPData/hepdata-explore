@@ -24,7 +24,7 @@ class CMEnergiesFilter extends Filter {
     }
 
     toElasticQuery(): any {
-        const restrictions = [];
+        const restrictions: any = [];
 
         /*
          Each table defines a range of cmenergies. With this filter we find

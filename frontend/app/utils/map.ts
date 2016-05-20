@@ -3,7 +3,7 @@ interface Iterable<T> {
 }
 
 export function map<V,Z>(iterable: Iterable<V>, callback: (value: V) => Z): Z[] {
-    const ret = [];
+    const ret: Z[] = [];
     for (let value of iterable) {
         ret.push(callback(value));
     }

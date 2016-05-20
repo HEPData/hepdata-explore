@@ -29,19 +29,20 @@ export class FilterShellComponent {
     }
 
     loadObservableParam<T>(params: any, paramName: string, type: T, required: boolean = true) {
+        const component = <{[key: string]: Function}>(<any>this);
         const value: any = params[paramName];
         if (required) {
             assert(value != undefined, 'Parameter ' + paramName + ' is missing.');
         }
         if (typeof value == 'function') {
             // The value is a observable, set it.
-            this['_' + paramName] = value;
+            component['_' + paramName] = value;
         } else {
             // The value is a raw object, wrap it in a observable
             if (value != undefined) { // undefined/null is OK for optional params
                 assertInstance(value, type);
             }
-            this['_' + paramName] = ko.computed(() => (value));
+            component['_' + paramName] = ko.computed(() => (value));
         }
     }
 

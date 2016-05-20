@@ -59,9 +59,9 @@ export abstract class Filter {
         assert(this._serializableParameters.length > 0, 'Serializable parameters ' +
             'not declared in class ' + this.constructor.name);
 
-        const ret = {};
+        const ret: any = {};
         for (let fieldName of this._serializableParameters) {
-            ret[fieldName] = this.dumpValue(this[fieldName]);
+            ret[fieldName] = this.dumpValue((<any>this)[fieldName]);
         }
         return ret;
     };
@@ -71,13 +71,13 @@ export abstract class Filter {
                 'Unknown parameter found in class ' + this.constructor.name +
                 ': ' + key);
 
-            this[key] = this.loadValue(params[key]);
+            (<any>this)[key] = this.loadValue(params[key]);
         }
     }
 
     /** Fields may have nested filters inside. This function serializes them
      * recursively. */
-    private dumpValue(value: any) {
+    private dumpValue(value: any): any {
         if (Array.isArray(value)) {
             return _.map(value, (v) => this.dumpValue(v));
         } else if (value instanceof Filter) {
@@ -89,7 +89,7 @@ export abstract class Filter {
 
     /** Counterpart to dumpValue(), deserializes nested filters recursively if
      * used as a field value. */
-    private loadValue(value: any) {
+    private loadValue(value: any): any {
        if (Array.isArray(value)) {
            return _.map(value, (v) => this.loadValue(v));
        } else if (typeof value == 'object' && 'type' in value) {

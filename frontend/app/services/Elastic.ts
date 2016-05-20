@@ -58,7 +58,7 @@ export class Elastic {
                 const publications: Publication[] = _.map(results.hits.hits,
                     (x) => x._source);
 
-                const tables = [];
+                const tables: PublicationTable[] = [];
 
                 for (let publication of publications) {
                     for (let table of publication.tables) {
@@ -118,7 +118,7 @@ export class Elastic {
             }
         }).then((results) => {
             return _(results.aggregations.tables_filtered.tables.variables.buckets)
-                .map((bucket) => ({
+                .map((bucket: any) => ({
                     name: bucket.key,
                     count: bucket.doc_count
                 }))

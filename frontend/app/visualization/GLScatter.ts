@@ -1,12 +1,9 @@
 import {DataPoint} from "../base/dataFormat";
 import {ensure} from "../utils/assert";
+import {RuntimeError} from "../base/errors";
 
-export function ShaderError(message) {
-    this.name = 'ShaderError';
-    this.message = message;
-    this.stack = (<any>new Error()).stack;
+export class ShaderError extends RuntimeError {
 }
-ShaderError.prototype = new Error();
 
 // Shader constants
 const dotRadiusPx = 2;
@@ -367,9 +364,9 @@ export class GLScatter {
         const yScale = this.yScale.bind(this);
 
         var colorScale = d3.scale.category10();
-        function hexToR(h) {return parseInt(h.substring(0,2),16)}
-        function hexToG(h) {return parseInt(h.substring(2,4),16)}
-        function hexToB(h) {return parseInt(h.substring(4,6),16)}
+        function hexToR(h: string) {return parseInt(h.substring(0,2),16)}
+        function hexToG(h: string) {return parseInt(h.substring(2,4),16)}
+        function hexToB(h: string) {return parseInt(h.substring(4,6),16)}
 
         function addDataPointData(dataPoint: DataPoint) {
             // Add these properties that are the same for all the vertices of a
@@ -418,7 +415,7 @@ export class GLScatter {
         }
     }
 
-    compileProgram(vertShaderSource: string, fragShaderSource): WebGLProgram|null {
+    compileProgram(vertShaderSource: string, fragShaderSource: string): WebGLProgram|null {
         const gl = this.gl;
 
         const program = gl.createProgram();
@@ -444,7 +441,8 @@ export class GLScatter {
         gl.compileShader(shader);
 
         if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            throw new ShaderError(gl.getShaderInfoLog(shader));
+            throw new ShaderError(gl.getShaderInfoLog(shader)
+                || 'null shader info log');
         }
 
         return shader;

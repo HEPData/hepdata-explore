@@ -5,7 +5,7 @@ export function variableTokenizer(obj: any) {
         return [];
     }
     if (Array.isArray(obj)) {
-        return obj.map(t => lunr.utils.asString(t).toLowerCase())
+        return obj.map((t: any) => lunr.utils.asString(t).toLowerCase());
     }
 
     return obj.toString().trim().toLowerCase().split(variableSeparator)

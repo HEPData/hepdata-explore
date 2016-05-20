@@ -87,7 +87,7 @@ class FilterIndex {
         }));
     }
 
-    private static stripHtmlTags(html) {
+    private static stripHtmlTags(html: string) {
         const el = document.createElement('div');
         el.innerHTML = html;
         return el.textContent;

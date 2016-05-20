@@ -17,5 +17,5 @@ declare class Map2<K1,K2,V> {
     keys(): IterableIterator<[K1,K2]>
     values(): IterableIterator<V>
     
-    inspect(depth?: number, options?: any);
+    inspect(depth?: number, options?: any): string;
 }

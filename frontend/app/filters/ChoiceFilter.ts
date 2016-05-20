@@ -28,10 +28,7 @@ class ChoiceFilter extends Filter {
     }
 
     filterTable(table: PublicationTable): boolean {
-        if (this.field.includes('indep')) {
-            debugger;
-        }
-        return table[this.field] == this.value;
+        return (<any>table)[this.field] == this.value;
     }
 
     getComponent() {

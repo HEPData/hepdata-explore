@@ -47,7 +47,7 @@ class MyClass {
     public x = 1;
 
     @observable()
-    public list = []; // MUST be initialized to an array, otherwise an ordinary
+    public list: string[] = []; // MUST be initialized to an array, otherwise an ordinary
     // ko.observable() would be used instead of a ko.observableArray()
 
     constructor() {
