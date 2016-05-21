@@ -57,7 +57,7 @@ export class AutocompleteService<SuggestionType> {
     @observable()
     public suggestions: SuggestionType[] = [];
     @observable()
-    public selectedSuggestionIx = 0;
+    public selectedSuggestionIx: number|null = null;
 
     private search(query: string): Promise<SuggestionType[]> {
         // Execute the domain specific search function
@@ -82,17 +82,32 @@ export class AutocompleteService<SuggestionType> {
                         }
                     });
                 // console.log('hit %d miss %d', hit, miss);
+
+                // Select the first suggestion
+                if (this.suggestions.length > 0) {
+                    this.selectedSuggestionIx = 0;
+                } else {
+                    this.selectedSuggestionIx = null;
+                }
                 return this.suggestions
             })
     }
 
     private nextSuggestion() {
+        if (this.suggestions.length == 0) {
+            return;
+        }
+
         this.selectedSuggestionIx = mod(this.selectedSuggestionIx + 1,
                 this.suggestions.length);
         this.ensureSuggestionIsVisible(this.suggestions[this.selectedSuggestionIx]);
     }
 
     private prevSuggestion() {
+        if (this.suggestions.length == 0) {
+            return;
+        }
+
         this.selectedSuggestionIx = mod(this.selectedSuggestionIx - 1,
             this.suggestions.length);
         this.ensureSuggestionIsVisible(this.suggestions[this.selectedSuggestionIx]);
