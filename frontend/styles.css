@@ -398,7 +398,7 @@ ul.suggestions {
     background: #F3F0DD;
 }
 
-.choice-filter .suggestion.selected, .suggestion.selected, .suggestion.crossMatch.selected {
+.choice-filter .suggestion.selected, .suggestion.selected {
     background: #4980D3;
     color: white;
 }
@@ -607,4 +607,8 @@ img.bubble-tail {
 
 .suggestion.crossMatch {
     background: #EEDAF2;
+}
+
+.suggestion.crossMatch.selected {
+    background: #AB49D3;
 }
