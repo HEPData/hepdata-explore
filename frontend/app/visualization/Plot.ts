@@ -147,6 +147,7 @@ export class Plot {
 
     clone() {
         const newPlot = new Plot(this.tableCache, this.config.clone());
+        newPlot.alive = true;
         newPlot.loadTables();
         return newPlot;
     }
