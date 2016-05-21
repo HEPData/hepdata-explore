@@ -18,17 +18,24 @@ export class BubbleFocusComponent {
         this._bubble = bubble;
     }
 
-    public bubbleKeyHandler(nextHandler: (component: any, ev: KeyboardEvent) => boolean|undefined) {
-        return (component: any, ev: KeyboardEvent) => {
-            if (this._bubble) {
-                const bubbleNext = this._bubble.keyHook(ev);
-                if (bubbleNext) {
-                    return nextHandler(component, ev);
-                } else {
-                    return false;
+    public bubbleKeyHandlers(nextKeyDownHandler: (component: any, ev: KeyboardEvent) => boolean|undefined) {
+        return {
+            keydown: (component: any, ev: KeyboardEvent) => {
+                if (this._bubble) {
+                    const bubbleNext = this._bubble.keyDownHook(ev);
+                    if (bubbleNext) {
+                        return nextKeyDownHandler(component, ev);
+                    } else {
+                        return false;
+                    }
+                }
+            },
+            keypress: (component: any, ev: KeyboardEvent) => {
+                if (this._bubble) {
+                    return this._bubble.keyPressHook(ev);
                 }
             }
-        }
+        } 
     }
 
     public dispose() {

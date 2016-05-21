@@ -175,7 +175,7 @@ export class BubbleComponent {
         });
     }
 
-    public keyHook(ev: KeyboardEvent) {
+    public keyDownHook(ev: KeyboardEvent) {
         if (ev.keyCode == KeyCode.Escape) {
             const bubbleWasVisible = this.visible;
 
@@ -187,9 +187,12 @@ export class BubbleComponent {
             return false;
         } else if (ev.keyCode == KeyCode.Return) {
             this.$bubbleEvents.onNext(BubbleEvent.EscOrReturn);
-        } else if (ev.char != '') {
-            this.$bubbleEvents.onNext(BubbleEvent.CharKey);
         }
+        return true;
+    }
+
+    public keyPressHook(ev: KeyboardEvent) {
+        this.$bubbleEvents.onNext(BubbleEvent.CharKey);
         return true;
     }
 
