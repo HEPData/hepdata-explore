@@ -592,3 +592,15 @@ img.bubble-tail {
 .custom-plot input {
     width: 350px;
 }
+
+.plot-legend {
+    padding-left: 0;
+}
+
+.plot-legend li {
+    max-width: 280px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: block;
+    white-space: nowrap;
+}

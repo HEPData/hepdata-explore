@@ -5,9 +5,8 @@
         x: <span data-bind="text: plot.xScaleType"></span>
         y: <span data-bind="text: plot.yScaleType"></span>
     </div>
-    <ul data-bind="foreach: plot.config.yVars">
-        <li>
-            <span data-bind="text: $data"></span>
+    <ul class="plot-legend" data-bind="foreach: plot.config.yVars">
+        <li data-bind="text: $data, attr: {title: $data}">
         </li>
     </ul>
     <button class="btn btn-primary" data-bind="click: showEditPlot">Edit plot</button>
