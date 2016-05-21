@@ -51,13 +51,16 @@ export class AutocompleteService<SuggestionType> {
         this.koQuery.subscribe((query: string) => {
             this.search(query);
         });
-        this.search(this.koQuery());
     }
 
     @observable()
     public suggestions: SuggestionType[] = [];
     @observable()
     public selectedSuggestionIx: number|null = null;
+
+    public updateSearchResults(): Promise<SuggestionType[]> {
+        return this.search(this.koQuery());
+    }
 
     private search(query: string): Promise<SuggestionType[]> {
         // Execute the domain specific search function
@@ -74,7 +77,7 @@ export class AutocompleteService<SuggestionType> {
                     .map((suggestion) => {
                         const sameOldSuggestion = oldSuggestionsByKey.get(this.keyFn(suggestion));
                         if (sameOldSuggestion) {
-                            hit ++;
+                            hit++;
                             return sameOldSuggestion;
                         } else {
                             miss++;

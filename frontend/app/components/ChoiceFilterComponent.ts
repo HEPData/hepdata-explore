@@ -64,6 +64,7 @@ class ChoiceFilterComponent {
             maxSuggestions: 5,
             suggestionClickedFn: this.useSuggestion,
         });
+        this.autocomplete.updateSearchResults();
     }
 
     @bind()

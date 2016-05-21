@@ -10,8 +10,18 @@ import IDisposable = Rx.IDisposable;
 
 
 export class VariableChoice {
+    /* ? */
     position: number;
+
+    /** Variable name */
     name: string;
+
+    /**
+     * True if choosing this variable would yield results (that is, if this is
+     * a y var, there are tables that have both this y var and the selected x
+     * var.
+     */
+    isCrossMatch: boolean;
 }
 
 
@@ -53,6 +63,19 @@ export class VariableVM {
                 this.cleanValue = suggestion.name;
             },
         });
+
+        this._subscription = ko.getObservable(this, 'focused')
+            .subscribe((focused: boolean) => {
+                if (focused) {
+                    this.autocomplete.updateSearchResults();
+                }
+            })
+    }
+
+    private _subscription: KnockoutSubscription;
+    dispose() {
+        this._subscription.dispose();
+        ko.untrack(this);
     }
 }
 
@@ -116,7 +139,7 @@ export class CustomPlotVM {
         for (var i = 0; i < this.yVars.length - 1; i++) {
             const yVar = this.yVars[i];
             if (yVar.fieldValue == '' && !yVar.focused) {
-                this.yVars.splice(i--, 1);
+                this.deleteYVar(i--);
             }
         }
 
@@ -130,6 +153,7 @@ export class CustomPlotVM {
     }
 
     deleteYVar(index: number) {
+        this.yVars[index].dispose();
         this.yVars.splice(index, 1);
     }
 
@@ -164,7 +188,7 @@ export class CustomPlotVM {
         if (this.isYVarsClean()
             && !_.isEqual(this.plot.config.yVars, this.getPlottableYVars()))
         {
-            // Replace this.plot.yVars contents
+            // Replace this.plot.config.yVars contents
             this.plot.config.yVars.splice(0, this.plot.config.yVars.length,
                 ...this.getPlottableYVars());
         }
@@ -188,10 +212,14 @@ export class CustomPlotVM {
             });
         });
 
+        const yVarsSet = new Set(this.getPlottableYVars());
         const results = allVariablesIndex.search(query)
             .map((result, index) => ({
                 position: index,
                 name: allVariables[result.ref],
+                isCrossMatch: !!this.tableCache.hasTableWithVariables(
+                    allVariables[result.ref],
+                    yVarsSet),
             }));
 
         return Promise.resolve(results);
@@ -219,8 +247,19 @@ export class CustomPlotVM {
             .map((result, index) => ({
                 position: index,
                 name: allVariables[result.ref],
+                isCrossMatch: !!this.tableCache.hasTableWithVariables(
+                    this.xVar.cleanValue,
+                    allVariables[result.ref])
             }));
 
         return Promise.resolve(results);
+    }
+
+    dispose() {
+        this.xVar.dispose();
+        for (let yVar of this.yVars) {
+            yVar.dispose();
+        }
+        ko.untrack(this);
     }
 }

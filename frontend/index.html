@@ -140,7 +140,8 @@
             <li class="suggestion"
                 data-bind="
                     css: {
-                        selected: ($index() == $parent.autocomplete.selectedSuggestionIx)
+                        selected: ($index() == $parent.autocomplete.selectedSuggestionIx),
+                        crossMatch: isCrossMatch,
                     },
                     event: {
                         mousedown: $parent.autocomplete.koMouseDownHandler($data)

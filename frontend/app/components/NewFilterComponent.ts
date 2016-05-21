@@ -42,6 +42,7 @@ export class NewFilterComponent {
             suggestionClickedFn: this.addFilterFromSearchResult,
             maxSuggestions: 100,
         });
+        this.autocomplete.updateSearchResults();
     }
 
     @bind()

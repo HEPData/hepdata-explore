@@ -43,14 +43,37 @@ class TableCache {
      *
      * Both xVar and yVars may be kdependent or independent variables.
      *
-     * For a table to be selected it MUST have both xVar and and yVar.
+     * For a table to be selected it MUST have both xVar and and at least one of
+     * yVars.
      */
-    public getTablesWithVariables(xVar: string, yVar: string): PublicationTable[] {
+    public getTablesWithVariables(xVar: string, yVars: Set<string>|string): PublicationTable[] {
+        const yVarsSet = (typeof yVars == 'string' ? new Set([yVars]) : yVars);
+
         return _.filter(this.allTables, (table) => {
-            const variableNames = _.map(table.indep_vars, 'name').concat(
-                                  _.map(table.dep_vars, 'name'));
+            const variableNames = _.map(table.indep_vars, x=>x.name).concat(
+                                  _.map(table.dep_vars, x=>x.name));
             return variableNames.indexOf(xVar) != -1 &&
-                    variableNames.indexOf(yVar) != -1;
+                   !!variableNames.find(x=>yVarsSet.has(x));
+        });
+    }
+
+    /** Tries to find a table containing the required variables.
+     *
+     * Both xVar and yVars may be kdependent or independent variables.
+     *
+     * For a table to be selected it MUST have both xVar and and at least one of
+     * yVars.
+     *
+     * Returns true if such table is found, false otherwise.
+     */
+    public hasTableWithVariables(xVar: string, yVars: Set<string>|string): boolean {
+        const yVarsSet = (typeof yVars == 'string' ? new Set([yVars]) : yVars);
+
+        return !!_.find(this.allTables, (table) => {
+            const variableNames = _.map(table.indep_vars, x=>x.name).concat(
+                _.map(table.dep_vars, x=>x.name));
+            return variableNames.indexOf(xVar) != -1 &&
+                !!variableNames.find(x=>yVarsSet.has(x));
         });
     }
 
