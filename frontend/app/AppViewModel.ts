@@ -335,7 +335,7 @@ export class AppViewModel {
     }
     
     public showEditPlotDialog(plot: Plot) {
-        this.customPlotVM = new CustomPlotVM(plot, this.tableCache);
+        this.customPlotVM = new CustomPlotVM(plot.clone(), this.tableCache);
         this.customPlotVisible = true;
     }
 

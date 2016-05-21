@@ -142,11 +142,13 @@ export class Plot {
             if (this.alive) {
                 this.loadTables();
             }
-        })
+        });
     }
 
     clone() {
-        return new Plot(this.tableCache, this.config.clone());
+        const newPlot = new Plot(this.tableCache, this.config.clone());
+        newPlot.loadTables();
+        return newPlot;
     }
 
     private addLayer(layer: PlotLayer) {
