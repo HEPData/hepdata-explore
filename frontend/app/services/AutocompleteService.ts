@@ -72,7 +72,7 @@ export class AutocompleteService<SuggestionType> {
                 });
                 var hit = 0, miss = 0;
 
-                this.suggestions = _.orderBy(results, this.rankingFn, ['asc'])
+                this.suggestions = _.sortBy(results, this.rankingFn)
                     .slice(0, this.maxSuggestions)
                     .map((suggestion) => {
                         const sameOldSuggestion = oldSuggestionsByKey.get(this.keyFn(suggestion));
