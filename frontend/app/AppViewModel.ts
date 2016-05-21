@@ -46,7 +46,7 @@ export class AppViewModel {
     tableCache = new TableCache;
 
     @observable()
-    plotPool: PlotPool;
+    plotPool = new PlotPool(this.tableCache);
 
     @observable()
     customPlotVisible = false;
@@ -66,8 +66,6 @@ export class AppViewModel {
     }
 
     constructor() {
-        this.plotPool = new PlotPool(this.tableCache);
-
         const appState$ = (<KnockoutObservable<StateDump>>
             ko.getObservable(this, 'appState'))
             .toObservableWithReplyLatest();
