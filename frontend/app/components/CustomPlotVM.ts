@@ -76,6 +76,11 @@ export class VariableVM {
             .subscribe((focused: boolean) => {
                 if (focused) {
                     this.autocomplete.updateSearchResults();
+                } else {
+                    // If the field loses focuses dirty, restore it to the clean value
+                    if (this.fieldValue != this.cleanValue) {
+                        this.fieldValue = this.cleanValue;
+                    }
                 }
             })
     }
