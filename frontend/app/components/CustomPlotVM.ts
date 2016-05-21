@@ -44,7 +44,8 @@ export class VariableVM {
         this.autocomplete = new AutocompleteService<VariableChoice>({
             koQuery: ko.getObservable(this, 'fieldValue'),
             searchFn: opts.searchFn,
-            rankingFn: (s: VariableChoice) => -s.name.length,
+            // The currently selected variable always appears first if present
+            rankingFn: (s: VariableChoice) => (s.name == this.cleanValue ? -1 : -s.name.length),
             keyFn: (s: VariableChoice) => s.name,
             maxSuggestions: 100,
             suggestionClickedFn: (suggestion: VariableChoice) => {
