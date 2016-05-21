@@ -85,9 +85,17 @@ export class BubbleComponent {
     @observable()
     styleLeft: string|null = null;
 
+    @observable()
+    currentBubbleState = BubbleState.Unselected;
+
+    @computedObservable()
+    get visible() {
+        return (this.currentBubbleState == BubbleState.SelectedWithBubble);
+    }
+
     private $bubbleEvents = new Rx.Subject<BubbleEvent>();
 
-    private bubbleState$ = this.$bubbleEvents
+    private bubbleState$Handler = this.$bubbleEvents
         .scan((prevState, event) => {
             if (event == BubbleEvent.Blur) {
                 return BubbleState.Unselected;
@@ -107,9 +115,7 @@ export class BubbleComponent {
             return prevState;
         }, BubbleState.Unselected)
         .distinctUntilChanged()
-        .forEach(function (x) {
-            console.log(x);
-        });
+        .forEach((state) => {this.currentBubbleState = state});
 
     @computedObservable()
     get focused(): boolean {
@@ -171,9 +177,13 @@ export class BubbleComponent {
 
     public keyHook(ev: KeyboardEvent) {
         if (ev.keyCode == KeyCode.Escape) {
+            const bubbleWasVisible = this.visible;
+
             this.$bubbleEvents.onNext(BubbleEvent.EscOrReturn);
-            // Don't bubble (avoid closing modal dialog)
-            ev.stopImmediatePropagation();
+            if (bubbleWasVisible) {
+                // Don't bubble (avoid closing modal dialog)
+                ev.stopImmediatePropagation();
+            } // the modal would be closed if the bubble was not visible already though
             return false;
         } else if (ev.keyCode == KeyCode.Return) {
             this.$bubbleEvents.onNext(BubbleEvent.EscOrReturn);
@@ -239,6 +249,7 @@ export class BubbleComponent {
 
     public dispose() {
         ko.untrack(this);
+        this.bubbleState$Handler.dispose();
     }
 
 }
