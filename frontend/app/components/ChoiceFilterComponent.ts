@@ -59,7 +59,7 @@ class ChoiceFilterComponent {
         this.autocomplete = new AutocompleteService<ChoiceSuggestion>({
             koQuery: ko.getObservable(this, 'valueTyped'),
             searchFn: this.search,
-            rankingFn: (s: ChoiceSuggestion) => s.absoluteFrequencyFullDB,
+            rankingFn: (s: ChoiceSuggestion) => -s.absoluteFrequencyFullDB,
             keyFn: (s: ChoiceSuggestion) => s.suggestedValue,
             maxSuggestions: 5,
             suggestionClickedFn: this.useSuggestion,

@@ -37,7 +37,7 @@ export class NewFilterComponent {
                     return Promise.resolve(filterIndex.returnAll());
                 }
             },
-            rankingFn: (suggestion) => suggestion.score,
+            rankingFn: (suggestion) => -suggestion.score,
             keyFn: (suggestion) => suggestion.match.filterClass,
             suggestionClickedFn: this.addFilterFromSearchResult,
             maxSuggestions: 100,

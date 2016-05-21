@@ -21,7 +21,7 @@ function mod(dividend: number, divisor: number) {
 interface AutocompleteOptions<SuggestionType> {
     koQuery: KnockoutObservable<string>;
     searchFn: (query: string) => Promise<SuggestionType[]>;
-    rankingFn: (suggestion: SuggestionType) => number;
+    rankingFn: (suggestion: SuggestionType) => number|number[];
     keyFn: (suggestion: SuggestionType) => any;
     suggestionClickedFn: (suggestion: SuggestionType) => void;
     maxSuggestions: number;
@@ -31,7 +31,7 @@ export class AutocompleteService<SuggestionType> {
     /** Returns the current query string */
     public koQuery: KnockoutObservable<string>;
     public searchFn: (query: string) => Promise<SuggestionType[]>;
-    public rankingFn: (suggestion: SuggestionType) => number;
+    public rankingFn: (suggestion: SuggestionType) => number|number[];
     /** Two suggestions from two different searches are considered to be the
      * same if they return the same key. */
     public keyFn: (suggestion: SuggestionType) => any;
@@ -72,7 +72,7 @@ export class AutocompleteService<SuggestionType> {
                 });
                 var hit = 0, miss = 0;
 
-                this.suggestions = _.orderBy(results, this.rankingFn, ['desc'])
+                this.suggestions = _.orderBy(results, this.rankingFn, ['asc'])
                     .slice(0, this.maxSuggestions)
                     .map((suggestion) => {
                         const sameOldSuggestion = oldSuggestionsByKey.get(this.keyFn(suggestion));
