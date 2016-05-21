@@ -2,18 +2,18 @@ import {PlotLayer} from "./PlotLayer";
 import {Plot} from "./Plot";
 import {ensure} from "../utils/assert";
 
-function yottaAndBeyondFormat(normalFormat: (n: number) => string) {
+function scientificNotation(normalFormat: (n: number) => string) {
     return (n: number) => {
         const abs = Math.abs(n);
         let ret: string;
         if (abs == 0) {
             ret = '0';
-        } else if (abs < 1e24 && (abs == 0 || abs > 1e-24)) {
-            // If the absolute value of the exponent is less than 24
-            // use normal format (e.g. with SI prefixes, like 30.2M)
+        } else if (abs < 1e3 && (abs == 0 || abs > 1e-3)) {
+            // For small quantities use normal format
             ret = normalFormat(n);
         } else {
-            // Use scientific notation (e.g. 2.78e+100)
+            // For too big or too small quantities use scientific notation
+            // (e.g. 2.78e+100)
             ret = n.toExponential(1);
         }
         return ret;
@@ -59,7 +59,7 @@ export class AxesLayer extends PlotLayer {
 
         // Draw X ticks
         let pastTickEnd: number|null = null;
-        const xTickFormat = yottaAndBeyondFormat(this.plot.xScale.tickFormat(undefined, 's'));
+        const xTickFormat = scientificNotation(this.plot.xScale.tickFormat(undefined, 'r'));
         for (let tickValue of this.plot.xScale.ticks()) {
             const tickX = Math.round(this.plot.xScale(tickValue));
 
@@ -81,7 +81,7 @@ export class AxesLayer extends PlotLayer {
         }
 
         // Draw Y ticks
-        const yTickFormat = yottaAndBeyondFormat(this.plot.yScale.tickFormat(undefined, 's'));
+        const yTickFormat = scientificNotation(this.plot.yScale.tickFormat(undefined, 'r'));
         for (let tickValue of this.plot.yScale.ticks()) {
             const tickY = Math.round(this.plot.yScale(tickValue));
 
