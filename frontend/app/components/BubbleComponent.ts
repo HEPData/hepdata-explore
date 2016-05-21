@@ -172,7 +172,8 @@ export class BubbleComponent {
     public keyHook(ev: KeyboardEvent) {
         if (ev.keyCode == KeyCode.Escape) {
             this.$bubbleEvents.onNext(BubbleEvent.EscOrReturn);
-            // Don't bubble (avoid closing modal dialog) [TODO does not work]
+            // Don't bubble (avoid closing modal dialog)
+            ev.stopImmediatePropagation();
             return false;
         } else if (ev.keyCode == KeyCode.Return) {
             this.$bubbleEvents.onNext(BubbleEvent.EscOrReturn);
