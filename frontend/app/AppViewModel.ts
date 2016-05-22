@@ -123,6 +123,15 @@ export class AppViewModel {
             .map(Filter.load)
             .map(elastic.fetchFilteredData)
             .map(rxObservableFromPromise)
+            .map(x => x
+                // Handle errors of the elastic request independently, so an
+                // error at a request does not stop the complete stream (which
+                // would prevent more filter updates from triggering these
+                // search calls)
+                .doOnError((err) => {
+                    console.log(err);
+                })
+                .catch(() => Rx.Observable.empty<PublicationTable[]>()))
             .setLoading((loading) => {this.loadingNewData = loading})
             // Get the latest response
             .switch()
