@@ -36,7 +36,12 @@ export abstract class Filter {
 
     abstract getComponent(): ComponentRef;
 
-    abstract filterTable(table: PublicationTable): boolean;
+    /** By default tables are only filtered by elastic search. This function
+     * allows to add an additional client side filter.
+     */
+    abstract filterTable(table: PublicationTable): boolean {
+        return true;
+    };
 
     isRemoveAllowed() {
         return true;

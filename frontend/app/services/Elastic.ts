@@ -8,7 +8,7 @@ import {
     AssertionError
 } from "../utils/assert";
 import {jsonPOST} from "../base/network";
-import {sum} from "../utils/map";
+import {sum, map} from "../utils/map";
 import SomeFilter = require("../filters/SomeFilter");
 import AllFilter = require("../filters/AllFilter");
 import {calculateComplementaryFilter} from "../utils/complementaryFilter";
@@ -24,7 +24,18 @@ interface ElasticQueryResult {
 
     // Matched publications
     hits: {
-        hits: {_source:Publication}[]
+        hits: {
+            _source: Publication,
+            inner_hits: {
+                tables: {
+                    hits: {
+                        hits: {
+                            _source: PublicationTable
+                        }[]
+                    }
+                }
+            }
+        }[]
     };
 }
 
@@ -49,27 +60,31 @@ export class Elastic {
                 "nested": {
                     "path": "tables",
                     "query": rootFilter.toElasticQuery(),
-                }
+                    "inner_hits": {},
+                },
             }
         };
         return jsonPOST(this.elasticUrl + '/publication/_search', requestData)
             .then((results: ElasticQueryResult) => {
-                const publications: Publication[] = _.map(results.hits.hits,
-                    (x) => x._source);
+                const returnedTables: PublicationTable[] = [];
 
-                const tables: PublicationTable[] = [];
+                for (let publicationHit of results.hits.hits) {
+                    const publication: Publication = publicationHit._source;
+                    const filteredTables: PublicationTable[] = map(
+                        publicationHit.inner_hits.tables.hits.hits, h=>h._source);
 
-                for (let publication of publications) {
-                    for (let table of publication.tables) {
+                    for (let table of filteredTables) {
+                        // Use client side filtering too
                         if (!rootFilter.isUsable() || rootFilter.filterTable(table)) {
+                            // The table passes all filters, index it.
                             table.publication = publication;
                             this.addRangeProperties(table.data_points);
-                            tables.push(table);
+                            returnedTables.push(table);
                         }
                     }
                 }
 
-                return tables;
+                return returnedTables;
             })
     }
 

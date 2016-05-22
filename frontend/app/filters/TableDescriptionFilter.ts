@@ -32,14 +32,6 @@ export class TableDescriptionFilter extends Filter {
         }
     }
 
-    filterTable(table: PublicationTable): boolean {
-        if (this.value == null || this.value == '') {
-            return true;
-        }
-        // TODO client side filtering
-        return true;
-    }
-
     getComponent() {
         return {
             name: 'hep-table-description',
