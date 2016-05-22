@@ -16,7 +16,7 @@ export class TableDescriptionFilter extends Filter {
     }
 
     static getLongName() {
-        return 'Table comment';
+        return 'Table description';
     }
 
     toElasticQuery(): any {
