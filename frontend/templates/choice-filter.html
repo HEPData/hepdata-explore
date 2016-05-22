@@ -1,6 +1,6 @@
 <form data-bind="event: {submit: autocomplete.acceptSelected}">
     <input data-bind="
-        textInput: valueTyped,
+        textInput: ko.getObservable($data, 'valueTyped'),
         event: {keydown: autocomplete.keyPressed},
         attr: {
             placeholder: 'Filter by ' + filter.getLongName().toLowerCase() + '...'

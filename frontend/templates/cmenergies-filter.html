@@ -1,11 +1,14 @@
 <form class="filter-form">
     <label>
         <div>Minimum:</div>
-        <input type="text" pattern="-?[0-9]*.?[0-9]*" data-bind="value: minTyped,
-         hasFocus: ko.getObservable($data, focused)">
+        <input type="text" pattern="-?[0-9]*.?[0-9]*" data-bind="
+            value: ko.getObservable($data, 'minTyped'),
+            hasFocus: ko.getObservable($data, 'focused'),
+        ">
     </label>
     <label>
         <div>Maximum:</div>
-        <input type="text" pattern="-?[0-9]*.?[0-9]*" data-bind="value: maxTyped">
+        <input type="text" pattern="-?[0-9]*.?[0-9]*"
+               data-bind="value: ko.getObservable($data, 'maxTyped')">
     </label>
 </form>
