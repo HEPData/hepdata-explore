@@ -24,9 +24,12 @@ export class TableDescriptionFilter extends Filter {
 
     toElasticQuery(): any {
         if (this.value != null && this.value != '') {
+            const field = (this.mode == 'match' ? 'description'
+                : 'description_not_analyzed');
+
             return {
                 [this.mode]: {
-                    "tables.description": this.value,
+                    ["tables." + field]: this.value,
                 },
             };
         } else {

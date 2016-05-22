@@ -45,10 +45,10 @@ export class Elastic {
     constructor() {
         if (location.hostname.indexOf('rufian.eu') != -1) {
             // my test server
-            this.elasticUrl = location.origin + '/elastic/hepdata3';
+            this.elasticUrl = location.origin + '/elastic/hepdata4';
         } else {
             // testing on localhost and LAN
-            this.elasticUrl = 'http://' + location.hostname + ':9200/hepdata3';
+            this.elasticUrl = 'http://' + location.hostname + ':9200/hepdata4';
         }
     }
 
