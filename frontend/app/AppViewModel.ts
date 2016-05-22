@@ -137,7 +137,7 @@ export class AppViewModel {
                 var t2 = performance.now();
                 console.log("Data indexed in %.2f ms.", t2 - t1);
 
-                if (debugOpenEditPlot) {
+                if (debugOpenEditPlot && this.plotPool.plots[0].alive) {
                     debugOpenEditPlot = false;
                     this.showEditPlotDialog(this.plotPool.plots[0]);
                 }
