@@ -1,6 +1,7 @@
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {observable} from "../decorators/observable";
 import {TableDescriptionFilter} from "../filters/TableDescriptionFilter";
+import {app} from "../AppViewModel";
 
 @KnockoutComponent('hep-table-description', {
     template: { fromUrl: 'table-description-filter.html' },
@@ -15,8 +16,15 @@ export class TableDescriptionFilterComponent {
     @observable()
     focused = true;
 
+    @observable()
+    showMatches = false;
+
     constructor(params: any) {
         this.filter = params.filter;
+    }
+
+    getTableNames(): string[] {
+        return app.tableCache.allTables.slice(0, 30).map(t=>t.description);
     }
 
     dispose() {
