@@ -39,7 +39,7 @@ export abstract class Filter {
     /** By default tables are only filtered by elastic search. This function
      * allows to add an additional client side filter.
      */
-    abstract filterTable(table: PublicationTable): boolean {
+    filterTable(table: PublicationTable): boolean {
         return true;
     };
 
