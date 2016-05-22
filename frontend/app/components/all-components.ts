@@ -8,3 +8,4 @@ import "./PlotPoolComponent";
 import "./CMEnergiesFilterComponent";
 import "./BubbleComponent";
 import "./BubbleFocusComponent";
+import "./TableDescriptionFilterComponent";

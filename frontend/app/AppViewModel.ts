@@ -139,7 +139,7 @@ export class AppViewModel {
 
                 if (debugOpenEditPlot && this.plotPool.plots[0].alive) {
                     debugOpenEditPlot = false;
-                    this.showEditPlotDialog(this.plotPool.plots[0]);
+                    // this.showEditPlotDialog(this.plotPool.plots[0]);
                 }
             });
     }

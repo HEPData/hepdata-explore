@@ -1,4 +1,3 @@
-import ChoiceFilter = require("../filters/ChoiceFilter");
 import CMEnergiesFilter = require("../filters/CMEnergiesFilter");
 import {floatEquals} from "../utils/floatEquals";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";

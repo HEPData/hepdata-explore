@@ -89,10 +89,10 @@ export abstract class Filter {
 
     /** Counterpart to dumpValue(), deserializes nested filters recursively if
      * used as a field value. */
-    private loadValue(value: any): any {
+    private loadValue(value: any|null): any {
        if (Array.isArray(value)) {
            return _.map(value, (v) => this.loadValue(v));
-       } else if (typeof value == 'object' && 'type' in value) {
+       } else if (value !== null && typeof value == 'object' && 'type' in value) {
            return Filter.load(value);
        } else {
            return value;
@@ -122,10 +122,6 @@ export abstract class Filter {
      * replaces it with newFilter.
      *
      * Returns boolean indicating whether a replacement was made.
-     *
-     * @param oldFilter
-     * @param newFilter
-     * @returns {boolean}
      */
     public replaceFilter(oldFilter: Filter, newFilter: Filter): boolean {
         return false;

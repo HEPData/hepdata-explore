@@ -6,6 +6,7 @@ import {
 } from "../filters/filter-factories";
 import SomeFilter = require("../filters/SomeFilter");
 import CMEnergiesFilter = require("../filters/CMEnergiesFilter");
+import {TableDescriptionFilter} from "../filters/TableDescriptionFilter";
 
 
 interface FilterIndexRecordDefinition {
@@ -125,6 +126,11 @@ filterIndex.populate([
         filterClass: CMEnergiesFilter,
         description: `Returns tables having a <code>cmenergies</code> overlapping the specified range.`,
         tags: ['sqrt', 'sqrts', 'cmenergies'],
+    },
+    {
+        filterClass: TableDescriptionFilter,
+        description: `Returns tables containing some text in their description.`,
+        tags: ['table', 'name', 'description', 'content'],
     },
 ]);
 

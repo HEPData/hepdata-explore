@@ -1,0 +1,9 @@
+<form class="filter-form" data-bind="submit: function() { return false }">
+    <label>
+        <div>Expression:</div>
+        <input type="text" data-bind="
+            value: ko.getObservable(filter, 'value'),
+            hasFocus: ko.getObservable($data, 'focused'),
+        ">
+    </label>
+</form>
