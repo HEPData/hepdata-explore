@@ -119,6 +119,8 @@ export class Plot {
     axesLayer: AxesLayer;
     scatterLayer: ScatterLayer;
 
+    matchingTables: PublicationTable[];
+
     @computedObservable()
     private get _configChanged() {
         this.config.xVar;
@@ -189,14 +191,15 @@ export class Plot {
         );
 
         // Collect all tables having data going to be plotted
-        let allTables: PublicationTable[] = [];
+        let matchingTables: PublicationTable[] = [];
         for (let tables of Array.from(tablesByYVar.values())) {
-            allTables = allTables.concat(tables);
+            matchingTables = matchingTables.concat(tables);
         }
-        this.countTables = allTables.length;
-        this.countPublications = _.uniq(_.map(allTables,
+        this.matchingTables = matchingTables;
+        this.countTables = matchingTables.length;
+        this.countPublications = _.uniq(_.map(matchingTables,
             (t: PublicationTable) => t.publication)).length;
-        this.calculateMinMax(allTables);
+        this.calculateMinMax(matchingTables);
 
         this.xScaleType = this.chooseScale(this.dataMinX, this.dataMaxX);
         this.xScale = this.d3Scale(this.xScaleType)
