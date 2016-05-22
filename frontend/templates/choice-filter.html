@@ -6,6 +6,7 @@
             placeholder: 'Filter by ' + filter.getLongName().toLowerCase() + '...'
         },
         hasFocus: ko.getObservable($data, 'focused')">
+
     <!-- ko component: {
         name: "suggestions-box",
         params: {
@@ -13,6 +14,7 @@
             template: 'choiceFilterAutocomplete'
         }
     } -->
+
         <div class="bar total" data-bind="style: {
             width: freqDividedByModeFullDB * 100 + '%'
         }"></div>
@@ -21,5 +23,6 @@
         <div class="absolute-freq"
              data-bind="text: recordCountFormat(absoluteFrequencyFullDB)"></div>
         <div style="clear: both"></div>
+
     <!-- /ko -->
 </form>
