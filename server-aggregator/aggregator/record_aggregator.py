@@ -159,6 +159,7 @@ class RecordAggregator(object):
         publication = dict(
             inspire_record=inspire_record,
             comment=header['comment'],
+            comment_not_analyzed=header['comment'],
         )
 
         processed_tables = []
@@ -330,6 +331,7 @@ class RecordAggregator(object):
         table = dict(
             table_num=table_num,
             description=table['description'],
+            description_not_analyzed=table['description'],
 
             cmenergies_min=cmenergies_min,
             cmenergies_max=cmenergies_max,
@@ -423,12 +425,14 @@ class RecordAggregator(object):
                 "publication": {
                     "properties": {
                         "comment": {"type": "string"},
+                        "comment_not_analyzed": {"type": "string","index": "not_analyzed"},
                         "inspire_record": {"type": "long"},
                         "tables": {
                             "type": "nested",
                             "properties": {
                                 "table_num": {"type": "long"},
                                 "description": {"type": "string"},
+                                "description_not_analyzed": {"type": "string","index": "not_analyzed"},
 
                                 "cmenergies_min": {"type": "double"},
                                 "cmenergies_max": {"type": "double"},
@@ -442,8 +446,8 @@ class RecordAggregator(object):
                                         "particles_out": {"type": "string","index": "not_analyzed"},
                                     }
                                 },
-                                "observables": {"type": "string"},
-                                "phrases": {"type": "string"},
+                                "observables": {"type": "string","index": "not_analyzed"},
+                                "phrases": {"type": "string","index": "not_analyzed"},
 
                                 "indep_vars": {
                                     "type": "object",

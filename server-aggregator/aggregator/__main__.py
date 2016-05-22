@@ -60,7 +60,7 @@ def _add(index, submission_paths, only_these=None):
 
 
 def add(*submission_paths):
-    _add('hepdata3', submission_paths)
+    _add('hepdata4', submission_paths)
 
 
 def add_demo_subset(*submission_paths):
