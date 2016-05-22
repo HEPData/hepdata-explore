@@ -1,4 +1,3 @@
-import {PublicationTable} from "../base/dataFormat";
 import DslParam = require("../base/DslParam");
 import {Filter} from "./Filter";
 import {registerFilterClass} from "./filterRegistry";
@@ -9,10 +8,14 @@ export class TableDescriptionFilter extends Filter {
     @observable()
     value: string|null;
 
-    constructor(value: string|null = null) {
+    @observable()
+    mode: 'match'|'regex';
+
+    constructor(value: string|null = null, mode: 'match'|'regex' = 'match') {
         super();
         this.value = value;
-        this.registerSerializableFields(['value']);
+        this.mode = mode;
+        this.registerSerializableFields(['value', 'mode']);
     }
 
     static getLongName() {
@@ -22,7 +25,7 @@ export class TableDescriptionFilter extends Filter {
     toElasticQuery(): any {
         if (this.value != null && this.value != '') {
             return {
-                "match": {
+                [this.mode]: {
                     "tables.description": this.value,
                 },
             };

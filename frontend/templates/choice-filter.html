@@ -1,5 +1,5 @@
 <form data-bind="event: {submit: autocomplete.acceptSelected}">
-    <input data-bind="
+    <input type="text" data-bind="
         textInput: ko.getObservable($data, 'valueTyped'),
         event: {keydown: autocomplete.keyPressed},
         attr: {

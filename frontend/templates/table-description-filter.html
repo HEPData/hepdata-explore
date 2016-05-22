@@ -6,4 +6,16 @@
             hasFocus: ko.getObservable($data, 'focused'),
         ">
     </label>
+
+    <label style="display: block;">
+        <input type="radio" name="mode" value="match"
+               data-bind="checked: ko.getObservable(filter, 'mode')">
+        <span>Natural text search</span>
+    </label>
+
+    <label style="display: block;">
+        <input type="radio" name="mode" value="regexp"
+               data-bind="checked: ko.getObservable(filter, 'mode')">
+        <span>Regular expression</span>
+    </label>
 </form>

@@ -1,6 +1,6 @@
 <form data-bind="event: {submit: autocomplete.acceptSelected}">
     <hep-bubble-focus>
-        <input data-bind="
+        <input type="text" data-bind="
             textInput: ko.getObservable($parent, 'query'),
             hasFocus: ko.getObservable($parent, 'focused'),
             event: {keydown: $parent.autocomplete.keyPressed}

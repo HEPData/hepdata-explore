@@ -349,7 +349,7 @@ filter-shell filter-shell filter-shell .head {
     background: #DEE0E0;
 }
 
-input {
+input[type="text"] {
     width: 100%;
     border: 1px solid lightgray;
     padding: 1px 3px;
