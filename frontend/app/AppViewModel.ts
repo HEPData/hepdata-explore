@@ -30,6 +30,7 @@ import {computedObservable} from "./decorators/computedObservable";
 import {rxObservableFromPromise} from "./rx/rxObservableFromPromise";
 import {rxObservableFromHash, getCurrentHash} from "./rx/rxObservableFromHash";
 import "rx/setLoadingOperator";
+import {HTTPError} from "./base/network";
 
 declare function stableStringify(thing: any): string;
 
@@ -124,14 +125,24 @@ export class AppViewModel {
             .map(elastic.fetchFilteredData)
             .map(rxObservableFromPromise)
             .map(x => x
+                .doOnError((err) => {
+                    if (err instanceof HTTPError && err.code == 400) {
+                        console.log('Bad request');
+                    }
+                })
+                .retryWhen((errors) => errors
+                    // Only retry non-400 errors
+                    .filter((err: any) => err instanceof HTTPError && err.code != 400)
+                    // Retry up to three times, for a total of 4 request attempts,
+                    // waiting 1 second between attempts.
+                    .zip(Rx.Observable.range(0, 3), Rx.Observable.timer(1000, 1000))
+                )
                 // Handle errors of the elastic request independently, so an
                 // error at a request does not stop the complete stream (which
                 // would prevent more filter updates from triggering these
                 // search calls)
-                .doOnError((err) => {
-                    console.log(err);
-                })
-                .catch(() => Rx.Observable.empty<PublicationTable[]>()))
+                // .catch(() => Rx.Observable.empty<PublicationTable[]>())
+            )
             .setLoading((loading) => {this.loadingNewData = loading})
             // Get the latest response
             .switch()
