@@ -19,12 +19,19 @@ export class TableDescriptionFilterComponent {
     @observable()
     showMatches = false;
 
+    @observable()
+    regexpInfoVisible = false;
+
     constructor(params: any) {
         this.filter = params.filter;
     }
 
     getTableNames(): string[] {
         return app.tableCache.allTables.slice(0, 30).map(t=>t.description);
+    }
+
+    toggleRegexpInfo() {
+        this.regexpInfoVisible = !this.regexpInfoVisible;
     }
 
     dispose() {

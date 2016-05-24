@@ -620,3 +620,8 @@ img.bubble-tail {
     margin-top: 60px;
     padding: 5px 20px 10px 20px;
 }
+.regex-info {
+  background: wheat;
+  padding: 10px;
+  border-radius: 5px;
+}

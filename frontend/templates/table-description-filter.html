@@ -16,8 +16,34 @@
     <label style="display: block;">
         <input type="radio" name="mode" value="regexp"
                data-bind="checked: ko.getObservable(filter, 'mode')">
-        <span>Regular expression</span>
+        <span>
+            Regular expression
+            <a href="javascript:;" data-bind="
+                click: toggleRegexpInfo,
+                text: regexpInfoVisible ? '(less info)' : '(more info)',
+            "></a>
+        </span>
     </label>
+
+    <div class="regex-info" data-bind="visible: regexpInfoVisible">
+        <p>
+            You can use regular expressions to select table descriptions matching text patterns.
+        </p><p>
+            For instance, <code>.*(95|99)% CL.*</code> will match all tables whose description contain either <code>95% CL</code>
+            or <code>99% CL</code>.
+        </p>
+        <p>
+            The expressions use the
+            <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html" target="_blank">
+                syntax from ElasticSearch
+            </a>, which is based on Lucene.
+        </p>
+
+        <p>
+            <b>Note:</b> Expressions are case sensitive. Patterns are always anchored so you need to use <code>.*</code> at the beginning and the end
+            of an expression to search inside all of the text.
+        </p>
+    </div>
 
     <label style="display: block;">
         <input type="checkbox" data-bind="checked: showMatches">
