@@ -162,20 +162,16 @@ export class AppViewModel {
             .map(rxObservableFromPromise)
             .map(x => x
                 .map<SearchState>(tables => ({tables: tables, error: null}))
-                .doOnError((err) => {
-                    if (err instanceof HTTPError && err.code == 400) {
-                        console.log('Bad request');
-                    }
-                })
                 .retryWhen((errors) => errors
                     .scan((countRetries: number, err: any) => {
-                        // Retry up to three times, for a total of 4 request attempts.
+                        console.log('retries', countRetries);
+                        // Retry up to four times, for a total of 5 request attempts.
                         // Only retry non-400 errors.
-                        if (countRetries < 3 || err instanceof HTTPError && err.code != 400) {
+                        if (countRetries >= 4 || err instanceof HTTPError && err.code != 400) {
                             throw err;
                         }
                         return countRetries + 1;
-                    }, 0)
+                    }, 1)
                     // Waiting 1 second between attempts.
                     .zip(Rx.Observable.timer(1000, 1000))
                 )
@@ -184,7 +180,6 @@ export class AppViewModel {
                 // would prevent more filter updates from triggering these
                 // search calls)
                 .catch((err) => {
-                    console.log(err);
                     let errorMessage: ErrorMessage;
                     if (err instanceof HTTPError && err.code == 400) {
                         errorMessage = formatMessageFromError(err);
@@ -225,7 +220,6 @@ export class AppViewModel {
                         // this.showEditPlotDialog(this.plotPool.plots[0]);
                     }
                 }
-                console.log(state);
                 this.currentError = state.error
             });
     }
