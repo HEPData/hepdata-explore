@@ -164,7 +164,6 @@ export class AppViewModel {
                 .map<SearchState>(tables => ({tables: tables, error: null}))
                 .retryWhen((errors) => errors
                     .scan((countRetries: number, err: any) => {
-                        console.log('retries', countRetries);
                         // Retry up to four times, for a total of 5 request attempts.
                         // Only retry non-400 errors.
                         if (countRetries >= 4 || err instanceof HTTPError && err.code != 400) {
