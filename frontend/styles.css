@@ -616,6 +616,7 @@ img.bubble-tail {
 .error-window {
     width: 400px;
     background: #703D67;
+    color: white;
     margin: 0 auto;
     margin-top: 60px;
     padding: 5px 20px 10px 20px;
