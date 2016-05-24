@@ -92,24 +92,14 @@
                 "></hep-plot-pool>
             </div>
         </div>
+
         <div id="visualization-loading" data-bind="visible: false">
             <div class="loading-box">
-                <h2>Please wait...</h2>
-                <!--<div>-->
-                    <!--<i id="loading-downloading"-->
-                       <!--class="fa fa-arrow-right loading-arrow"></i>-->
-                    <!--Downloading data-->
-                <!--</div>-->
-                <!--<div>-->
-                    <!--<i id="loading-processing"-->
-                       <!--class="fa fa-arrow-right loading-arrow"-->
-                       <!--data-bind="style: {visibility: isRendering() ? 'visible' : 'hidden'}"></i>-->
-                    <!--Rendering data-->
-                <!--</div>-->
+                <h2>Loading the application...</h2>
             </div>
         </div>
 
-        <div class="error-window" data-bind="visible: currentError, if: currentError">
+        <div style="display: none;" class="error-window" data-bind="visible: currentError, if: currentError">
             <h3 data-bind="text: currentError.title "></h3>
             <p data-bind="text: currentError.message"></p>
             <pre data-bind="visible: currentError.detail, text: currentError.detail"></pre>
