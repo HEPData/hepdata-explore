@@ -612,3 +612,11 @@ img.bubble-tail {
 .suggestion.crossMatch.selected {
     background: #AB49D3;
 }
+
+.error-window {
+    width: 400px;
+    background: #703D67;
+    margin: 0 auto;
+    margin-top: 60px;
+    padding: 5px 20px 10px 20px;
+}

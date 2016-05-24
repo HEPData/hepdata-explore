@@ -30,7 +30,7 @@ import {computedObservable} from "./decorators/computedObservable";
 import {rxObservableFromPromise} from "./rx/rxObservableFromPromise";
 import {rxObservableFromHash, getCurrentHash} from "./rx/rxObservableFromHash";
 import "rx/setLoadingOperator";
-import {HTTPError} from "./base/network";
+import {HTTPError, NetworkError} from "./base/network";
 
 declare function stableStringify(thing: any): string;
 
@@ -43,6 +43,29 @@ function screenUpdated() {
 interface ErrorMessage {
     title: string;
     message: string;
+    detail: string|null;
+}
+
+function formatMessageFromError(err: HTTPError): ErrorMessage {
+    const cause = _.get<string>(err.response, 'error.root_cause.0.type', 'unknown cause');
+    const reason = _.get<string>(err.response, 'error.root_cause.0.reason', 'unknown reason');
+
+    if (cause == 'illegal_argument_exception') {
+        // Catch regex errors, which are the user' fault
+        return {
+            title: 'Invalid argument',
+            message: 'This error is usually caused by a buggy regexp in your filters. More details below:',
+            detail: reason,
+        }
+    } else {
+        // Generic error (these should be the programmer's fault)
+        return {
+            title: 'Filter failed',
+            message: 'The search server rejected the search with error.',
+            detail: `${cause}: ${reason}`,
+        }
+    }
+
 }
 
 interface SearchState {
@@ -164,14 +187,18 @@ export class AppViewModel {
                     console.log(err);
                     let errorMessage: ErrorMessage;
                     if (err instanceof HTTPError && err.code == 400) {
+                        errorMessage = formatMessageFromError(err);
+                    } else if (err instanceof NetworkError) {
                         errorMessage = {
-                            title: 'Bad regexp',
-                            message: 'more info'
+                            title: 'Network error',
+                            message: 'Could not contact the search server after several retries.',
+                            detail: null,
                         }
                     } else {
                         errorMessage = {
-                            title: 'A server error occurred',
-                            message: 'Contact with support.'
+                            title: 'Unknow error',
+                            message: 'An unknown error occurred retrieving the filtered data.',
+                            detail: null,
                         }
                     }
                     return Rx.Observable.just({error: errorMessage, tables: null});
