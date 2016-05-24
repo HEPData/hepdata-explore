@@ -40,6 +40,19 @@ export function* range(limit: number) {
     }
 }
 
+export function groupBy<K,V>(list: Iterable<V>, keyFn: (value: V) => K): Map<K,V[]> {
+    const ret = new Map<K,V[]>();
+    for (let value of list) {
+        const key = keyFn(value);
+        if (!ret.has(key)) {
+            ret.set(key, []);
+        }
+
+        ret.get(key)!.push(value);
+    }
+    return ret;
+}
+
 function test() {
     interface Point {
         x: number;

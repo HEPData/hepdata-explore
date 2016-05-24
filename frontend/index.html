@@ -212,6 +212,24 @@
                     </td>
                 </tr>
             </table>
+
+            <h3>Publication list</h3>
+            <ul data-bind="foreach: plot.matchingTablesByPublication">
+                <li>
+                    <a data-bind="text: 'Publication title', attr: {href: 'https://hepdata.net/record/ins' + publication.inspire_record}"></a>
+                    <ul data-bind="foreach: tables">
+                        <li>
+                            <a data-bind="text: 'Table ' + table_num, attr: {
+                                href: 'https://hepdata.net/record/ins' + $parent.publication.inspire_record + '?table=Table' + table_num
+                            }"></a>
+                            <span data-bind="text: description"></span>
+                            <div>
+                                (<span data-bind="text: data_points.length"></span> data points)
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         </div>
 
         <div style="clear: both"></div>

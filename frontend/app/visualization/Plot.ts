@@ -7,6 +7,7 @@ import {assertDefined, AssertionError, ensure} from "../utils/assert";
 import {ScatterLayer} from "./ScatterLayer";
 import {observable} from "../decorators/observable";
 import {computedObservable} from "../decorators/computedObservable";
+import {groupBy, map} from "../utils/map";
 
 export interface Margins {
     top: number;
@@ -119,7 +120,17 @@ export class Plot {
     axesLayer: AxesLayer;
     scatterLayer: ScatterLayer;
 
+    @observable()
     matchingTables: PublicationTable[];
+
+    @computedObservable()
+    private get matchingTablesByPublication() {
+        const groups = groupBy(this.matchingTables, (t) => t.publication);
+        return map(groups.entries(), ([publication, tables]) => ({
+            publication: publication,
+            tables: tables,
+        }));
+    }
 
     @computedObservable()
     private get _configChanged() {
