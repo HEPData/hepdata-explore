@@ -108,6 +108,11 @@
                 <!--</div>-->
             </div>
         </div>
+
+        <div class="error-window" data-bind="visible: currentError, if: currentError">
+            <h3 data-bind="text: currentError.title "></h3>
+            <p data-bind="text: currentError.message"></p>
+        </div>
     </div>
 
 </div>

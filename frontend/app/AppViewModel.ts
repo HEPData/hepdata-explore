@@ -40,6 +40,16 @@ function screenUpdated() {
     });
 }
 
+interface ErrorMessage {
+    title: string;
+    message: string;
+}
+
+interface SearchState {
+    error: ErrorMessage|null,
+    tables: PublicationTable[]|null,
+}
+
 export class AppViewModel {
     @observable()
     rootFilter: Filter|null = null;
@@ -57,6 +67,9 @@ export class AppViewModel {
 
     @observable()
     loadingNewData = false;
+
+    @observable()
+    currentError: ErrorMessage|null = null;
 
     @computedObservable()
     get appState(): StateDump {
@@ -125,42 +138,68 @@ export class AppViewModel {
             .map(elastic.fetchFilteredData)
             .map(rxObservableFromPromise)
             .map(x => x
+                .map<SearchState>(tables => ({tables: tables, error: null}))
                 .doOnError((err) => {
                     if (err instanceof HTTPError && err.code == 400) {
                         console.log('Bad request');
                     }
                 })
                 .retryWhen((errors) => errors
-                    // Only retry non-400 errors
-                    .filter((err: any) => err instanceof HTTPError && err.code != 400)
-                    // Retry up to three times, for a total of 4 request attempts,
-                    // waiting 1 second between attempts.
-                    .zip(Rx.Observable.range(0, 3), Rx.Observable.timer(1000, 1000))
+                    .scan((countRetries: number, err: any) => {
+                        // Retry up to three times, for a total of 4 request attempts.
+                        // Only retry non-400 errors.
+                        if (countRetries < 3 || err instanceof HTTPError && err.code != 400) {
+                            throw err;
+                        }
+                        return countRetries + 1;
+                    }, 0)
+                    // Waiting 1 second between attempts.
+                    .zip(Rx.Observable.timer(1000, 1000))
                 )
                 // Handle errors of the elastic request independently, so an
                 // error at a request does not stop the complete stream (which
                 // would prevent more filter updates from triggering these
                 // search calls)
-                // .catch(() => Rx.Observable.empty<PublicationTable[]>())
+                .catch((err) => {
+                    console.log(err);
+                    let errorMessage: ErrorMessage;
+                    if (err instanceof HTTPError && err.code == 400) {
+                        errorMessage = {
+                            title: 'Bad regexp',
+                            message: 'more info'
+                        }
+                    } else {
+                        errorMessage = {
+                            title: 'A server error occurred',
+                            message: 'Contact with support.'
+                        }
+                    }
+                    return Rx.Observable.just({error: errorMessage, tables: null});
+                })
+
             )
             .setLoading((loading) => {this.loadingNewData = loading})
             // Get the latest response
             .switch()
             // Replace the tables with the ones received from the server and
             // update the plots
-            .forEach((tables: PublicationTable[]) => {
-                var t1 = performance.now();
+            .forEach((state) => {
+                if (state.tables) {
+                    var t1 = performance.now();
 
-                this.tableCache.replaceAllTables(tables);
-                this.updateUnpinnedPlots();
+                    this.tableCache.replaceAllTables(state.tables);
+                    this.updateUnpinnedPlots();
 
-                var t2 = performance.now();
-                console.log("Data indexed in %.2f ms.", t2 - t1);
+                    var t2 = performance.now();
+                    console.log("Data indexed in %.2f ms.", t2 - t1);
 
-                if (debugOpenEditPlot && this.plotPool.plots[0].alive) {
-                    debugOpenEditPlot = false;
-                    // this.showEditPlotDialog(this.plotPool.plots[0]);
+                    if (debugOpenEditPlot && this.plotPool.plots[0].alive) {
+                        debugOpenEditPlot = false;
+                        // this.showEditPlotDialog(this.plotPool.plots[0]);
+                    }
                 }
+                console.log(state);
+                this.currentError = state.error
             });
     }
 
