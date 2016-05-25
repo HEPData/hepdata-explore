@@ -14,6 +14,8 @@ export class PlotComponent {
     plot: Plot;
     @observable()
     tableCache: TableCache;
+    @observable()
+    controlsVisible: boolean = true;
 
     constructor(params: any) {
         assertHas(params, [
@@ -23,6 +25,9 @@ export class PlotComponent {
 
         this.plot = params.plot;
         this.tableCache = ko.unwrap(params.tableCache);
+        if ('controlsVisible' in params) {
+            this.controlsVisible = ko.unwrap(params.controlsVisible);
+        }
     }
     
     @bind()

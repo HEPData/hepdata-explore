@@ -15,5 +15,7 @@
             <span class="legend-span" data-bind="latex: $data, attr: {title: $data}"></span>
         </li>
     </ul>
-    <button class="btn btn-primary" data-bind="click: showEditPlot">Edit plot</button>
+    <div class="controls" data-bind="if: controlsVisible">
+        <button class="btn btn-primary" data-bind="click: showEditPlot">Edit plot</button>
+    </div>
 </div>
