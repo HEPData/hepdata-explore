@@ -626,3 +626,28 @@ img.bubble-tail {
   padding: 10px;
   border-radius: 5px;
 }
+
+ul.publication-list {
+  padding-left: 0;
+  list-style: none;
+}
+
+.publication-title, .table-num {
+  font-weight: bold;
+}
+
+ul.publication-list ul {
+  padding-left: 30px;
+  list-style: none;
+}
+
+.legend-circle {
+  position: relative;
+  left: -15px;
+  margin-right: -13px;
+}
+
+.data-point-count {
+  font-style: italic;
+  color: gray;
+}
