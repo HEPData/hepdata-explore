@@ -5,6 +5,7 @@ import sys
 
 import argh
 from contextualized import contextualized_tracebacks
+from elasticsearch.exceptions import TransportError
 
 from aggregator import shared_dcontext
 from progressbar import ProgressBar, Percentage, Bar, Widget
@@ -52,7 +53,12 @@ def _add(index, submission_paths, only_these=None):
             if inspire_id not in only_these:
                 continue
 
-        record_aggregator.process_submission(submission_path)
+        try:
+            record_aggregator.process_submission(submission_path)
+        except TransportError as err:
+            print(err)
+            print(dir(err))
+            raise err
 
     pbar.finish()
     print('Done', file=sys.stderr)
@@ -60,7 +66,7 @@ def _add(index, submission_paths, only_these=None):
 
 
 def add(*submission_paths):
-    _add('hepdata4', submission_paths)
+    _add('hepdata5', submission_paths)
 
 
 def add_demo_subset(*submission_paths):

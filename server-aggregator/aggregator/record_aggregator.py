@@ -1,3 +1,4 @@
+import json
 import os
 from itertools import chain
 
@@ -85,6 +86,11 @@ def clean_errors(y, errors):
     return ret
 
 
+def cut_text(text):
+    # Some descriptions are absurdly long, enough to make ElasticSearch reject them
+    return text[:2048]
+
+
 def extract_variable_name(header):
     if 'units' in header and header['units'].strip() != '':
         return '%s (%s)' % (header['name'], header['units'])
@@ -152,14 +158,31 @@ class RecordAggregator(object):
         with open(os.path.join(path, 'submission.yaml')) as f:
             submission = list(yaml.load_all(f, Loader=SafeLoader))
 
+        try:
+            with open(os.path.join(path, 'publication.json')) as f:
+                publication_meta = json.load(f)
+        except IOError:
+            # Default data for records with missing publication info
+            publication_meta = {
+                'record': {
+                    'title': 'Unknown title',
+                    'collaborations': [],
+                    'publication_date': None,
+                }
+            }
+
         header = submission[0]
         tables = submission[1:]
 
         inspire_record = find_inspire_record(header)
         publication = dict(
             inspire_record=inspire_record,
-            comment=header['comment'],
-            comment_not_analyzed=header['comment'],
+            title=publication_meta['record']['title'],
+            title_not_analyzed=publication_meta['record']['title'].lower(),
+            collaborations=publication_meta['record']['collaborations'],
+            publication_date=publication_meta['record'].get('publication_date'),
+            comment=cut_text(header['comment']),
+            comment_not_analyzed=cut_text(header['comment'].lower()),
         )
 
         processed_tables = []
@@ -331,7 +354,7 @@ class RecordAggregator(object):
         table = dict(
             table_num=table_num,
             description=table['description'],
-            description_not_analyzed=table['description'],
+            description_not_analyzed=table['description'].lower(),
 
             cmenergies_min=cmenergies_min,
             cmenergies_max=cmenergies_max,
@@ -349,6 +372,8 @@ class RecordAggregator(object):
         return table
 
     def write_publication(self, publication):
+        with open('/tmp/pub.json', 'w') as f:
+            f.write(json.dumps(publication))
         self.elastic.update(self.index, 'publication',
                             publication['inspire_record'], {
                                 'doc': publication,
@@ -424,8 +449,12 @@ class RecordAggregator(object):
             "mappings": {
                 "publication": {
                     "properties": {
+                        "title": {"type": "string"},
+                        "title_not_analyzed": {"type": "string","index": "not_analyzed"},
                         "comment": {"type": "string"},
                         "comment_not_analyzed": {"type": "string","index": "not_analyzed"},
+                        "collaborations": {"type": "string","index": "not_analyzed"},
+                        "publication_date": {"type": "date", "format": "strict_date_optional_time"},
                         "inspire_record": {"type": "long"},
                         "tables": {
                             "type": "nested",
