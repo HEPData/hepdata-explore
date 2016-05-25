@@ -589,7 +589,7 @@ img.bubble-tail {
     transform: none !important;
 }
 
-.custom-plot input {
+.custom-plot input[type="text"] {
     width: 350px;
 }
 
@@ -651,4 +651,13 @@ ul.publication-list ul {
 .data-point-count {
   font-style: italic;
   color: gray;
+}
+
+.color-policy-header {
+    font-weight: bold;
+}
+
+.color-policy label {
+  display: block;
+  font-weight: normal;
 }

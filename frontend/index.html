@@ -213,6 +213,20 @@
                 </tr>
             </table>
 
+            <div class="color-policy">
+                <div class="color-policy-header">Color policy:</div>
+                <label>
+                    <input type="radio" name="colorPolicy" value="per-variable"
+                           data-bind="checked: ko.getObservable(plot.config, 'colorPolicy')">
+                    Per variable
+                </label>
+                <label>
+                    <input type="radio" name="colorPolicy" value="per-table"
+                           data-bind="checked: ko.getObservable(plot.config, 'colorPolicy')">
+                    Per table
+                </label>
+            </div>
+
             <h3>Publication list</h3>
             <ul class="publication-list" data-bind="foreach: plot.matchingTablesByPublication">
                 <li>
