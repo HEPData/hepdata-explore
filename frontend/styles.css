@@ -591,6 +591,7 @@ img.bubble-tail {
 
 .custom-plot input[type="text"] {
     width: 350px;
+    margin-bottom: 5px;
 }
 
 .plot-legend {
@@ -653,11 +654,17 @@ ul.publication-list ul {
   color: gray;
 }
 
-.color-policy-header {
-    font-weight: bold;
-}
-
 .color-policy label {
   display: block;
   font-weight: normal;
+}
+.plot-settings {
+  margin-left: 10px;
+}
+
+.plot-settings th {
+  padding-right: 5px;
+}
+.custom-plot .y-var-td input[type="text"] {
+  margin-bottom: 10px !important;
 }

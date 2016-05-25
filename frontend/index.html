@@ -173,13 +173,14 @@
         "></hep-plot>
 
 
-        <div style="float: left">
+        <div style="float: left" class="plot-settings">
+            <h4>Variables</h4>
             <table>
                 <tr>
                     <th>x axis</th>
-                    <td class="text-nowrap" data-bind="with: xVar">
+                    <td class="y-var-td text-nowrap" data-bind="with: xVar">
                         <hep-bubble-focus>
-                            <input data-bind="
+                            <input type="text" data-bind="
                                 textInput: ko.getObservable($parent, 'fieldValue'),
                                 event: bubbleKeyHandlers($parent.autocomplete.keyPressedHandleEnter),
                                 hasFocus: ko.getObservable($parent, 'focused'),
@@ -193,7 +194,6 @@
                                     }
                                 }"></div>
                             </hep-bubble>
-
                         </hep-bubble-focus>
                     </td>
                 </tr>
@@ -202,7 +202,7 @@
                     <td data-bind="foreach: yVars">
                         <div class="text-nowrap">
                             <hep-bubble-focus>
-                                <input data-bind="
+                                <input type="text" data-bind="
                                     textInput: ko.getObservable($parent, 'fieldValue'),
                                     event: bubbleKeyHandlers($parent.autocomplete.keyPressedHandleEnter),
                                     hasFocus: ko.getObservable($parent, 'focused')
@@ -218,13 +218,19 @@
                                 </hep-bubble>
 
                             </hep-bubble-focus>
+                            <button tabindex="-1" data-bind="
+                                click: $parent.deleteYVar.bind(null, $index()),
+                                visible: cleanValue != '',
+                            ">
+                                <i class="fa fa-trash-o" aria-hidden="true"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
             </table>
 
+            <h4>Color policy</h4>
             <div class="color-policy">
-                <div class="color-policy-header">Color policy:</div>
                 <label>
                     <input type="radio" name="colorPolicy" value="per-variable"
                            data-bind="checked: ko.getObservable(plot.config, 'colorPolicy')">
@@ -237,31 +243,31 @@
                 </label>
             </div>
 
-            <h3>Publication list</h3>
-            <ul class="publication-list" data-bind="foreach: plot.matchingTablesByPublication">
-                <li>
-                    <a class="publication-title" data-bind="latex: publication.title, attr: {
-                        href: 'https://hepdata.net/record/ins' + publication.inspire_record
-                    }"></a>
-                    <ul data-bind="foreach: tables">
-                        <li>
-                            <svg class="legend-circle" width="10" height="10" data-bind="if: $parents[1].plot.config.colorPolicy == 'per-table'">
-                                <circle r="2.5" cx="5" cy="5" data-bind="attr: {
-                                    fill: $parents[1].plot.getLegendColorByTable($data)
-                                }"></circle>
-                            </svg>
+            <!--<h3>Publication list</h3>-->
+            <!--<ul class="publication-list" data-bind="foreach: plot.matchingTablesByPublication">-->
+                <!--<li>-->
+                    <!--<a class="publication-title" data-bind="latex: publication.title, attr: {-->
+                        <!--href: 'https://hepdata.net/record/ins' + publication.inspire_record-->
+                    <!--}"></a>-->
+                    <!--<ul data-bind="foreach: tables">-->
+                        <!--<li>-->
+                            <!--<svg class="legend-circle" width="10" height="10" data-bind="if: $parents[1].plot.config.colorPolicy == 'per-table'">-->
+                                <!--<circle r="2.5" cx="5" cy="5" data-bind="attr: {-->
+                                    <!--fill: $parents[1].plot.getLegendColorByTable($data)-->
+                                <!--}"></circle>-->
+                            <!--</svg>-->
 
-                            <a class="table-num" data-bind="text: 'Table ' + table_num, attr: {
-                                href: 'https://hepdata.net/record/ins' + $parent.publication.inspire_record + '?table=Table' + table_num
-                            }"></a>
-                            <span data-bind="latex: description"></span>
-                            <div class="data-point-count">
-                                (<span data-bind="text: data_points.length"></span> data points)
-                            </div>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+                            <!--<a class="table-num" data-bind="text: 'Table ' + table_num, attr: {-->
+                                <!--href: 'https://hepdata.net/record/ins' + $parent.publication.inspire_record + '?table=Table' + table_num-->
+                            <!--}"></a>-->
+                            <!--<span data-bind="latex: description"></span>-->
+                            <!--<div class="data-point-count">-->
+                                <!--(<span data-bind="text: data_points.length"></span> data points)-->
+                            <!--</div>-->
+                        <!--</li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+            <!--</ul>-->
         </div>
 
         <div style="clear: both"></div>

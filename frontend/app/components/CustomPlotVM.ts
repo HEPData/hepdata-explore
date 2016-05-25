@@ -174,6 +174,7 @@ export class CustomPlotVM {
         }
     }
 
+    @bind()
     deleteYVar(index: number) {
         this.yVars[index].dispose();
         this.yVars.splice(index, 1);
