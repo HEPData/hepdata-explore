@@ -216,7 +216,7 @@
             <h3>Publication list</h3>
             <ul data-bind="foreach: plot.matchingTablesByPublication">
                 <li>
-                    <a data-bind="text: 'Publication title', attr: {href: 'https://hepdata.net/record/ins' + publication.inspire_record}"></a>
+                    <a data-bind="text: publication.title, attr: {href: 'https://hepdata.net/record/ins' + publication.inspire_record}"></a>
                     <ul data-bind="foreach: tables">
                         <li>
                             <a data-bind="text: 'Table ' + table_num, attr: {
