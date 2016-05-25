@@ -6,7 +6,13 @@
         y: <span data-bind="text: plot.yScaleType"></span>
     </div>
     <ul class="plot-legend" data-bind="foreach: plot.config.yVars">
-        <li data-bind="text: $data, attr: {title: $data}">
+        <li>
+            <svg class="legend-circle" width="10" height="10" data-bind="if: $parent.plot.config.colorPolicy == 'per-variable'">
+                <circle r="2.5" cx="5" cy="5" data-bind="attr: {
+                    fill: $parent.plot.getLegendColorByVariable($data)
+                }"></circle>
+            </svg>
+            <span class="legend-span" data-bind="text: $data, attr: {title: $data}"></span>
         </li>
     </ul>
     <button class="btn btn-primary" data-bind="click: showEditPlot">Edit plot</button>

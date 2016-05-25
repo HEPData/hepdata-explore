@@ -74,7 +74,7 @@ export class PlotConfig {
     yVars: string[] = [];
 
     @observable()
-    colorPolicy: ColorPolicy = 'per-table';
+    colorPolicy: ColorPolicy = 'per-variable';
 
     clone() {
         const c = new PlotConfig();

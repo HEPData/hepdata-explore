@@ -594,14 +594,15 @@ img.bubble-tail {
 }
 
 .plot-legend {
-    padding-left: 0;
+    padding-left: 20px;
+    list-style: none;
 }
 
-.plot-legend li {
+.legend-span {
     max-width: 280px;
     text-overflow: ellipsis;
     overflow: hidden;
-    display: block;
+    display: inline;
     white-space: nowrap;
 }
 
