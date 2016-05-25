@@ -87,8 +87,15 @@ def clean_errors(y, errors):
 
 
 def cut_text(text):
-    # Some descriptions are absurdly long, enough to make ElasticSearch reject them
-    return text[:2048]
+    if text is not None:
+        # Some descriptions are absurdly long, enough to make ElasticSearch
+        # reject them
+        return text[:2048]
+
+
+def lower_or_null(text):
+    if text is not None:
+        return text.lower()
 
 
 def extract_variable_name(header):
@@ -177,12 +184,13 @@ class RecordAggregator(object):
         inspire_record = find_inspire_record(header)
         publication = dict(
             inspire_record=inspire_record,
-            title=publication_meta['record']['title'],
-            title_not_analyzed=publication_meta['record']['title'].lower(),
             collaborations=publication_meta['record']['collaborations'],
+            # All of these may be None
+            title=publication_meta['record']['title'],
+            title_not_analyzed=lower_or_null(publication_meta['record'].get('title')),
             publication_date=publication_meta['record'].get('publication_date'),
             comment=cut_text(header['comment']),
-            comment_not_analyzed=cut_text(header['comment'].lower()),
+            comment_not_analyzed=cut_text(lower_or_null(header['comment'])),
         )
 
         processed_tables = []
