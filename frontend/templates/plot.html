@@ -12,7 +12,7 @@
                     fill: $parent.plot.getLegendColorByVariable($data)
                 }"></circle>
             </svg>
-            <span class="legend-span" data-bind="text: $data, attr: {title: $data}"></span>
+            <span class="legend-span" data-bind="latex: $data, attr: {title: $data}"></span>
         </li>
     </ul>
     <button class="btn btn-primary" data-bind="click: showEditPlot">Edit plot</button>

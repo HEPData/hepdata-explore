@@ -28,6 +28,7 @@
     <script src="lib/rx.all.js"></script>
     <script src="lib/rx.dom.js"></script>
     <script src="lib/knockout.rx.js"></script>
+
     <link rel="stylesheet" href="invenio.css">
     <link href='https://fonts.googleapis.com/css?family=Noto+Sans' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic' rel='stylesheet' type='text/css'>
@@ -46,9 +47,18 @@
             return thing;
         }
     </script>
+
+    <script type="text/x-mathjax-config">
+    // Use $math$ blocks
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+    });
+    </script>
+    <script type="text/javascript" async
+            src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
 </head>
 <body>
-
 <div id="fake-header">
     <img src="img/hepdata_logo.svg" alt="" height="54">
 </div>
@@ -230,7 +240,7 @@
             <h3>Publication list</h3>
             <ul class="publication-list" data-bind="foreach: plot.matchingTablesByPublication">
                 <li>
-                    <a class="publication-title" data-bind="text: publication.title, attr: {
+                    <a class="publication-title" data-bind="latex: publication.title, attr: {
                         href: 'https://hepdata.net/record/ins' + publication.inspire_record
                     }"></a>
                     <ul data-bind="foreach: tables">
@@ -244,7 +254,7 @@
                             <a class="table-num" data-bind="text: 'Table ' + table_num, attr: {
                                 href: 'https://hepdata.net/record/ins' + $parent.publication.inspire_record + '?table=Table' + table_num
                             }"></a>
-                            <span data-bind="text: description"></span>
+                            <span data-bind="latex: description"></span>
                             <div class="data-point-count">
                                 (<span data-bind="text: data_points.length"></span> data points)
                             </div>
