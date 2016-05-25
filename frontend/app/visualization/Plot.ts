@@ -138,7 +138,7 @@ export class Plot {
     }
 
     @computedObservable()
-    private get _configChanged() {
+    private get _shouldLoadTables() {
         this.config.xVar;
         this.config.yVars;
         return ++this._counter;
@@ -156,11 +156,17 @@ export class Plot {
         this.addLayer(this.axesLayer);
 
         // Listen for config changes.
-        ko.getObservable(this, '_configChanged').subscribe(() => {
+        ko.getObservable(this, '_shouldLoadTables').subscribe(() => {
             if (this.alive) {
                 this.loadTables();
             }
         });
+
+        ko.getObservable(this.config, 'colorPolicy').subscribe(() => {
+            if (this.alive) {
+                this.redraw();
+            }
+        })
     }
 
     clone() {
@@ -227,6 +233,10 @@ export class Plot {
             .domain([this.dataMinY, this.dataMaxY])
             .range([this.height - this.margins.bottom, this.margins.top]);
 
+        this.redraw();
+    }
+
+    public redraw() {
         this.axesLayer.clean();
         this.axesLayer.draw();
 
