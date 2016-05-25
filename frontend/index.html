@@ -219,6 +219,10 @@
                     <a data-bind="text: publication.title, attr: {href: 'https://hepdata.net/record/ins' + publication.inspire_record}"></a>
                     <ul data-bind="foreach: tables">
                         <li>
+                            <svg width="10" height="10">
+                                <circle r="2.5" fill="red" cx="5" cy="5"></circle>
+                            </svg>
+
                             <a data-bind="text: 'Table ' + table_num, attr: {
                                 href: 'https://hepdata.net/record/ins' + $parent.publication.inspire_record + '?table=Table' + table_num
                             }"></a>
@@ -274,6 +278,7 @@
                     },
                     leak: $parent.autocomplete.leakSuggestionElementHandler($data)
                 ">
+
                 <b data-bind="text: match.name"></b>
                 <p data-bind="html: match.description"></p>
             </li>
