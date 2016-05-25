@@ -3,7 +3,7 @@ import TableCache = require("../services/TableCache");
 import {PublicationTable} from "../base/dataFormat";
 import {RuntimeError} from "../base/errors";
 import {PlotLayer} from "./PlotLayer";
-import {assertDefined, AssertionError, ensure} from "../utils/assert";
+import {assertDefined, AssertionError, ensure, assert} from "../utils/assert";
 import {ScatterLayer} from "./ScatterLayer";
 import {observable} from "../decorators/observable";
 import {computedObservable} from "../decorators/computedObservable";
@@ -39,8 +39,6 @@ export function findColIndex(variableName: string, table: PublicationTable) {
     throw new RuntimeError('Variable name not found');
 }
 
-export type ScaleType = "lin" | "log";
-
 export function findColIndexOrNull(variableName: string, table: PublicationTable): number|null {
     const colIndep = table.indep_vars.findIndex(
         (variable) => variable.name == variableName);
@@ -57,6 +55,9 @@ export function findColIndexOrNull(variableName: string, table: PublicationTable
     return null; // Variable name not found
 }
 
+export type ScaleType = "lin" | "log";
+export type ColorPolicy = 'per-variable' | 'per-table';
+
 /** These properties here:
  * - are configurable by the user
  * - conform the serialized representation of the plot
@@ -72,10 +73,14 @@ export class PlotConfig {
     @observable()
     yVars: string[] = [];
 
+    @observable()
+    colorPolicy: ColorPolicy = 'per-table';
+
     clone() {
         const c = new PlotConfig();
         c.pinned = this.pinned;
         c.xVar = this.xVar;
+        c.colorPolicy = this.colorPolicy;
         c.yVars = _.clone(this.yVars);
         return c;
     }
@@ -292,5 +297,27 @@ export class Plot {
 
     getRange() {
         return this.dataMinX + ' to ' + this.dataMaxX;
+    }
+
+    private colorScale = d3.scale.category10();
+    getLegendColor(table: PublicationTable, yVar: string) {
+        if (this.config.colorPolicy == 'per-table') {
+            return this.getLegendColorByTable(table);
+        } else if (this.config.colorPolicy == 'per-variable') {
+            return this.getLegendColorByVariable(yVar);
+        } else {
+            throw new RuntimeError('Unsupported colorPolicy value');
+        }
+    }
+
+    getLegendColorByTable(table: PublicationTable) {
+        assert(table.table_num != null);
+        assert(table.publication.inspire_record != null);
+        return this.colorScale(table.table_num + '-' + table.publication.inspire_record);
+    }
+
+    getLegendColorByVariable(yVar: string) {
+        assert(typeof yVar == 'string');
+        return this.colorScale(yVar);
     }
 }

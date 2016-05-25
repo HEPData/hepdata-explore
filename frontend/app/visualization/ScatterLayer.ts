@@ -65,7 +65,6 @@ export class ScatterLayer extends PlotLayer {
         const xScale = plot.xScale;
         const yScale = plot.yScale;
         const xVar = ensure(plot.config.xVar);
-        var colorScale = d3.scale.category10();
 
         const points = this.points;
         points.length = 0;
@@ -80,7 +79,7 @@ export class ScatterLayer extends PlotLayer {
                     // variables.
                     continue;
                 }
-                const color = colorScale(yVar + '-' + table.table_num + '-' + table.publication.inspire_record);
+                const color = this.plot.getLegendColor(table, yVar);
 
                 for (let row of table.data_points) {
                     const x = row[colX].value;

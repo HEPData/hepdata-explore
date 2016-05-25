@@ -219,8 +219,10 @@
                     <a data-bind="text: publication.title, attr: {href: 'https://hepdata.net/record/ins' + publication.inspire_record}"></a>
                     <ul data-bind="foreach: tables">
                         <li>
-                            <svg width="10" height="10">
-                                <circle r="2.5" fill="red" cx="5" cy="5"></circle>
+                            <svg width="10" height="10" data-bind="if: $parents[1].plot.config.colorPolicy == 'per-table'">
+                                <circle r="2.5" cx="5" cy="5" data-bind="attr: {
+                                    fill: $parents[1].plot.getLegendColorByTable($data)
+                                }"></circle>
                             </svg>
 
                             <a data-bind="text: 'Table ' + table_num, attr: {
