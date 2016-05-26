@@ -129,8 +129,22 @@
         data: ko.getObservable(customPlotModal, 'templateData'),
     },
     footer: { data: {
-        action: customPlotModal.confirm,
+        action: ko.getObservable(customPlotModal, 'action'),
         primaryLabel: ko.getObservable(customPlotModal, 'primaryLabel'),
+    } }
+}"></div>
+
+<div data-bind="modal: {
+    visible: ko.getObservable(viewPublicationsModal, 'visible'),
+    dialogCss: 'modal-lg view-publications',
+    header: { data: { label: 'Publication list' } },
+    body: {
+        name: 'viewPublications',
+        data: ko.getObservable(viewPublicationsModal, 'templateData'),
+    },
+    footer: { data: {
+        action: ko.getObservable(viewPublicationsModal, 'action'),
+        primaryLabel: ko.getObservable(viewPublicationsModal, 'primaryLabel'),
     } }
 }"></div>
 
@@ -242,31 +256,6 @@
                 </label>
             </div>
 
-            <!--<h3>Publication list</h3>-->
-            <!--<ul class="publication-list" data-bind="foreach: plot.matchingTablesByPublication">-->
-                <!--<li>-->
-                    <!--<a class="publication-title" data-bind="latex: publication.title, attr: {-->
-                        <!--href: 'https://hepdata.net/record/ins' + publication.inspire_record-->
-                    <!--}"></a>-->
-                    <!--<ul data-bind="foreach: tables">-->
-                        <!--<li>-->
-                            <!--<svg class="legend-circle" width="10" height="10" data-bind="if: $parents[1].plot.config.colorPolicy == 'per-table'">-->
-                                <!--<circle r="2.5" cx="5" cy="5" data-bind="attr: {-->
-                                    <!--fill: $parents[1].plot.getLegendColorByTable($data)-->
-                                <!--}"></circle>-->
-                            <!--</svg>-->
-
-                            <!--<a class="table-num" data-bind="text: 'Table ' + table_num, attr: {-->
-                                <!--href: 'https://hepdata.net/record/ins' + $parent.publication.inspire_record + '?table=Table' + table_num-->
-                            <!--}"></a>-->
-                            <!--<span data-bind="latex: description"></span>-->
-                            <!--<div class="data-point-count">-->
-                                <!--(<span data-bind="text: data_points.length"></span> data points)-->
-                            <!--</div>-->
-                        <!--</li>-->
-                    <!--</ul>-->
-                <!--</li>-->
-            <!--</ul>-->
         </div>
 
         <div style="clear: both"></div>
@@ -321,6 +310,67 @@
     <div data-bind="if: autocomplete.suggestions.length == 0">
         No filters found. Try with other words...
     </div>
+</script>
+
+<script id="viewPublications" type="text/html">
+
+    <div data-bind="if: !('error' in $data)">
+        <div class="plot-column" style="float: left">
+            <hep-plot params="
+                plot: plot,
+                tableCache: plot.tableCache,
+                controlsVisible: false,
+            "></hep-plot>
+
+            <div class="color-policy">
+                <h4>Color policy</h4>
+                <label>
+                    <input type="radio" name="colorPolicy" value="per-variable"
+                           data-bind="checked: ko.getObservable(plot.config, 'colorPolicy')">
+                    Per variable
+                </label>
+                <label>
+                    <input type="radio" name="colorPolicy" value="per-table"
+                           data-bind="checked: ko.getObservable(plot.config, 'colorPolicy')">
+                    Per table
+                </label>
+            </div>
+        </div>
+
+
+        <div style="float: left" class="publication-list-box">
+            <h3>Publication list</h3>
+            <ul class="publication-list"
+                data-bind="foreach: plot.matchingTablesByPublication">
+                <li>
+                    <a class="publication-title" data-bind="latex: publication.title, attr: {
+                        href: 'https://hepdata.net/record/ins' + publication.inspire_record
+                    }"></a>
+                    <ul data-bind="foreach: tables">
+                        <li>
+                            <svg class="legend-circle" width="10" height="10"
+                                 data-bind="if: $parents[1].plot.config.colorPolicy == 'per-table'">
+                                <circle r="2.5" cx="5" cy="5" data-bind="attr: {
+                                    fill: $parents[1].plot.getLegendColorByTable($data)
+                                }"></circle>
+                            </svg>
+
+                            <a class="table-num" data-bind="text: 'Table ' + table_num, attr: {
+                                href: 'https://hepdata.net/record/ins' + $parent.publication.inspire_record + '?table=Table' + table_num
+                            }"></a>
+                            <span data-bind="latex: description"></span>
+                            <div class="data-point-count">
+                                (<span data-bind="text: data_points.length"></span> data points)
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div style="clear: both"></div>
+    </div>
+
 </script>
 
 <script src="lib/require.js" data-main="build/bootstrap"></script>

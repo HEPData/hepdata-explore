@@ -44,7 +44,7 @@ export class ModalWindow<VM> {
             });
     }
 
-    show(primaryLabel: string, viewModel: VM) {
+    show(primaryLabel: string|null, viewModel: VM) {
         this.primaryLabel = primaryLabel;
         this.viewModel = viewModel;
         this.visible = true;
@@ -60,7 +60,26 @@ export class ModalWindow<VM> {
         this.visible = false;
     }
 
+    /**
+     * The action property of knockstrap modal.
+     *
+     * Return the confirm function if a primary button label has been set, which
+     * will cause knockstrap to include the primary button.
+     *
+     * In other case, returns null, which will cause it to not create the
+     * button.
+     */
+    @computedObservable()
+    get action(): Function|null {
+        if (this.primaryLabel != null) {
+            return this.confirm;
+        } else {
+            return null;
+        }
+    }
+
     dispose() {
         this.subscription.dispose();
+        ko.untrack(this);
     }
 }

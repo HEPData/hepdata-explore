@@ -603,8 +603,9 @@ img.bubble-tail {
     max-width: 280px;
     text-overflow: ellipsis;
     overflow: hidden;
-    display: inline;
+    display: inline-block;
     white-space: nowrap;
+    vertical-align: middle;
 }
 
 .suggestion.crossMatch {
@@ -639,8 +640,9 @@ ul.publication-list {
 }
 
 ul.publication-list ul {
-  padding-left: 30px;
+  padding-left: 18px;
   list-style: none;
+  margin-top: 5px;
 }
 
 .legend-circle {
@@ -667,4 +669,24 @@ ul.publication-list ul {
 }
 .custom-plot .y-var-td input[type="text"] {
   margin-bottom: 10px !important;
+}
+
+.publication-list-box {
+  margin-left: 20px;
+  max-height: 600px;
+  overflow-y: auto;
+  width: 510px;
+}
+
+.modal-content .plot-box {
+  border: none;
+  box-shadow: none;
+}
+
+.publication-list ul li {
+  margin-bottom: 5px;
+}
+
+.view-publications .color-policy {
+  margin-left: 20px;
 }

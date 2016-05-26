@@ -32,6 +32,7 @@ import {rxObservableFromHash, getCurrentHash} from "./rx/rxObservableFromHash";
 import "rx/setLoadingOperator";
 import {HTTPError, NetworkError} from "./base/network";
 import {ModalWindow} from "./base/ModalWindow";
+import {ViewPublicationsVM} from "./components/ViewPublicationsVM";
 
 declare function stableStringify(thing: any): string;
 
@@ -111,6 +112,9 @@ export class AppViewModel {
 
     @observable()
     customPlotModal = new ModalWindow<CustomPlotVM>();
+
+    @observable()
+    viewPublicationsModal = new ModalWindow<ViewPublicationsVM>();
 
     @observable()
     loadingNewData = false;
@@ -240,7 +244,7 @@ export class AppViewModel {
 
                     if (debugOpenEditPlot && this.plotPool.plots[0].alive) {
                         debugOpenEditPlot = false;
-                        this.showEditPlotDialog(this.plotPool.plots[0]);
+                        this.showPublicationsDialog(this.plotPool.plots[0]);
                     }
                 }
                 this.currentError = state.error
@@ -449,6 +453,14 @@ export class AppViewModel {
         }).catch(() => {
             // No action on cancel
         }).finally(() => {customPlotVM.dispose()});
+    }
+
+    public showPublicationsDialog(plot: Plot) {
+        const viewPublicationsVM = new ViewPublicationsVM(plot.clone());
+        this.viewPublicationsModal.show(null, viewPublicationsVM)
+            .then(() => {})
+            .catch(() => {})
+            .finally(() => {viewPublicationsVM.dispose()});
     }
 
     @bind()

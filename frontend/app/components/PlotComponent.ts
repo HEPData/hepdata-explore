@@ -23,7 +23,7 @@ export class PlotComponent {
             {name: 'tableCache', type: TableCache},
         ]);
 
-        this.plot = params.plot;
+        this.plot = ko.unwrap(params.plot);
         this.tableCache = ko.unwrap(params.tableCache);
         if ('controlsVisible' in params) {
             this.controlsVisible = ko.unwrap(params.controlsVisible);
@@ -33,5 +33,10 @@ export class PlotComponent {
     @bind()
     showEditPlot() {
         app.showEditPlotDialog(this.plot);
+    }
+    
+    @bind()
+    showPublicationsDialog() {
+        app.showPublicationsDialog(this.plot);
     }
 }
