@@ -88,6 +88,7 @@ export class Elastic {
             })
     }
 
+    /** Returns count of tables grouped by a field. */
     fetchCountByField(field: string, filter: Filter|null)
         : Promise<CountAggregationBucket[]>
     {

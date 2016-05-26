@@ -11,8 +11,10 @@ import {ensure} from "../utils/assert";
 
 interface ChoiceSuggestion {
     suggestedValue: string;
-    freqDividedByModeFullDB: number;
+    /** Number of tables having the suggested value */
     absoluteFrequencyFullDB: number;
+    /** Number of tables having the suggested value / total of tables retrieved */
+    freqDividedByModeFullDB: number;
 }
 
 @KnockoutComponent('choice-filter', {
