@@ -298,7 +298,7 @@ export class AutocompleteService<SuggestionType> {
             scrollPane.scrollTop = newIndexTop * elementHeight;
         } else {
             // Scroll the viewport one page up. The element before indexTop
-            // must be the
+            // must be the visible at the bottom.
             const newIndexBottom = Math.max(indexTop - 1, 0);
             const scrollBottom = (newIndexBottom + 1) * elementHeight;
             scrollPane.scrollTop = scrollBottom - viewportHeight;
