@@ -31,6 +31,7 @@ import {rxObservableFromPromise} from "./rx/rxObservableFromPromise";
 import {rxObservableFromHash, getCurrentHash} from "./rx/rxObservableFromHash";
 import "rx/setLoadingOperator";
 import {HTTPError, NetworkError} from "./base/network";
+import {ModalWindow} from "./base/ModalWindow";
 
 declare function stableStringify(thing: any): string;
 
@@ -38,6 +39,11 @@ function screenUpdated() {
     return new Promise(function (resolve, reject) {
         window.requestAnimationFrame(resolve)
     });
+}
+
+
+function showModal(koVisible: KnockoutObservable<boolean>) {
+
 }
 
 interface ErrorMessage {
@@ -83,10 +89,10 @@ export class AppViewModel {
     plotPool = new PlotPool(this.tableCache);
 
     @observable()
-    customPlotVisible = false;
+    customPlotVM: CustomPlotVM|null = null;
 
     @observable()
-    customPlotVM: CustomPlotVM|null = null;
+    customPlotModal = new ModalWindow();
 
     @observable()
     loadingNewData = false;
@@ -415,13 +421,17 @@ export class AppViewModel {
     
     public showEditPlotDialog(plot: Plot) {
         this.customPlotVM = new CustomPlotVM(plot.clone(), this.tableCache);
-        this.customPlotVisible = true;
+        this.customPlotModal.show().then((ret: any) => {
+            console.log('ok, returned:');
+            console.log(ret);
+        }).catch(()=>{
+            console.log('rejected');
+        })
     }
 
     @bind()
     public customPlotConfirm() {
         console.log('confirm');
-        this.customPlotVisible = false;
         this.customPlotVM = null;
     }
 

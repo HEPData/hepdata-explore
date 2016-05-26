@@ -121,7 +121,7 @@
 <div id="fake-footer">HEPData Explore</div>
 
 <div data-bind="modal: {
-    visible: ko.getObservable($data, 'customPlotVisible'),
+    visible: ko.getObservable(customPlotModal, 'visible'),
     dialogCss: 'modal-lg custom-plot',
     header: { data: { label: 'Custom plot' } },
     body: {
@@ -131,7 +131,7 @@
         })
     },
     footer: { data: {
-        action: customPlotConfirm,
+        action: customPlotModal.confirm,
         primaryLabel: 'Add plot'
     } }
 }"></div>
