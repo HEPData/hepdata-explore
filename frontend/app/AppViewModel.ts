@@ -428,10 +428,10 @@ export class AppViewModel {
     }
     
     public showEditPlotDialog(plot: Plot) {
-        const customPlotVM = new CustomPlotVM(plot.clone(), this.tableCache);
-        this.customPlotModal.show('Edit plot', customPlotVM).then((vm: CustomPlotVM) => {
+        const customPlotVM = new CustomPlotVM(plot.clone());
+        this.customPlotModal.show('Edit plot', customPlotVM).then(() => {
             // Bring the updated configuration to the original plot
-            plot.config = vm.plot.config;
+            plot.config = customPlotVM.plot.config;
         }).catch(() => {
             // No action on cancel
         }).finally(() => {customPlotVM.dispose()});
@@ -439,7 +439,13 @@ export class AppViewModel {
 
     @bind()
     public addCustomPlotDialog() {
-        console.log('Not yet implemented');
+        const customPlotVM = new CustomPlotVM(new Plot(this.tableCache));
+        this.customPlotModal.show('Add plot', customPlotVM).then(() => {
+            const plot = this.plotPool.getFreePlot();
+            plot.config = customPlotVM.plot.config;
+            plot.alive = true;
+        }).catch(() => {
+        }).finally(() => {customPlotVM.dispose()});
     }
 
     @computedObservable()

@@ -136,7 +136,7 @@ export class CustomPlotVM {
 
     private _disposables: IDisposable[] = [];
 
-    constructor(public plot: Plot, public tableCache: TableCache) {
+    constructor(public plot: Plot) {
         this._disposables.push(
             ko.getObservable(this, '_cleanValuesChanged').subscribe(() => {
                 this.updatePlot();
@@ -219,7 +219,7 @@ export class CustomPlotVM {
 
     @bind()
     getXCompletion(query: string): Promise<VariableChoice[]> {
-        const allVariables = Array.from(this.tableCache.getAllVariableNames());
+        const allVariables = Array.from(this.plot.tableCache.getAllVariableNames());
 
         const allVariablesIndex = lunr(function() {
             this.field('value');
@@ -240,7 +240,7 @@ export class CustomPlotVM {
             .map((result, index) => ({
                 position: index,
                 name: allVariables[result.ref],
-                isCrossMatch: !!this.tableCache.hasTableWithVariables(
+                isCrossMatch: !!this.plot.tableCache.hasTableWithVariables(
                     allVariables[result.ref],
                     yVarsSet),
             }));
@@ -250,7 +250,7 @@ export class CustomPlotVM {
 
     @bind()
     getYCompletion(query: string): Promise<VariableChoice[]> {
-        const allVariables = Array.from(this.tableCache.getAllVariableNames());
+        const allVariables = Array.from(this.plot.tableCache.getAllVariableNames());
 
         const allVariablesIndex = lunr(function () {
             this.field('value');
@@ -270,7 +270,7 @@ export class CustomPlotVM {
             .map((result, index) => ({
                 position: index,
                 name: allVariables[result.ref],
-                isCrossMatch: !!this.tableCache.hasTableWithVariables(
+                isCrossMatch: !!this.plot.tableCache.hasTableWithVariables(
                     this.xVar.cleanValue,
                     allVariables[result.ref])
             }));
