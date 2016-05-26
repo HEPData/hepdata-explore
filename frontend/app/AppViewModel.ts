@@ -429,7 +429,7 @@ export class AppViewModel {
     
     public showEditPlotDialog(plot: Plot) {
         const customPlotVM = new CustomPlotVM(plot.clone(), this.tableCache);
-        this.customPlotModal.show(customPlotVM).then((vm: CustomPlotVM) => {
+        this.customPlotModal.show('Edit plot', customPlotVM).then((vm: CustomPlotVM) => {
             // Bring the updated configuration to the original plot
             plot.config = vm.plot.config;
         }).catch(() => {

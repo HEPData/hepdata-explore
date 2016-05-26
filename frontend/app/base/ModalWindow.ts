@@ -11,6 +11,9 @@ export class ModalWindow<VM> {
 
     @observable()
     viewModel: VM|null = null;
+
+    @observable()
+    primaryLabel: string|null = null;
     
     @computedObservable()
     get templateData() {
@@ -41,7 +44,8 @@ export class ModalWindow<VM> {
             });
     }
 
-    show(viewModel: VM) {
+    show(primaryLabel: string, viewModel: VM) {
+        this.primaryLabel = primaryLabel;
         this.viewModel = viewModel;
         this.visible = true;
         return new Promise((resolve, reject) => {

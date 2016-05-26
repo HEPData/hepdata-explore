@@ -130,7 +130,7 @@
     },
     footer: { data: {
         action: customPlotModal.confirm,
-        primaryLabel: 'Add plot'
+        primaryLabel: ko.getObservable(customPlotModal, 'primaryLabel'),
     } }
 }"></div>
 
