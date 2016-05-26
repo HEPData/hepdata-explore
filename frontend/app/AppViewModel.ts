@@ -429,11 +429,11 @@ export class AppViewModel {
     
     public showEditPlotDialog(plot: Plot) {
         const customPlotVM = new CustomPlotVM(plot.clone(), this.tableCache);
-        this.customPlotModal.show(customPlotVM).then((ret: any) => {
-            console.log('ok, returned:');
-            console.log(ret);
-        }).catch(()=>{
-            console.log('rejected');
+        this.customPlotModal.show(customPlotVM).then((vm: CustomPlotVM) => {
+            // Bring the updated configuration to the original plot
+            plot.config = vm.plot.config;
+        }).catch(() => {
+            // No action on cancel
         }).finally(() => {customPlotVM.dispose()});
     }
 

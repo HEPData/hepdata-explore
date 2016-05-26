@@ -87,6 +87,7 @@ export class PlotConfig {
 }
 
 export class Plot {
+    @observable()
     config: PlotConfig;
 
     /** Plot is a pooled class. True if this instance is being used. */
