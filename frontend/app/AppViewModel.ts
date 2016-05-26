@@ -234,7 +234,7 @@ export class AppViewModel {
                     var t2 = performance.now();
                     console.log("Data indexed in %.2f ms.", t2 - t1);
 
-                    if (debugOpenEditPlot && this.plotPool.plots[0].alive) {
+                    if (debugOpenEditPlot && this.plotPool.plots.length > 0) {
                         debugOpenEditPlot = false;
                         this.showPublicationsDialog(this.plotPool.plots[0]);
                     }
@@ -250,15 +250,13 @@ export class AppViewModel {
         // Update every plot data
         const plotsToRetire: Plot[] = [];
         for (let plot of this.plotPool.plots) {
-            if (plot.alive) {
-                // Update data
-                plot.loadTables();
-                // Kill if no data is matched with the new tables
-                if (plot.isEmpty()) {
-                    plotsToRetire.push(plot)
-                } else {
-                    remainingPlots--;
-                }
+            // Update data
+            plot.loadTables();
+            // Kill if no data is matched with the new tables
+            if (plot.isEmpty()) {
+                plotsToRetire.push(plot)
+            } else {
+                remainingPlots--;
             }
         }
         for (let plot of plotsToRetire) {

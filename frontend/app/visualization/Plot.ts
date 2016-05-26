@@ -90,10 +90,6 @@ export class Plot {
     @observable()
     config: PlotConfig;
 
-    /** Plot is a pooled class. True if this instance is being used. */
-    @observable()
-    alive: boolean = false;
-
     /** An element created to hold several canvas stacked on top of each other. */
     canvasOnion: HTMLDivElement;
     /** Needed to extract data for plots. */
@@ -158,21 +154,16 @@ export class Plot {
 
         // Listen for config changes.
         ko.getObservable(this, '_shouldLoadTables').subscribe(() => {
-            if (this.alive) {
-                this.loadTables();
-            }
+            this.loadTables();
         });
 
         ko.getObservable(this.config, 'colorPolicy').subscribe(() => {
-            if (this.alive) {
-                this.redraw();
-            }
+            this.redraw();
         })
     }
 
     clone() {
         const newPlot = new Plot(this.tableCache, this.config.clone());
-        newPlot.alive = true;
         newPlot.loadTables();
         return newPlot;
     }
@@ -184,7 +175,6 @@ export class Plot {
     spawn(xVar: string, yVars: string[]): this {
         this.config.xVar = xVar;
         this.config.yVars = yVars;
-        this.alive = true;
 
         this.loadTables();
         return this;

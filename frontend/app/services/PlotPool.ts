@@ -32,18 +32,14 @@ export class PlotPool {
         // Reuse a plot from the freePlots array if possible
         const plot = this.freePlots.pop() || new Plot(this.tableCache);
 
-        assert(plot.alive == false);
-        plot.alive = true;
         this.plots.push(plot);
 
         return plot;
     }
 
     retirePlot(plot: Plot) {
-        assert(plot.alive == true);
         assert(this.plots.indexOf(plot) != -1);
 
-        plot.alive = false;
         this.plots.remove(plot);
         this.freePlots.push(plot);
     }
