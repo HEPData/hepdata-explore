@@ -7,6 +7,7 @@ export class ViewPublicationsVM {
 
     constructor(plot: Plot) {
         this.plot = plot;
+        this.plot.config.colorPolicy = 'per-table';
     }
 
     dispose() {
