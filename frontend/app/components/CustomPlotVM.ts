@@ -236,16 +236,28 @@ export class CustomPlotVM {
         });
 
         const yVarsSet = new Set(this.getPlottableYVars());
-        const results = allVariablesIndex.search(query)
-            .map((result, index) => ({
-                position: index,
-                name: allVariables[result.ref],
+        if (query != '') {
+            const results = allVariablesIndex.search(query)
+                .map((result, index) => ({
+                    position: index,
+                    name: allVariables[result.ref],
+                    isCrossMatch: !!this.plot.tableCache.hasTableWithVariables(
+                        allVariables[result.ref],
+                        yVarsSet
+                    ),
+                }));
+            return Promise.resolve(results);
+        } else {
+            const results = map(allVariables, (xVar, i) => ({
+                position: i,
+                name: xVar,
                 isCrossMatch: !!this.plot.tableCache.hasTableWithVariables(
-                    allVariables[result.ref],
-                    yVarsSet),
+                    xVar,
+                    yVarsSet
+                )
             }));
-
-        return Promise.resolve(results);
+            return Promise.resolve(results);
+        }
     }
 
     @bind()
@@ -266,16 +278,28 @@ export class CustomPlotVM {
             });
         });
 
-        const results = allVariablesIndex.search(query)
-            .map((result, index) => ({
-                position: index,
-                name: allVariables[result.ref],
+        if (query != '') {
+            const results = allVariablesIndex.search(query)
+                .map((result, index) => ({
+                    position: index,
+                    name: allVariables[result.ref],
+                    isCrossMatch: !!this.plot.tableCache.hasTableWithVariables(
+                        this.xVar.cleanValue,
+                        allVariables[result.ref]
+                    )
+                }));
+            return Promise.resolve(results);
+        } else {
+            const results = map(allVariables, (yVar, i) => ({
+                position: i,
+                name: yVar,
                 isCrossMatch: !!this.plot.tableCache.hasTableWithVariables(
                     this.xVar.cleanValue,
-                    allVariables[result.ref])
+                    yVar
+                )
             }));
-
-        return Promise.resolve(results);
+            return Promise.resolve(results);
+        }
     }
 
     dispose() {

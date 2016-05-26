@@ -2,17 +2,21 @@ interface Iterable<T> {
     [Symbol.iterator]: () => IterableIterator<T>
 }
 
-export function map<V,Z>(iterable: Iterable<V>, callback: (value: V) => Z): Z[] {
+export function map<V,Z>(iterable: Iterable<V>, callback: (value: V, index: number) => Z): Z[] {
     const ret: Z[] = [];
+    let i = 0;
     for (let value of iterable) {
-        ret.push(callback(value));
+        ret.push(callback(value, i));
+        i += 1;
     }
     return ret;
 }
 
-export function *imap<V,Z>(iterable: Iterable<V>, callback: (value: V) => Z): IterableIterator<Z> {
+export function *imap<V,Z>(iterable: Iterable<V>, callback: (value: V, index: number) => Z): IterableIterator<Z> {
+    let i = 0;
     for (let value of iterable) {
-        yield callback(value);
+        yield callback(value, i);
+        i += 1;
     }
 }
 
