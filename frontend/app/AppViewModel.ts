@@ -161,6 +161,9 @@ export class AppViewModel {
 
         // For every state of the application
         appState$
+            // Excluding the state when the filter is still null because the
+            // first state has not loaded yet
+            .filter((s) => s.filter != null)
             // Serialize it
             .map(stableStringify)
             // If this state is different from the previous one
