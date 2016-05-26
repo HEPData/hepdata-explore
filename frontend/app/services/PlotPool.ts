@@ -2,6 +2,7 @@ import {Plot} from "../visualization/Plot";
 import TableCache = require("./TableCache");
 import {RuntimeError} from "../base/errors";
 import {observable} from "../decorators/observable";
+import {assert} from "../utils/assert";
 
 class ExhaustedPool extends RuntimeError {
     constructor() {
@@ -10,25 +11,40 @@ class ExhaustedPool extends RuntimeError {
 }
 
 export class PlotPool {
+    /** Array of alive plots, in the order they appear in screen. */
     @observable()
     plots: Plot[] = [];
-    tableCache: TableCache;
-    maxPlots = 6;
 
-    constructor(tableCache: TableCache) {
+    /** Array of dead plots. */
+    freePlots: Plot[] = [];
+
+    tableCache: TableCache;
+
+    constructor(tableCache: TableCache, numPlots = 6) {
         this.tableCache = tableCache;
 
-        for (let i = 0; i < this.maxPlots; i++) {
-            this.plots[i] = new Plot(tableCache);
+        for (let i = 0; i < numPlots; i++) {
+            this.freePlots.push(new Plot(tableCache));
         }
     }
 
-    getFreePlot() {
-        for (let plot of this.plots) {
-            if (!plot.alive) {
-                return plot;
-            }
-        }
-        throw new ExhaustedPool();
+    spawnPlot() {
+        // Reuse a plot from the freePlots array if possible
+        const plot = this.freePlots.pop() || new Plot(this.tableCache);
+
+        assert(plot.alive == false);
+        plot.alive = true;
+        this.plots.push(plot);
+
+        return plot;
+    }
+
+    retirePlot(plot: Plot) {
+        assert(plot.alive == true);
+        assert(this.plots.indexOf(plot) != -1);
+
+        plot.alive = false;
+        this.plots.remove(plot);
+        this.freePlots.push(plot);
     }
 }

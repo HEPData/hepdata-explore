@@ -298,10 +298,6 @@ export class Plot {
         this.dataMaxY = dataMaxY;
     }
 
-    kill() {
-        this.alive = false;
-    }
-
     getPointCount() {
         return this.scatterLayer.points.length;
     }

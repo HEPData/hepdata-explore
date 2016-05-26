@@ -83,10 +83,20 @@ export class AppViewModel {
     @observable()
     rootFilter: Filter|null = null;
 
+    /**
+     * Stores the data from publications after a search has been performed, with
+     * several indices.
+     */
     tableCache = new TableCache;
 
     @observable()
     plotPool = new PlotPool(this.tableCache);
+
+    /**
+     * The application will generate automatically plots until `autoMaxPlots`
+     * are allocated in the screen.
+     */
+    autoMaxPlots = 6;
 
     /**
      * Returns the view model of the Custom Plot modal dialog.
@@ -239,20 +249,24 @@ export class AppViewModel {
 
     updateUnpinnedPlots() {
         // After the next loop, this variable will hold how many free plots we have
-        let remainingPlots = this.plotPool.maxPlots;
+        let remainingPlots = this.autoMaxPlots;
 
         // Update every plot data
+        const plotsToRetire: Plot[] = [];
         for (let plot of this.plotPool.plots) {
             if (plot.alive) {
                 // Update data
                 plot.loadTables();
                 // Kill if no data is matched with the new tables
                 if (plot.isEmpty()) {
-                    plot.kill();
+                    plotsToRetire.push(plot)
                 } else {
                     remainingPlots--;
                 }
             }
+        }
+        for (let plot of plotsToRetire) {
+            this.plotPool.retirePlot(plot);
         }
 
         // Continue only if we still have free plots
@@ -368,7 +382,7 @@ export class AppViewModel {
                     (numPlot + 1) * maxPlotVars);
 
                 // Finally, we add the new plot now
-                const plot = this.plotPool.getFreePlot().spawn(group.xVar, yVars);
+                const plot = this.plotPool.spawnPlot().spawn(group.xVar, yVars);
             }
         }
     }
@@ -441,9 +455,8 @@ export class AppViewModel {
     public addCustomPlotDialog() {
         const customPlotVM = new CustomPlotVM(new Plot(this.tableCache));
         this.customPlotModal.show('Add plot', customPlotVM).then(() => {
-            const plot = this.plotPool.getFreePlot();
+            const plot = this.plotPool.spawnPlot();
             plot.config = customPlotVM.plot.config;
-            plot.alive = true;
         }).catch(() => {
         }).finally(() => {customPlotVM.dispose()});
     }
