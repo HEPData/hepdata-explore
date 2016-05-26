@@ -590,8 +590,8 @@ img.bubble-tail {
 }
 
 .custom-plot input[type="text"] {
-    width: 350px;
     margin-bottom: 5px;
+    width: 445px;
 }
 
 .plot-legend {
