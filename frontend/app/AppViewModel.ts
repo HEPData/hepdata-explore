@@ -36,17 +36,6 @@ import {ViewPublicationsVM} from "./components/ViewPublicationsVM";
 
 declare function stableStringify(thing: any): string;
 
-function screenUpdated() {
-    return new Promise(function (resolve, reject) {
-        window.requestAnimationFrame(resolve)
-    });
-}
-
-
-function showModal(koVisible: KnockoutObservable<boolean>) {
-
-}
-
 interface ErrorMessage {
     title: string;
     message: string;
