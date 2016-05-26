@@ -176,7 +176,7 @@ export class AppViewModel {
                 stateStorage.put(hash, stateDump);
             });
 
-        let debugOpenEditPlot = true;
+        let debugOpenEditPlot = false;
         // For every state of the application
         appState$
             // If it has set filter
