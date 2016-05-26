@@ -130,7 +130,7 @@ filterIndex.populate([
     {
         filterClass: TableDescriptionFilter,
         description: `Returns tables containing some text in their description.`,
-        tags: ['table', 'name', 'description', 'content'],
+        tags: ['table', 'name', 'description', 'content', 'regex', 'regexp'],
     },
 ]);
 

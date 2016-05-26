@@ -29,7 +29,7 @@
         <p>
             You can use regular expressions to select table descriptions matching text patterns.
         </p><p>
-            For instance, <code>.*(95|99)% CL.*</code> will match all tables whose description contain either <code>95% CL</code>
+            For instance, <code>.*(95|99)% cl.*</code> will match all tables whose description contain either <code>95% CL</code>
             or <code>99% CL</code>.
         </p>
         <p>
@@ -40,8 +40,14 @@
         </p>
 
         <p>
-            <b>Note:</b> Expressions are case sensitive. Patterns are always anchored so you need to use <code>.*</code> at the beginning and the end
-            of an expression to search inside all of the text.
+            <b>Note (1):</b> Expressions are case sensitive, but the text is indexed
+            as lowercase. Therefore only lowercase letters will return results.
+        </p>
+
+        <p>
+            <b>Note (2):</b> Patterns are always anchored so you need to use <code>.*</code> at
+            the beginning and at the end of an expression to search inside all
+            the text.
         </p>
     </div>
 
