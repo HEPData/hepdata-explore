@@ -4,4 +4,6 @@ export enum KeyCode {
     Tab = 9,
     Return = 13,
     Escape = 27,
+    PageUp = 33,
+    PageDown = 34,
 }

@@ -143,6 +143,10 @@ export class AutocompleteService<SuggestionType> {
             this.acceptSelected();
             // Keep bubbling so the focus jumps to the next field
             return true;
+        } else if (!modifier && (event.keyCode == KeyCode.PageDown)) {
+            this.pageDown();
+        } else if (!modifier && (event.keyCode == KeyCode.PageUp)) {
+            this.pageUp();
         } else {
             // Bubble the event so the characters are added to the text box.
             // Enter key is also bubbled, triggering submit event, which is
@@ -231,6 +235,82 @@ export class AutocompleteService<SuggestionType> {
             // scroll down
             scrollPane.scrollTop += elementBottom - viewportBottom;
         }
+    }
+
+    /**
+     * A paging algorithm to implement keyboard scrolling for the PageDown
+     * and PageUp keys.
+     *
+     * Imitates the behavior of IntelliJ autocompletion for those same keys.
+     */
+    private pagingAlgorithm(direction: 'up' | 'down') {
+        const scrollPane = this._scrollPane;
+        if (!scrollPane) {
+            // No scroll pane specified, so nothing to scroll.
+            return;
+        }
+
+        // Calculate the limits of the viewport in pixels
+        const viewportHeight = scrollPane.getBoundingClientRect().height;
+        const viewportTop = scrollPane.scrollTop;
+        const viewportBottom = scrollPane.scrollTop + viewportHeight;
+
+        // Quit if there are no suggestions (that's the only case in which
+        // selectedSuggestion may be null).
+        const currentSuggestion = this.getSelectedSuggestion();
+        if (!currentSuggestion) {
+            return;
+        }
+
+        // We assume all element have the same height. Get it.
+        const currentElement = this._suggestionElements.get(currentSuggestion);
+        if (!currentElement) throw new AssertionError();
+        const elementHeight = currentElement.getBoundingClientRect().height;
+
+        // Calculate how many suggestions a page can cover
+        const suggestionsPerPage = Math.floor(viewportHeight / elementHeight);
+
+        let newSuggestionIndex: number;
+        if (direction == 'down') {
+            // Select the item one page down
+            newSuggestionIndex = Math.min(
+                this.selectedSuggestionIx + suggestionsPerPage,
+                this.suggestions.length - 1
+            );
+        } else {
+            // Select the item one page up
+            newSuggestionIndex = Math.max(
+                this.selectedSuggestionIx - suggestionsPerPage,
+                0
+            );
+        }
+        this.selectedSuggestionIx = newSuggestionIndex;
+
+        // Calculate the top and bottom suggestions that fit completely in the
+        // viewport.
+        const indexTop = Math.ceil(viewportTop / elementHeight);
+        const indexBottom = Math.floor(viewportBottom / elementHeight) - 1;
+
+        if (direction == 'down') {
+            // Scroll the viewport one page down. The element following to
+            // indexBottom must be visible at the top.
+            const newIndexTop = indexBottom + 1;
+            scrollPane.scrollTop = newIndexTop * elementHeight;
+        } else {
+            // Scroll the viewport one page up. The element before indexTop
+            // must be the
+            const newIndexBottom = Math.max(indexTop - 1, 0);
+            const scrollBottom = (newIndexBottom + 1) * elementHeight;
+            scrollPane.scrollTop = scrollBottom - viewportHeight;
+        }
+    }
+
+    pageDown() {
+        this.pagingAlgorithm('down');
+    }
+
+    pageUp() {
+        this.pagingAlgorithm('up');
     }
 
     public leakScrollPaneHandler() {
