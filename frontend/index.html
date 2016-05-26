@@ -126,9 +126,7 @@
     header: { data: { label: 'Custom plot' } },
     body: {
         name: 'customPlot',
-        data: ko.computed(function() {
-            return customPlotVM || {error: 'customPlotVM not set'};
-        })
+        data: ko.getObservable(customPlotModal, 'templateData'),
     },
     footer: { data: {
         action: customPlotModal.confirm,

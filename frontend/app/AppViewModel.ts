@@ -88,11 +88,19 @@ export class AppViewModel {
     @observable()
     plotPool = new PlotPool(this.tableCache);
 
-    @observable()
-    customPlotVM: CustomPlotVM|null = null;
+    /**
+     * Returns the view model of the Custom Plot modal dialog.
+     *
+     * It's kept as a convenience shorthand for debugging and coding in the
+     * browser developer tools.
+     */
+    @computedObservable()
+    get customPlotVM(): CustomPlotVM|null {
+        return this.customPlotModal.viewModel;
+    }
 
     @observable()
-    customPlotModal = new ModalWindow();
+    customPlotModal = new ModalWindow<CustomPlotVM>();
 
     @observable()
     loadingNewData = false;
@@ -420,19 +428,13 @@ export class AppViewModel {
     }
     
     public showEditPlotDialog(plot: Plot) {
-        this.customPlotVM = new CustomPlotVM(plot.clone(), this.tableCache);
-        this.customPlotModal.show().then((ret: any) => {
+        const customPlotVM = new CustomPlotVM(plot.clone(), this.tableCache);
+        this.customPlotModal.show(customPlotVM).then((ret: any) => {
             console.log('ok, returned:');
             console.log(ret);
         }).catch(()=>{
             console.log('rejected');
-        })
-    }
-
-    @bind()
-    public customPlotConfirm() {
-        console.log('confirm');
-        this.customPlotVM = null;
+        }).finally(() => {customPlotVM.dispose()});
     }
 
     @bind()
