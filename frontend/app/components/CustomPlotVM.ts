@@ -65,7 +65,7 @@ export class VariableVM {
                 s.name.length,
             ],
             keyFn: (s: VariableChoice) => s.name,
-            maxSuggestions: 100,
+            maxSuggestions: 50,
             suggestionClickedFn: (suggestion: VariableChoice) => {
                 this.fieldValue = suggestion.name;
                 this.cleanValue = suggestion.name;
