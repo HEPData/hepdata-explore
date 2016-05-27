@@ -1,6 +1,7 @@
 import {PlotLayer} from "./PlotLayer";
 import {Plot, findColIndex, findColIndexOrNull} from "./Plot";
 import {assert, ensure} from "../utils/assert";
+import {observable} from "../decorators/observable";
 
 export interface CanvasScatterPoint {
     x: number;
@@ -12,6 +13,7 @@ export interface CanvasScatterPoint {
 
 export class ScatterLayer extends PlotLayer {
     ctx: CanvasRenderingContext2D;
+    @observable()
     points: CanvasScatterPoint[] = [];
 
     constructor(plot: Plot) {
@@ -66,8 +68,7 @@ export class ScatterLayer extends PlotLayer {
         const yScale = plot.yScale;
         const xVar = ensure(plot.config.xVar);
 
-        const points = this.points;
-        points.length = 0;
+        const points: CanvasScatterPoint[] = [];
 
         for (let yVar of plot.config.yVars) {
             const tables = plot.tableCache.getTablesWithVariables(xVar, yVar);
@@ -102,5 +103,7 @@ export class ScatterLayer extends PlotLayer {
                 }
             }
         }
+
+        this.points = points;
     }
 }
