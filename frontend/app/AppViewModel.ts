@@ -156,13 +156,12 @@ export class AppViewModel {
                     .map((tables) => pair([stateDump, tables]));
             })
             .switch()
-            .do(([stateDump, tables]) => {
+            .forEach(([stateDump, tables]) => {
                 this.plotPool.loadPlots(stateDump.plots);
                 this.tableCache.replaceAllTables(tables);
+                // Reenable autoplots
+                this.autoplotsInhibited = false;
             })
-            // Reenable autoplots
-            .finally(()=> {this.autoplotsInhibited = false})
-            .subscribe();
 
         /*
         locationHash$
@@ -176,7 +175,6 @@ export class AppViewModel {
             });
             */
 
-        /*
         // For every state of the application
         appState$
             // Excluding the state when the filter is still null because the
@@ -200,6 +198,8 @@ export class AppViewModel {
         let debugOpenEditPlot = false;
         // For every state of the application
         appState$
+            // If it has been triggered by the user
+            .filter(() => !this.autoplotsInhibited)
             // If it has set filter
             .filter((it) => it.filter != null)
             // And the filter has changed from the last time
@@ -231,7 +231,6 @@ export class AppViewModel {
                 }
                 this.currentError = state.error
             });
-            */
     }
 
     @bind()
