@@ -16,7 +16,6 @@ class TableCache {
     }
 
     public replaceAllTables(newTables: PublicationTable[]) {
-        this.allTables = newTables;
         this.tablesByIndepVar.clear();
         this.tablesByDepVar.clear();
 
@@ -29,7 +28,7 @@ class TableCache {
             array.push(value);
         }
 
-        for (let table of this.allTables) {
+        for (let table of newTables) {
             for (let varName of table.indep_vars) {
                 addItemToMultiMap(this.tablesByIndepVar, varName.name, table);
             }
@@ -37,11 +36,13 @@ class TableCache {
                 addItemToMultiMap(this.tablesByDepVar, varName.name, table);
             }
         }
+
+        this.allTables = newTables;
     }
 
     /** Returns a list of tables containing the required variables.
      *
-     * Both xVar and yVars may be kdependent or independent variables.
+     * Both xVar and yVars may be dependent or independent variables.
      *
      * For a table to be selected it MUST have both xVar and and at least one of
      * yVars.
