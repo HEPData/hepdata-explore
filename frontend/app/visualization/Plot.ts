@@ -58,6 +58,13 @@ export function findColIndexOrNull(variableName: string, table: PublicationTable
 export type ScaleType = "lin" | "log";
 export type ColorPolicy = 'per-variable' | 'per-table';
 
+export interface PlotConfigDump {
+    pinned: boolean;
+    xVar: string|null;
+    yVars: string[];
+    colorPolicy: ColorPolicy;
+}
+
 /** These properties here:
  * - are configurable by the user
  * - conform the serialized representation of the plot
@@ -76,13 +83,30 @@ export class PlotConfig {
     @observable()
     colorPolicy: ColorPolicy = 'per-variable';
 
+    dump(): PlotConfigDump {
+        return {
+            pinned: this.pinned,
+            xVar: this.xVar,
+            yVars: _.clone(this.yVars),
+            colorPolicy: this.colorPolicy,
+        }
+    }
+
+    static load(dump: PlotConfigDump) {
+        const instance = new PlotConfig();
+        instance.pinned = dump.pinned;
+        instance.xVar = dump.xVar;
+        instance.yVars = _.clone(dump.yVars);
+        instance.colorPolicy = dump.colorPolicy;
+        return instance;
+    }
+
     clone() {
-        const c = new PlotConfig();
-        c.pinned = this.pinned;
-        c.xVar = this.xVar;
-        c.colorPolicy = this.colorPolicy;
-        c.yVars = _.clone(this.yVars);
-        return c;
+        return PlotConfig.load(this.dump());
+    }
+
+    dispose() {
+        ko.untrack(this);
     }
 }
 
@@ -136,11 +160,14 @@ export class Plot {
 
     @computedObservable()
     private get _shouldLoadTables() {
+        this.tableCache.allTables;
         this.config.xVar;
         this.config.yVars;
         return ++this._counter;
     }
     private _counter = 0;
+
+    private _disposables: KnockoutSubscription[] = [];
 
     constructor(tableCache: TableCache, config?: PlotConfig) {
         this.tableCache = tableCache;
@@ -153,13 +180,22 @@ export class Plot {
         this.addLayer(this.axesLayer);
 
         // Listen for config changes.
-        ko.getObservable(this, '_shouldLoadTables').subscribe(() => {
-            this.loadTables();
-        });
+        this._disposables.push(ko.getObservable(this, '_shouldLoadTables')
+            .subscribe(() => {
+                this.loadTables();
+            }));
+        this._disposables.push(ko.pureComputed(() => this.config.colorPolicy)
+            .subscribe(() => {
+                this.redraw();
+            }));
+    }
 
-        ko.getObservable(this.config, 'colorPolicy').subscribe(() => {
-            this.redraw();
-        })
+    dispose() {
+        this.config.dispose();
+        for (let disposable of this._disposables) {
+            disposable.dispose();
+        }
+        ko.untrack(this);
     }
 
     clone() {
@@ -197,7 +233,11 @@ export class Plot {
     }
 
     public loadTables() {
-        const xVar = ensure(this.config.xVar);
+        if (this.config.xVar == null) {
+            return;
+        }
+        const xVar = this.config.xVar!;
+
         const tablesByYVar: Map<string, PublicationTable[]> = new Map(
             _.map(this.config.yVars, (yVar): [string, PublicationTable[]] =>
                 [yVar, this.tableCache.getTablesWithVariables(xVar, yVar)])

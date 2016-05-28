@@ -113,7 +113,7 @@ export abstract class Filter {
     }
 
     /** Deserializes a filter. */
-    public static load(dump: FilterDump) {
+    public static load(dump: FilterDump): Filter {
         const constructor = filterRegistry.get(dump.type);
         if (!constructor)
             throw new RuntimeError('Could not find constructor for ' + dump.type);

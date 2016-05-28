@@ -30,9 +30,13 @@ import {computedObservable} from "./decorators/computedObservable";
 import {rxObservableFromPromise} from "./rx/rxObservableFromPromise";
 import {rxObservableFromHash, getCurrentHash} from "./rx/rxObservableFromHash";
 import "rx/setLoadingOperator";
+import "rx/chainOperator";
+import "rx/withOperator";
 import {HTTPError, NetworkError} from "./base/network";
 import {ModalWindow} from "./base/ModalWindow";
 import {ViewPublicationsVM} from "./components/ViewPublicationsVM";
+import {combineAsTuple} from "./rx/combineAsTuple";
+import {pair} from "./base/pair";
 
 declare function stableStringify(thing: any): string;
 
@@ -116,8 +120,11 @@ export class AppViewModel {
         return {
             version: 1,
             filter: this.rootFilter ? this.rootFilter.dump() : null,
+            plots: map(this.plotPool.plots, (p) => p.config),
         };
     }
+
+    autoplotsInhibited: boolean = false;
 
     constructor() {
         const appState$ = (<KnockoutObservable<StateDump>>
@@ -133,21 +140,43 @@ export class AppViewModel {
             // Fetch their associated state from the state server
             .map(this.fetchStateDumpFromHash)
             .map(rxObservableFromPromise)
-            .switch()
             // Discard old responses received out of order
-            // Load them in the application
-            .forEach(this.loadStateDump);
+            .switch()
+            // Ignore invalid states with null filter
+            .filter((stateDump: StateDump) => stateDump.filter != null)
+            // Show the filter in the UI
+            .do(() => {this.autoplotsInhibited = true})
+            .do((stateDump) => {this.rootFilter = Filter.load(stateDump.filter!)})
+            // Perform the search, but keep the state dump handy
+            .map((stateDump: StateDump) => {
+                const searchResults = Rx.Observable.fromPromise(
+                    elastic.fetchFilteredData(Filter.load(stateDump.filter!)));
 
+                return searchResults
+                    .map((tables) => pair([stateDump, tables]));
+            })
+            .switch()
+            .do(([stateDump, tables]) => {
+                this.plotPool.loadPlots(stateDump.plots);
+                this.tableCache.replaceAllTables(tables);
+            })
+            // Reenable autoplots
+            .finally(()=> {this.autoplotsInhibited = false})
+            .subscribe();
+
+        /*
         locationHash$
             // Take the first hash the user has when the page is loaded
             .take(1)
             // If it's an empty or invalid hash, load a default state
             .forEach((hash) => {
                 if (!AppViewModel.isValidHash(hash)) {
-                    this.loadStateDump(AppViewModel.getDefaultState());
+                    this.loadStateDumpFilter(AppViewModel.getDefaultState());
                 }
             });
+            */
 
+        /*
         // For every state of the application
         appState$
             // Excluding the state when the filter is still null because the
@@ -158,8 +187,8 @@ export class AppViewModel {
             // If this state is different from the previous one
             .distinctUntilChanged()
             // Calculate a new URL hash from this state dump
-            .map((stateDump: string) => <[string,string]>
-                [stateDump, customUrlHash(stateDump)])
+            .map((stateDump: string) => 
+                pair([stateDump, customUrlHash(stateDump)]))
             // If the hash differs from the current one
             .filter(([stateDump, hash]) => hash != getCurrentHash())
             // Update the browser history and persist the new state to the server
@@ -178,6 +207,36 @@ export class AppViewModel {
             .distinctUntilChanged(stableStringify)
             // Run the search on the server
             .map(Filter.load)
+            .chain(this.searchAsObservable)
+            // Update the loading label
+            .setLoading((loading) => {this.loadingNewData = loading})
+            // Get the latest response (filter out of order responses)
+            .switch()
+            // Replace the tables with the ones received from the server and
+            // update the plots
+            .forEach((state) => {
+                if (state.tables) {
+                    var t1 = performance.now();
+
+                    this.tableCache.replaceAllTables(state.tables);
+                    this.updateUnpinnedPlots();
+
+                    var t2 = performance.now();
+                    console.log("Data indexed in %.2f ms.", t2 - t1);
+
+                    if (debugOpenEditPlot && this.plotPool.plots.length > 0) {
+                        debugOpenEditPlot = false;
+                        this.showPublicationsDialog(this.plotPool.plots[0]);
+                    }
+                }
+                this.currentError = state.error
+            });
+            */
+    }
+
+    @bind()
+    searchAsObservable(source: Rx.Observable<Filter>): Rx.Observable<Rx.Observable<SearchState>> {
+        return source
             .map(elastic.fetchFilteredData)
             .map(rxObservableFromPromise)
             .map(x => x
@@ -210,37 +269,14 @@ export class AppViewModel {
                         }
                     } else {
                         errorMessage = {
-                            title: 'Unknow error',
+                            title: 'Unknown error',
                             message: 'An unknown error occurred retrieving the filtered data.',
                             detail: null,
                         }
                     }
                     return Rx.Observable.just({error: errorMessage, tables: null});
                 })
-
-            )
-            .setLoading((loading) => {this.loadingNewData = loading})
-            // Get the latest response
-            .switch()
-            // Replace the tables with the ones received from the server and
-            // update the plots
-            .forEach((state) => {
-                if (state.tables) {
-                    var t1 = performance.now();
-
-                    this.tableCache.replaceAllTables(state.tables);
-                    this.updateUnpinnedPlots();
-
-                    var t2 = performance.now();
-                    console.log("Data indexed in %.2f ms.", t2 - t1);
-
-                    if (debugOpenEditPlot && this.plotPool.plots.length > 0) {
-                        debugOpenEditPlot = false;
-                        this.showPublicationsDialog(this.plotPool.plots[0]);
-                    }
-                }
-                this.currentError = state.error
-            });
+            );
     }
 
     updateUnpinnedPlots() {
@@ -382,7 +418,7 @@ export class AppViewModel {
     }
 
     @bind()
-    public loadStateDump(stateDump: StateDump) {
+    public loadStateDumpFilter(stateDump: StateDump) {
         if (stateDump.version != 1) {
             console.warn('Unknown state dump version: ' + stateDump.version);
         }
@@ -405,6 +441,7 @@ export class AppViewModel {
             filter: new AllFilter([
                 new IndepVarFilter('PT (GEV)'),
             ]).dump(),
+            plots: [],
         };
     }
 
@@ -434,7 +471,7 @@ export class AppViewModel {
             return this.rootFilter.replaceFilter(oldFilter, newFilter);
         }
     }
-    
+
     public showEditPlotDialog(plot: Plot) {
         const customPlotVM = new CustomPlotVM(plot.clone());
         this.customPlotModal.show('Edit plot', customPlotVM).then(() => {

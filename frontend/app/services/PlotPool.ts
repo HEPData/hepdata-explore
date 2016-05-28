@@ -1,8 +1,9 @@
-import {Plot} from "../visualization/Plot";
+import {Plot, PlotConfig, PlotConfigDump} from "../visualization/Plot";
 import TableCache = require("./TableCache");
 import {RuntimeError} from "../base/errors";
 import {observable} from "../decorators/observable";
 import {assert} from "../utils/assert";
+import {map} from "../utils/map";
 
 class ExhaustedPool extends RuntimeError {
     constructor() {
@@ -42,5 +43,14 @@ export class PlotPool {
 
         this.plots.remove(plot);
         this.freePlots.push(plot);
+    }
+
+    /**
+     * Deserializes an array of PlotConfig[] objects into real plots and
+     * replaces the pool contents with them.
+     */
+    loadPlots(plotsConfig: PlotConfigDump[]) {
+        this.plots = map(plotsConfig, (config) => new Plot(this.tableCache,
+            PlotConfig.load(config)));
     }
 }
