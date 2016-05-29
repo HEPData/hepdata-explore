@@ -506,7 +506,7 @@ class RecordAggregator(object):
                                     },
                                 },
 
-                                # "data_points": {"type": "object", "enabled": False},
+                                "data_points": {"type": "object", "enabled": False},
                             }
                         }
                     }
