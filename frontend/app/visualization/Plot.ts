@@ -186,8 +186,12 @@ export class Plot {
             }));
         this._disposables.push(ko.pureComputed(() => this.config.colorPolicy)
             .subscribe(() => {
+                // When the color policy is changed it's not necessary to load
+                // tables from scratch, just redrawing them.
                 this.redraw();
             }));
+        // Initial data load and draw
+        this.loadTables();
     }
 
     dispose() {

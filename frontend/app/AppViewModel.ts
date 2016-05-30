@@ -14,11 +14,11 @@ import {elastic} from "./services/Elastic";
 import {DataPoint, PublicationTable} from "./base/dataFormat";
 import TableCache = require("./services/TableCache");
 import {PlotPool} from "./services/PlotPool";
-import {Plot} from "./visualization/Plot";
-import {assertHas, assert, AssertionError} from "./utils/assert";
+import {Plot, PlotConfig, PlotConfigDump} from "./visualization/Plot";
+import {assertHas, assert, AssertionError, ensure} from "./utils/assert";
 import {map, imap, sum, union, range} from "./utils/map";
 import CMEnergiesFilter = require("./filters/CMEnergiesFilter");
-import {Filter} from "./filters/Filter";
+import {Filter, FilterDump} from "./filters/Filter";
 import {StateDump} from "./base/StateDump";
 import {stateStorage} from "./services/StateStorage";
 import {customUrlHash} from "./utils/customUrlHash";
@@ -28,7 +28,10 @@ import {observable} from "./decorators/observable";
 import "decorators/computedObservable";
 import {computedObservable} from "./decorators/computedObservable";
 import {rxObservableFromPromise} from "./rx/rxObservableFromPromise";
-import {rxObservableFromHash, getCurrentHash} from "./rx/rxObservableFromHash";
+import {
+    rxObservableFromHash, getCurrentHash,
+    removeLeadingHashtag
+} from "./rx/rxObservableFromHash";
 import "rx/setLoadingOperator";
 import "rx/chainOperator";
 import "rx/withOperator";
@@ -66,6 +69,24 @@ function formatMessageFromError(err: HTTPError): ErrorMessage {
         }
     }
 
+}
+
+/**
+ * Instructs the application to perform a search and update the UI with the
+ * results.
+ */
+interface SearchRequest {
+    /**
+     * The filter to apply in ElasticSearch.
+     */
+    filter: Filter;
+
+    /**
+     * If set, once the data is received the current plots will be replaced with
+     * these values. Otherwise, the current plot set will be updated to reflect
+     * the new data using the auto-plot algorithm.
+     */
+    thenSetPlots: PlotConfigDump[]|null;
 }
 
 interface SearchState {
@@ -116,120 +137,210 @@ export class AppViewModel {
     currentError: ErrorMessage|null = null;
 
     @computedObservable()
-    get appState(): StateDump {
+    get appState(): StateDump|null {
+        if (!this.rootFilter) {
+            // Can't build a valid StateDump without a filter.
+            return null;
+        }
         return {
             version: 1,
-            filter: this.rootFilter ? this.rootFilter.dump() : null,
-            plots: map(this.plotPool.plots, (p) => p.config),
+            filter: this.rootFilter.dump(),
+            plots: this.plotsDump,
         };
     }
 
-    autoplotsInhibited: boolean = false;
+    @computedObservable()
+    get filterDump(): FilterDump|null {
+        if (this.rootFilter) {
+            return this.rootFilter.dump();
+        } else {
+            return null;
+        }
+    }
+    @computedObservable()
+    get plotsDump(): PlotConfigDump[] {
+        return map(this.plotPool.plots, (p) => p.config.dump());
+    }
+
+    private _updatedNonInteractively = {
+        filter: false,
+        plots: false,
+    };
+    private loadPlotsNonInteractive(value: PlotConfigDump[]) {
+        this._updatedNonInteractively.plots = true;
+        this.plotPool.loadPlots(value);
+        this._updatedNonInteractively.plots = false;
+    }
+    private setFilterNonInteractive(value: Filter|null) {
+        this._updatedNonInteractively.filter = true;
+        this.rootFilter = value;
+    }
+
+    /**
+     * While a state dump is being downloaded the filter controls are locked.
+     *
+     * Why would the user want to edit the filter if their changes are going to
+     * be trashed down in a few seconds when the server sends the response with
+     * the state dump?
+     *
+     * Just in case, this flag forbids them from doing it.
+     *
+     * @type {boolean}
+     */
+    public filterLocked = false;
 
     constructor() {
         const appState$ = (<KnockoutObservable<StateDump>>
             ko.getObservable(this, 'appState'))
             .toObservableWithReplyLatest();
 
-        const locationHash$ = rxObservableFromHash();
-
-        // For every hash we get in the URL bar
-        locationHash$
-            // Keep those that are valid
-            .filter(AppViewModel.isValidHash)
-            // Fetch their associated state from the state server
-            .map(this.fetchStateDumpFromHash)
-            .map(rxObservableFromPromise)
-            // Discard old responses received out of order
-            .switch()
-            // Ignore invalid states with null filter
-            .filter((stateDump: StateDump) => stateDump.filter != null)
-            // Show the filter in the UI
-            .do(() => {this.autoplotsInhibited = true})
-            .do((stateDump) => {this.rootFilter = Filter.load(stateDump.filter!)})
-            // Perform the search, but keep the state dump handy
-            .map((stateDump: StateDump) => {
-                const searchResults = Rx.Observable.fromPromise(
-                    elastic.fetchFilteredData(Filter.load(stateDump.filter!)));
-
-                return searchResults
-                    .map((tables) => pair([stateDump, tables]));
-            })
-            .switch()
-            .forEach(([stateDump, tables]) => {
-                this.plotPool.loadPlots(stateDump.plots);
-                this.tableCache.replaceAllTables(tables);
-                // Reenable autoplots
-                this.autoplotsInhibited = false;
-            })
-
-        /*
-        locationHash$
-            // Take the first hash the user has when the page is loaded
-            .take(1)
-            // If it's an empty or invalid hash, load a default state
-            .forEach((hash) => {
-                if (!AppViewModel.isValidHash(hash)) {
-                    this.loadStateDumpFilter(AppViewModel.getDefaultState());
+        const filterInteractiveUpdates$ = (<KnockoutObservable<FilterDump>>
+            ko.getObservable(this, 'filterDump'))
+            .toObservableWithReplyLatest()
+            .filter(() => {
+                if (!this._updatedNonInteractively.filter) {
+                    return true;
+                } else {
+                    // Consume token and stop propagation of this update
+                    this._updatedNonInteractively.filter = false;
+                    return false;
                 }
-            });
-            */
+            })
+            .distinctUntilChanged(stableStringify)
+            // Return the real filter instead of a serialization of itself
+            .map(() => this.rootFilter)
+            .shareReplay(1);
 
-        // For every state of the application
-        appState$
-            // Excluding the state when the filter is still null because the
-            // first state has not loaded yet
-            .filter((s) => s.filter != null)
-            // Serialize it
+        const plotsInteractiveUpdates$ = (<KnockoutObservable<Plot[]>>
+            ko.getObservable(this, 'plotsDump'))
+            .toObservable()
+            .filter(() => !this._updatedNonInteractively.plots)
+            .distinctUntilChanged(stableStringify)
+            .shareReplay(1);
+
+        const $searchRequests = new Rx.Subject<SearchRequest>();
+        $searchRequests
+            .distinctUntilChanged(stableStringify)
+            .map((req) => elastic.fetchFilteredData(req.filter)
+                .then(newTables => pair([req, newTables])))
+            .do(() => {this.loadingNewData = true})
+            .map(rxObservableFromPromise)
+            .switch()
+            .forEach(([req, newTables]) => {
+                this.tableCache.replaceAllTables(newTables);
+                if (req.thenSetPlots) {
+                    // Replace plots with the specified set
+                    this.loadPlotsNonInteractive(req.thenSetPlots);
+                } else {
+                    // Run autoplots algorithm
+                    this.updateUnpinnedPlots();
+                }
+                // Now, and only now, that filter and plots are consistent,
+                // send a request to upload the state and update the URL hash.
+                const stateDump = ensure(this.appState);
+                $stateUploadRequests.onNext(stateDump);
+            });
+            
+        const $stateUploadRequests = new Rx.Subject<StateDump>();
+        $stateUploadRequests
+            // Stringify as JSON
             .map(stableStringify)
-            // If this state is different from the previous one
+            // Avoid repeated states
             .distinctUntilChanged()
-            // Calculate a new URL hash from this state dump
-            .map((stateDump: string) => 
-                pair([stateDump, customUrlHash(stateDump)]))
-            // If the hash differs from the current one
-            .filter(([stateDump, hash]) => hash != getCurrentHash())
+            // Calculate the hash of the state
+            .map((stateDump: string) =>
+                pair([stateDump, customUrlHash(stateDump)])
+            )
+            // Stop if the calculated hash is the one currently in the URL bar    
+            .filter(([stateDump, hash]) =>
+                hash != removeLeadingHashtag(location.hash)
+            )
             // Update the browser history and persist the new state to the server
             .forEach(([stateDump, hash]) => {
                 history.pushState(null, undefined, '#' + hash);
-                stateStorage.put(hash, stateDump);
+                // Asynchronous and optimistic upload
+                console.log('Storing hash ' + hash);
+                stateStorage.put(hash, stateDump)
+                    .then(()=> {})
+                    .catch(() => {
+                        console.warn('Could not persist state: ' + hash);
+                    });
             });
 
-        let debugOpenEditPlot = false;
-        // For every state of the application
-        appState$
-            // If it has been triggered by the user
-            .filter(() => !this.autoplotsInhibited)
-            // If it has set filter
-            .filter((it) => it.filter != null)
-            // And the filter has changed from the last time
-            .map((it) => it.filter)
-            .distinctUntilChanged(stableStringify)
-            // Run the search on the server
-            .map(Filter.load)
-            .chain(this.searchAsObservable)
-            // Update the loading label
-            .setLoading((loading) => {this.loadingNewData = loading})
-            // Get the latest response (filter out of order responses)
+        // Loading of states from the URL
+        // ==============================
+        //
+        // For every hash we get in the URL bar
+        const locationHash$ = rxObservableFromHash();
+        locationHash$
+            // Filter out invalid hashes
+            .filter(AppViewModel.isValidHash)
+            .do((hash) => {console.log('Loading hash ' + hash);})
+            // Fetch their associated state from the state server
+            .map(this.fetchStateDumpFromHash)
+            .map(rxObservableFromPromise)
+            // Lock the filter UI while we download the new filter
+            .do(() => {this.filterLocked = true})
+            // Get the latest response
             .switch()
-            // Replace the tables with the ones received from the server and
-            // update the plots
-            .forEach((state) => {
-                if (state.tables) {
-                    var t1 = performance.now();
+            .forEach((stateDump) => {
+                const filter = Filter.load(stateDump.filter); 
+                // Load the filter in the UI
+                this.setFilterNonInteractive(filter);
+                // Send a search and plot request
+                $searchRequests.onNext({
+                    filter: filter,
+                    thenSetPlots: stateDump.plots,
+                });
+            })
 
-                    this.tableCache.replaceAllTables(state.tables);
-                    this.updateUnpinnedPlots();
-
-                    var t2 = performance.now();
-                    console.log("Data indexed in %.2f ms.", t2 - t1);
-
-                    if (debugOpenEditPlot && this.plotPool.plots.length > 0) {
-                        debugOpenEditPlot = false;
-                        this.showPublicationsDialog(this.plotPool.plots[0]);
-                    }
+        // Provide a default state when the application is started up without a hash.
+        // ==========================================================================
+        //
+        locationHash$
+            // Take the first hash the user has when the page is loaded
+            .take(1)
+            .forEach((hash) => {
+                // If it's an empty or invalid hash (e.g. the main page without
+                // any hash URL set)
+                if (!AppViewModel.isValidHash(hash)) {
+                    // Set a initial example filter
+                    this.rootFilter = AppViewModel.getDefaultFilter();
+                    // The update will be catched and autoplots will be run 
                 }
-                this.currentError = state.error
+            });
+
+        // Handling of filter updates done by the user
+        // ===========================================
+        //
+        // For every filter change
+        filterInteractiveUpdates$
+            // Ignore the first notification, when the application has just been
+            // loaded and filter is still null.
+            .filter((filter) => filter != null)
+            .do((filter) => {
+                console.log('Handling user filter update');
+            })
+            .map((filter) => filter!)
+            // Run the search on the server
+            .forEach((filter) => {
+                // Request searching by the filter and then running autoplots
+                $searchRequests.onNext({
+                    filter: filter,
+                    thenSetPlots: null,
+                })
+            });
+
+        // Storing application state when the user edits a plot
+        // ====================================================
+        //
+        // When the user edits a plot
+        plotsInteractiveUpdates$
+            .forEach((plots) => {
+                // Request to upload the current state
+                if (this.appState) {
+                    $stateUploadRequests.onNext(this.appState);
+                }
             });
     }
 
@@ -279,6 +390,8 @@ export class AppViewModel {
     }
 
     updateUnpinnedPlots() {
+        this._updatedNonInteractively.plots = true;
+
         // After the next loop, this variable will hold how many free plots we have
         let remainingPlots = this.autoMaxPlots;
 
@@ -414,6 +527,8 @@ export class AppViewModel {
                 const plot = this.plotPool.spawnPlot().spawn(group.xVar, yVars);
             }
         }
+
+        this._updatedNonInteractively.plots = false;
     }
 
     @bind()
@@ -434,14 +549,10 @@ export class AppViewModel {
         return !!AppViewModel.regexStateId.exec(hash);
     }
 
-    private static getDefaultState(): StateDump {
-        return {
-            version: 1,
-            filter: new AllFilter([
-                new IndepVarFilter('PT (GEV)'),
-            ]).dump(),
-            plots: [],
-        };
+    private static getDefaultFilter(): Filter {
+        return new AllFilter([
+            new IndepVarFilter('PT (GEV)'),
+        ]);
     }
 
     @bind()

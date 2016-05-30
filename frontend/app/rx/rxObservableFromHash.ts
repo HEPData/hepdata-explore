@@ -1,4 +1,4 @@
-function removeLeadingHashtag(hash: string) {
+export function removeLeadingHashtag(hash: string) {
     // Remove the leading #
     if (hash.startsWith('#')) {
         return hash.slice(1);

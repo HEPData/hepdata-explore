@@ -3,6 +3,8 @@
 //     debugger;
 // });
 
+// (<any>ko).options.deferUpdates = true;
+
 import {app} from "./AppViewModel";
 
 (<any>window).app = app;

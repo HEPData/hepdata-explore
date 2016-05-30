@@ -3,6 +3,6 @@ import {PlotConfig, PlotConfigDump} from "../visualization/Plot";
 
 export class StateDump {
     version: number;
-    filter: FilterDump|null;
+    filter: FilterDump;
     plots: PlotConfigDump[];
 }
