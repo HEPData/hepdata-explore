@@ -43,30 +43,35 @@ import {pair} from "./base/pair";
 
 declare function stableStringify(thing: any): string;
 
-interface ErrorMessage {
+class SearchError {
     title: string;
     message: string;
     detail: string|null;
+
+    constructor(data: SearchError) {
+        _.assign(this, data);
+        Object.seal(this);
+    }
 }
 
-function formatMessageFromError(err: HTTPError): ErrorMessage {
+function formatMessageFromError(err: HTTPError): SearchError {
     const cause = _.get<string>(err.response, 'error.root_cause.0.type', 'unknown cause');
     const reason = _.get<string>(err.response, 'error.root_cause.0.reason', 'unknown reason');
 
     if (cause == 'illegal_argument_exception') {
         // Catch regex errors, which are the user' fault
-        return {
+        return new SearchError({
             title: 'Invalid argument',
             message: 'This error is usually caused by a buggy regexp in your filters. More details below:',
             detail: reason,
-        }
+        });
     } else {
         // Generic error (these should be the programmer's fault)
-        return {
+        return new SearchError({
             title: 'Filter failed',
             message: 'The search server rejected the search with error.',
             detail: `${cause}: ${reason}`,
-        }
+        });
     }
 
 }
@@ -90,7 +95,7 @@ interface SearchRequest {
 }
 
 interface SearchState {
-    error: ErrorMessage|null,
+    error: SearchError|null,
     tables: PublicationTable[]|null,
 }
 
@@ -134,7 +139,7 @@ export class AppViewModel {
     loadingNewData = false;
 
     @observable()
-    currentError: ErrorMessage|null = null;
+    currentError: SearchError|null = null;
 
     @computedObservable()
     get appState(): StateDump|null {
@@ -225,23 +230,37 @@ export class AppViewModel {
                 .then(newTables => pair([req, newTables])))
             .do(() => {this.loadingNewData = true})
             .map(rxObservableFromPromise)
+            .map(AppViewModel.handleSearchErrors)
             .switch()
-            .forEach(([req, newTables]) => {
-                this.tableCache.replaceAllTables(newTables);
-                if (req.thenSetPlots) {
-                    // Replace plots with the specified set
-                    this.loadPlotsNonInteractive(req.thenSetPlots);
+            .forEach((result) => {
+                if (result instanceof SearchError) {
+                    // Show error to the user
+                    this.currentError = result;
                 } else {
-                    // Run autoplots algorithm
-                    this.updateUnpinnedPlots();
-                }
-                // Now, and only now, that filter and plots are consistent,
-                // send a request to upload the state and update the URL hash.
-                const stateDump = ensure(this.appState);
-                $stateUploadRequests.onNext(stateDump);
+                    let [req, newTables] = result;
 
-                // Turn off the loading data indication
-                this.loadingNewData = false;
+                    // Load the tables returned by the search
+                    this.tableCache.replaceAllTables(newTables);
+
+                    if (req.thenSetPlots) {
+                        // Replace plots with the specified set
+                        this.loadPlotsNonInteractive(req.thenSetPlots);
+                    } else {
+                        // Run autoplots algorithm
+                        this.updateUnpinnedPlots();
+                    }
+
+                    // Now, and only now, that filter and plots are consistent,
+                    // send a request to upload the state and update the URL hash.
+                    const stateDump = ensure(this.appState);
+                    $stateUploadRequests.onNext(stateDump);
+
+                    // Turn off the loading data indication
+                    this.loadingNewData = false;
+
+                    // Clear previous errors, if any
+                    this.currentError = null;
+                }
             });
             
         const $stateUploadRequests = new Rx.Subject<StateDump>();
@@ -294,7 +313,7 @@ export class AppViewModel {
                     filter: filter,
                     thenSetPlots: stateDump.plots,
                 });
-            })
+            });
 
         // Provide a default state when the application is started up without a hash.
         // ==========================================================================
@@ -346,49 +365,55 @@ export class AppViewModel {
             });
     }
 
-    @bind()
-    searchAsObservable(source: Rx.Observable<Filter>): Rx.Observable<Rx.Observable<SearchState>> {
-        return source
-            .map(elastic.fetchFilteredData)
-            .map(rxObservableFromPromise)
-            .map(x => x
-                .map<SearchState>(tables => ({tables: tables, error: null}))
-                .retryWhen((errors) => errors
-                    .scan((countRetries: number, err: any) => {
-                        // Retry up to four times, for a total of 5 request attempts.
-                        // Only retry non-400 errors.
-                        if (countRetries >= 4 || err instanceof HTTPError && err.code != 400) {
-                            throw err;
-                        }
+    static handleSearchErrors<T>(searchObservable: Rx.Observable<T>)
+        : Rx.Observable<T|SearchError>
+    {
+        return searchObservable
+            // Introduce type divergence: the search may return a list of
+            // publications or a SearchError.
+            .map(tables => <T|SearchError>tables)
+            // Retry logic
+            .retryWhen((errors) => errors
+                .scan<number>((countRetries: number, err: any) => {
+                    // Retry up to four times, for a total of 5 request attempts.
+                    // Only retry non-400 errors.
+                    if (countRetries < 4 && !(err instanceof HTTPError && err.code == 400)) {
                         return countRetries + 1;
-                    }, 1)
-                    // Waiting 1 second between attempts.
-                    .zip(Rx.Observable.timer(1000, 1000))
-                )
-                // Handle errors of the elastic request independently, so an
-                // error at a request does not stop the complete stream (which
-                // would prevent more filter updates from triggering these
-                // search calls)
-                .catch((err) => {
-                    let errorMessage: ErrorMessage;
-                    if (err instanceof HTTPError && err.code == 400) {
-                        errorMessage = formatMessageFromError(err);
-                    } else if (err instanceof NetworkError) {
-                        errorMessage = {
-                            title: 'Network error',
-                            message: 'Could not contact the search server after several retries.',
-                            detail: null,
-                        }
                     } else {
-                        errorMessage = {
-                            title: 'Unknown error',
-                            message: 'An unknown error occurred retrieving the filtered data.',
-                            detail: null,
-                        }
+                        throw err;
                     }
-                    return Rx.Observable.just({error: errorMessage, tables: null});
-                })
-            );
+                }, 1)
+                // Waiting 1 second between attempts.
+                .zip(Rx.Observable.timer(1000, 1000))
+            )
+            // Catch errors from the elastic request and turn them into a
+            // human friendly SearchError object.
+            //
+            // It's important to place the .catch inside the nested
+            // observable, so an error at a request does not stop the
+            // complete stream (which would prevent more filter updates
+            // from triggering these search calls)
+            .catch((err) => {
+                let searchError: SearchError;
+                if (err instanceof HTTPError && err.code == 400) {
+                    searchError = formatMessageFromError(err);
+                } else if (err instanceof NetworkError) {
+                    searchError = new SearchError({
+                        title: 'Network error',
+                        message: 'Could not contact the search server after several retries.',
+                        detail: null,
+                    });
+                } else {
+                    searchError = new SearchError({
+                        title: 'Unknown error',
+                        message: 'An unknown error occurred retrieving the filtered data.',
+                        detail: null,
+                    });
+                }
+                console.warn('Error querying ElasticSearch:');
+                console.warn(err);
+                return Rx.Observable.just(searchError);
+            });
     }
 
     updateUnpinnedPlots() {
