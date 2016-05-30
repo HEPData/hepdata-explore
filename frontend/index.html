@@ -129,7 +129,7 @@
         data: ko.getObservable(customPlotModal, 'templateData'),
     },
     footer: { data: {
-        action: ko.getObservable(customPlotModal, 'action'),
+        action: function () { return customPlotModal.action() },
         primaryLabel: ko.getObservable(customPlotModal, 'primaryLabel'),
     } }
 }"></div>
@@ -143,8 +143,7 @@
         data: ko.getObservable(viewPublicationsModal, 'templateData'),
     },
     footer: { data: {
-        action: ko.getObservable(viewPublicationsModal, 'action'),
-        primaryLabel: ko.getObservable(viewPublicationsModal, 'primaryLabel'),
+        action: null,
     } }
 }"></div>
 
