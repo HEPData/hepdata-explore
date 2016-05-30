@@ -239,6 +239,9 @@ export class AppViewModel {
                 // send a request to upload the state and update the URL hash.
                 const stateDump = ensure(this.appState);
                 $stateUploadRequests.onNext(stateDump);
+
+                // Turn off the loading data indication
+                this.loadingNewData = false;
             });
             
         const $stateUploadRequests = new Rx.Subject<StateDump>();
