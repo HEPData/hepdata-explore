@@ -261,7 +261,6 @@ export class AppViewModel {
                 // Asynchronous and optimistic upload
                 console.log('Storing hash ' + hash);
                 stateStorage.put(hash, stateDump)
-                    .then(()=> {})
                     .catch(() => {
                         console.warn('Could not persist state: ' + hash);
                     });
@@ -587,6 +586,7 @@ export class AppViewModel {
         this.customPlotModal.show('Edit plot', customPlotVM).then(() => {
             // Bring the updated configuration to the original plot
             plot.config = customPlotVM.plot.config;
+            return null;
         }).catch(() => {
             // No action on cancel
         }).finally(() => {customPlotVM.dispose()});
