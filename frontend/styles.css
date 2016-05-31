@@ -50,14 +50,17 @@ select#indepVarSelect {
     font-family: Lato;
 }
 
-.visualization-box {
+.visualization-box, .error-backdrop {
     position: absolute;
     top: 0;
     left: 340px;
     right: 0;
     bottom: 0;
-    overflow: auto;
     box-sizing: border-box;
+}
+
+.visualization-box {
+    overflow: auto;
     padding: 15px;
 }
 
@@ -689,4 +692,12 @@ ul.publication-list ul {
 
 .view-publications .color-policy {
   margin-left: 20px;
+}
+.error-backdrop {
+  position: absolute;
+  /* top: 0; */
+  /* left: 0; */
+  /* right: 0; */
+  /* bottom: 0; */
+  background: rgba(0, 0, 0, 0.5);
 }
