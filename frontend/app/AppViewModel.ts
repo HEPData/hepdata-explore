@@ -319,6 +319,7 @@ export class AppViewModel {
             // Get the latest response
             .switch()
             .forEach((stateDump) => {
+                console.log('Loaded state dump');
                 const filter = Filter.load(stateDump.filter); 
                 // Load the filter in the UI
                 this.setFilterNonInteractive(filter);
