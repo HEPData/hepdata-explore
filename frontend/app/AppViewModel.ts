@@ -230,9 +230,15 @@ export class AppViewModel {
             .distinctUntilChanged(stableStringify)
             // Request the data for the new filter, but keep the entire request
             // object handy, as it contains data we will need later.
-            .map((req) => elastic.fetchFilteredData(req.filter)
-                .then(newTables => pair([req, newTables])))
-            .map(rxObservableFromPromise)
+            //
+            // .defer() is required in order to return a *cold* observable so
+            // that in case of error, retries *create* a new promise (and
+            // therefore a new HTTP request) instead of reusing the value of
+            // the old one.
+            .map((req) => Rx.Observable.defer(() => Rx.Observable.fromPromise(
+                elastic.fetchFilteredData(req.filter)
+                    .then(newTables => pair([req, newTables]))
+            )))
             // Turn the loading indicator on
             .do(() => {this.loadingNewData = true})
             // Retrying and error handling logic is complex enough to warrant
