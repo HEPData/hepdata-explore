@@ -40,6 +40,7 @@ import {ModalWindow} from "./base/ModalWindow";
 import {ViewPublicationsVM} from "./components/ViewPublicationsVM";
 import {combineAsTuple} from "./rx/combineAsTuple";
 import {pair} from "./base/pair";
+import {RuntimeError} from "./base/errors";
 
 declare function stableStringify(thing: any): string;
 
@@ -139,7 +140,19 @@ export class AppViewModel {
     loadingNewData = false;
 
     @observable()
-    currentError: SearchError|null = null;
+    currentSearchError: SearchError|null = null;
+
+    @observable()
+    currentStateLoadError: SearchError|null = null;
+
+    /**
+     * Return the error that will be shown in the UI, if any.
+     * @returns {SearchError|null}
+     */
+    @computedObservable()
+    get currentError() {
+        return this.currentSearchError || this.currentStateLoadError;
+    }
 
     @computedObservable()
     get appState(): StateDump|null {
@@ -249,7 +262,7 @@ export class AppViewModel {
             .forEach((result) => {
                 if (result instanceof SearchError) {
                     // Show error to the user
-                    this.currentError = result;
+                    this.currentSearchError = result;
                 } else {
                     let [req, newTables] = result;
 
@@ -273,7 +286,7 @@ export class AppViewModel {
                     this.loadingNewData = false;
 
                     // Clear previous errors, if any
-                    this.currentError = null;
+                    this.currentSearchError = null;
                 }
             });
 
@@ -312,22 +325,30 @@ export class AppViewModel {
             .filter(AppViewModel.isValidHash)
             .do((hash) => {console.log('Loading hash ' + hash);})
             // Fetch their associated state from the state server
-            .map(this.fetchStateDumpFromHash)
-            .map(rxObservableFromPromise)
+            .map((hash) => Rx.Observable.defer(() =>
+                this.fetchStateDumpFromHash(hash)))
+            .map(AppViewModel.handleStateLoadErrors)
             // Lock the filter UI while we download the new filter
             .do(() => {this.filterLocked = true})
             // Get the latest response
             .switch()
-            .forEach((stateDump) => {
-                console.log('Loaded state dump');
-                const filter = Filter.load(stateDump.filter); 
-                // Load the filter in the UI
-                this.setFilterNonInteractive(filter);
-                // Send a search and plot request
-                $searchRequests.onNext({
-                    filter: filter,
-                    thenSetPlots: stateDump.plots,
-                });
+            .forEach((result) => {
+                if (result instanceof SearchError) {
+                    this.currentStateLoadError = result;
+                } else {
+                    const stateDump = <StateDump>result;
+
+                    console.log('Loaded state dump');
+                    const filter = Filter.load(stateDump.filter);
+                    // Load the filter in the UI
+                    this.setFilterNonInteractive(filter);
+                    // Send a search and plot request
+                    $searchRequests.onNext({
+                        filter: filter,
+                        thenSetPlots: stateDump.plots,
+                    });
+                    this.currentStateLoadError = null;
+                }
             });
 
         // Provide a default state when the application is started up without a hash.
@@ -380,6 +401,23 @@ export class AppViewModel {
             });
     }
 
+    static retryRequest<T>(source: Rx.Observable<T>) {
+        return source
+            .retryWhen((errors) => errors
+                .scan<number>((countRetries: number, err: any) => {
+                    // Retry up to four times, for a total of 5 request attempts.
+                    // Only retry non-400 (Bad Request) errors.
+                    const isError400 = (err instanceof HTTPError && err.code == 400);
+                    if (isError400 || countRetries == 5) {
+                        throw err;
+                    }
+                    return countRetries + 1;
+                }, 1)
+                // Waiting 1 second between attempts.
+                .zip(Rx.Observable.timer(1000, 1000))
+            );
+    }
+
     static handleSearchErrors<T>(searchObservable: Rx.Observable<T>)
         : Rx.Observable<T|SearchError>
     {
@@ -393,22 +431,9 @@ export class AppViewModel {
             // publications or a SearchError.
             .map(tables => <T|SearchError>tables)
             // Retry logic
-            .retryWhen((errors) => errors
-                .scan<number>((countRetries: number, err: any) => {
-                    // Retry up to four times, for a total of 5 request attempts.
-                    // Only retry non-400 (Bad Request) errors.
-                    const isError400 = (err instanceof HTTPError && err.code == 400);
-                    if (isError400 || countRetries == 5) {
-                        throw err;
-                    }
-                    return countRetries + 1;
-                }, 1)
-                // Waiting 1 second between attempts.
-                .zip(Rx.Observable.timer(1000, 1000))
-            )
+            .chain(AppViewModel.retryRequest)
             // Catch errors from the elastic request and turn them into a
             // human friendly SearchError object.
-            //
             .catch((err) => {
                 let searchError: SearchError;
                 if (err instanceof HTTPError && err.code == 400) {
@@ -430,6 +455,38 @@ export class AppViewModel {
                 console.warn(err);
                 return Rx.Observable.just(searchError);
             });
+    }
+
+    static handleStateLoadErrors<T>(source: Rx.Observable<T>) {
+        return source
+            .map(state => <T|SearchError>state)
+            // Retry logic
+            .chain(AppViewModel.retryRequest)
+            .catch((err) => {
+                let error: SearchError;
+                if (err instanceof NetworkError) {
+                    error = new SearchError({
+                        title: 'Network error',
+                        message: 'Could not load the requested application state (URL) due to a connectivity problem.',
+                        detail: null
+                    });
+                } else if (err instanceof HTTPError && err.code == 404) {
+                    error = new SearchError({
+                        title: 'State not found',
+                        message: 'The state specified in the URL does not exist in the server.',
+                        detail: null,
+                    })
+                } else {
+                    error = new SearchError({
+                        title: 'Unknown error',
+                        message: 'An unknown error occurred retrieving the application state from the URL.',
+                        detail: 'toString' in err ? err.toString() : null,
+                    })
+                }
+                console.warn('Error querying kv-server:');
+                console.warn(err);
+                return Rx.Observable.just(error);
+            })
     }
 
     updateUnpinnedPlots() {
