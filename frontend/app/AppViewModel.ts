@@ -223,15 +223,15 @@ export class AppViewModel {
             .distinctUntilChanged(stableStringify)
             .shareReplay(1);
 
-        const $searchRequests = new Rx.ReplaySubject<SearchRequest>(1);
+        const $searchRequests = new Rx.Subject<SearchRequest>();
         $searchRequests
             .distinctUntilChanged(stableStringify)
             .map((req) => elastic.fetchFilteredData(req.filter)
                 .then(newTables => pair([req, newTables])))
             .do(() => {this.loadingNewData = true})
             .map(rxObservableFromPromise)
+            .map(AppViewModel.handleSearchErrors)
             .switch()
-            .chain(AppViewModel.handleSearchErrors)
             .forEach((result) => {
                 if (result instanceof SearchError) {
                     // Show error to the user
@@ -263,9 +263,7 @@ export class AppViewModel {
                 }
             });
 
-        // keep resources to be able to retry at most 10 state requests at a
-        // point of time for up to 1 minute.
-        const $stateUploadRequests = new Rx.ReplaySubject<StateDump>(10, 60000);
+        const $stateUploadRequests = new Rx.Subject<StateDump>();
         $stateUploadRequests
             // Stringify as JSON
             .map(stableStringify)
@@ -370,6 +368,11 @@ export class AppViewModel {
     static handleSearchErrors<T>(searchObservable: Rx.Observable<T>)
         : Rx.Observable<T|SearchError>
     {
+        // It's important to place the .catch (and therefore, this call)
+        // inside the nested observable, so an error at a request does not
+        // stop the complete stream (which would prevent more filter updates
+        // from triggering these search calls)
+
         return searchObservable
             // Introduce type divergence: the search may return a list of
             // publications or a SearchError.
@@ -391,10 +394,6 @@ export class AppViewModel {
             // Catch errors from the elastic request and turn them into a
             // human friendly SearchError object.
             //
-            // It's important to place the .catch inside the nested
-            // observable, so an error at a request does not stop the
-            // complete stream (which would prevent more filter updates
-            // from triggering these search calls)
             .catch((err) => {
                 let searchError: SearchError;
                 if (err instanceof HTTPError && err.code == 400) {
