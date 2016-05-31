@@ -223,14 +223,22 @@ export class AppViewModel {
             .distinctUntilChanged(stableStringify)
             .shareReplay(1);
 
-        const $searchRequests = new Rx.Subject<SearchRequest>();
+        const $searchRequests = new Rx.ReplaySubject<SearchRequest>(1);
+        // Each time a piece of the application requests a search
         $searchRequests
+            // If it's different than the previous search
             .distinctUntilChanged(stableStringify)
+            // Request the data for the new filter, but keep the entire request
+            // object handy, as it contains data we will need later.
             .map((req) => elastic.fetchFilteredData(req.filter)
                 .then(newTables => pair([req, newTables])))
-            .do(() => {this.loadingNewData = true})
             .map(rxObservableFromPromise)
+            // Turn the loading indicator on
+            .do(() => {this.loadingNewData = true})
+            // Retrying and error handling logic is complex enough to warrant
+            // being separate in its own function
             .map(AppViewModel.handleSearchErrors)
+            // Discard out of order responses
             .switch()
             .forEach((result) => {
                 if (result instanceof SearchError) {
