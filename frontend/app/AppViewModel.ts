@@ -223,15 +223,15 @@ export class AppViewModel {
             .distinctUntilChanged(stableStringify)
             .shareReplay(1);
 
-        const $searchRequests = new Rx.Subject<SearchRequest>();
+        const $searchRequests = new Rx.ReplaySubject<SearchRequest>(1);
         $searchRequests
             .distinctUntilChanged(stableStringify)
             .map((req) => elastic.fetchFilteredData(req.filter)
                 .then(newTables => pair([req, newTables])))
             .do(() => {this.loadingNewData = true})
             .map(rxObservableFromPromise)
-            .map(AppViewModel.handleSearchErrors)
             .switch()
+            .chain(AppViewModel.handleSearchErrors)
             .forEach((result) => {
                 if (result instanceof SearchError) {
                     // Show error to the user
@@ -262,8 +262,10 @@ export class AppViewModel {
                     this.currentError = null;
                 }
             });
-            
-        const $stateUploadRequests = new Rx.Subject<StateDump>();
+
+        // keep resources to be able to retry at most 10 state requests at a
+        // point of time for up to 1 minute.
+        const $stateUploadRequests = new Rx.ReplaySubject<StateDump>(10, 60000);
         $stateUploadRequests
             // Stringify as JSON
             .map(stableStringify)
@@ -376,12 +378,12 @@ export class AppViewModel {
             .retryWhen((errors) => errors
                 .scan<number>((countRetries: number, err: any) => {
                     // Retry up to four times, for a total of 5 request attempts.
-                    // Only retry non-400 errors.
-                    if (countRetries < 4 && !(err instanceof HTTPError && err.code == 400)) {
-                        return countRetries + 1;
-                    } else {
+                    // Only retry non-400 (Bad Request) errors.
+                    const isError400 = (err instanceof HTTPError && err.code == 400);
+                    if (isError400 || countRetries == 5) {
                         throw err;
                     }
+                    return countRetries + 1;
                 }, 1)
                 // Waiting 1 second between attempts.
                 .zip(Rx.Observable.timer(1000, 1000))
