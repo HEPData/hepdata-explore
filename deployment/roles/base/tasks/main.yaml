@@ -24,6 +24,7 @@
     - python3-pip
     - python3-virtualenv
     - python3-dev
+    - virtualenv
     - cython3     # needed for PyYAML C extension
     - libyaml-dev # needed for PyYAML C extension
     - ipython3
