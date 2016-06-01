@@ -1,4 +1,12 @@
 ---
+
+- name: Install Python
+  gather_facts: no
+  hosts: all
+  pre_tasks:
+    - name: Install python 2
+      raw: apt-get install -qq python
+
 - name: set up server
   user: root
   hosts: all
