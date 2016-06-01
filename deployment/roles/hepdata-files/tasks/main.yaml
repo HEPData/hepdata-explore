@@ -6,13 +6,14 @@
 
 - file: path=/hepdata state=directory owner=hepdata group=hepdata mode=0755
 
-- name: Check if a data set is present
-  stat: path=/hepdata/data
-  register: dataset
-
 - name: Upload data set
-  unarchive: dest=/hepdata/ src=data.zip
-  when: not dataset.stat.exists
+  synchronize: dest=/hepdata/data.zip src=../../data.zip
+
+- name: Unzip dataset
+  command: unzip data.zip
+  args:
+    chdir: /hepdata
+    creates: /hepdata/data
 
 - name: Upload hepdata-explore
   synchronize: 
