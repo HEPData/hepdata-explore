@@ -1,0 +1,11 @@
+[Unit]
+Description=HEPData kv-server
+
+[Service]
+User=hepdata
+ExecStart=/hepdata/env/bin/python kv-server.py run-server --db-url sqlite:////hepdata/kv-server.db
+WorkingDirectory=/hepdata/hepdata-explore/kv-server
+
+[Install]
+WantedBy=multi-user.target
+

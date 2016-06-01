@@ -1,0 +1,16 @@
+---
+
+- name: Install virtualenv
+  pip:
+    requirements: /hepdata/hepdata-explore/kv-server/requirements.txt 
+    virtualenv: /hepdata/env
+    virtualenv_python: python3
+  become_user: hepdata
+
+- name: Install systemd service file
+  copy: src=kv-server.service dest=/etc/systemd/system/kv-server.service
+  notify: daemon-reload
+
+- service: name=kv-server enabled=yes
+
+- service: name=kv-server state=started

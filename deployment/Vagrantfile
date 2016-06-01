@@ -1,0 +1,37 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/xenial64"
+
+  config.vm.hostname = "hepdata.dev"
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo ln -sf /dev/null /etc/udev/rules.d/70-persistent-net.rules
+    if [ ! -x /usr/bin/python ]; then
+      sudo apt-get update
+      sudo apt-get install -y python
+    fi
+  SHELL
+
+  #config.vm.network :private_network, ip: "192.168.5.10"
+  if Vagrant.has_plugin? 'vagrant-hostsupdater'
+    config.hostsupdater.aliases = ["hepdata.dev"]
+  else
+    puts 'vagrant-hostsupdater missing, please install the plugin:'
+    puts 'vagrant plugin install vagrant-hostsupdater'
+    exit 1
+  end
+
+  config.vm.network "forwarded_port", guest: 80, host: 3010
+  
+  config.vm.provision "ansible" do |ansible|
+      ansible.playbook = "site.yaml"
+      ansible.sudo = true
+      ansible.host_vars = {
+        "default" => {
+          "from_scratch" => false
+        }
+      }
+      #ansible.tags = 'proxy'
+  end
+end

@@ -1,0 +1,60 @@
+---
+
+- name: Set hostname
+  copy: dest=/etc/hostname content='hepdata.rufian.eu'
+  tags: hostname
+  when: "{{from_scratch|bool}}"
+
+- name: Set hosts file
+  template: src=hosts dest=/etc/hosts
+  when: "{{from_scratch|bool}}"
+
+- name: Configure OpenSSH server
+  template: src=sshd_config dest=/etc/ssh/
+  notify: restart ssh
+  when: "{{from_scratch|bool}}"
+
+- name: Install a common set of packages
+  apt: pkg="{{ item }}"
+  with_items:
+    - aptitude
+    - wget
+    - ack-grep
+    - gcc
+    - python3-pip
+    - python3-virtualenv
+    - python3-dev
+    - cython3     # needed for PyYAML C extension
+    - libyaml-dev # needed for PyYAML C extension
+    - ipython3
+    - rsync
+    - net-tools # netstat
+    - tmux
+    - git
+    - sudo
+    # not so needed, but good to have just in case
+    - strace
+    - tcpdump
+    - nmap # ncat
+    - whois
+    - dnsutils # dig
+    - w3m
+    - mutt
+    - unzip
+    - zip
+    - tar
+    - mosh
+    - openjdk-8-jre-headless
+    - sqlite3
+
+- name: Set bashrc
+  copy: src=my_bashrc.sh dest=/etc/profile.d/my_bashrc.sh
+
+- name: Create /etc/ssh
+  file: dest=/etc/ssh state=directory
+
+- name: Add GitHub to SSH known hosts
+  copy: src=ssh_known_hosts dest=/etc/ssh/
+
+- name: Set authorized_keys
+  copy: dest=/root/.ssh/authorized_keys content="{{ authorized_keys }}"

@@ -1,0 +1,11 @@
+[Unit]
+Description=ElasticSearch
+
+[Service]
+User=hepdata
+ExecStart=/hepdata/elastic/elasticsearch-{{elastic_version}}/bin/elasticsearch
+WorkingDirectory=/hepdata/elastic
+LimitNOFILE=100000
+
+[Install]
+WantedBy=multi-user.target

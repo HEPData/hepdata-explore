@@ -1,0 +1,17 @@
+# Universal properties
+TYPE=Ethernet
+DEVICE=eth0
+ONBOOT=yes
+NM_CONTROLLED=no
+USERCTL=no
+PEERDNS=no
+IPV6INIT=no
+IPV6_AUTOCONF=no
+# Static or DHCP
+BOOTPROTO=static
+HWADDR={{ item.mac_address }}
+{% else %}
+BOOTPROTO=none
+IPADDR={{ item.ip_address }}
+PREFIX={{ item.prefix }}
+{% endif %}

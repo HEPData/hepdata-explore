@@ -1,0 +1,10 @@
+---
+- template: src=roles/ssl/templates/private_key.key
+    dest={{ ssl_priv_path }}/{{ site }}.key 
+    mode=0440 group={{ group | default('root') }}
+- template: src=roles/ssl/templates/certificate.pem
+    dest={{ ssl_cert_path }}/{{ site }}.pem 
+    mode=0440 group={{ group | default('root') }}
+- template: src=roles/ssl/templates/chain.pem
+    dest={{ ssl_cert_path }}/{{ site }}.chain.pem 
+    mode=0440 group={{ group | default('root') }}

@@ -1,0 +1,5 @@
+---
+- name: prueba
+  user: root
+  hosts: all
+  tasks:

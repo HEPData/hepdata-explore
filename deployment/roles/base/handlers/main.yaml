@@ -1,0 +1,7 @@
+---
+- name: reload daemons
+  command: systemctl daemon-reload
+- name: update tmpfiles
+  command: systemd-tmpfiles --create
+- name: restart ssh
+  service: name=sshd state=restarted

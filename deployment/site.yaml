@@ -1,0 +1,12 @@
+---
+- name: set up server
+  user: root
+  hosts: all
+  roles:
+    - { role: base, tags: ['base'] }
+    - { role: nginx, tags: ['nginx'] }
+    - { role: hepdata-files, tags: ['hepdata-files'] }
+    - { role: kvserver, tags: ['kvserver'] }
+    - { role: proxy, tags: ['proxy'] }
+    - { role: elastic, tags: ['elastic'] }
+    - { role: aggregator, tags: ['aggregator'] }

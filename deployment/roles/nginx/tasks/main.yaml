@@ -1,0 +1,12 @@
+---
+- apt: pkg=nginx
+- file: path=/etc/nginx/servers.d state=directory
+- file: path=/etc/nginx/apps.d state=directory
+- template: src=nginx.conf dest=/etc/nginx/
+  notify: reload nginx
+- copy: src="{{ item }}" dest=/etc/nginx/
+  with_items:
+    - mime.types
+  notify: reload nginx
+- file: path=/hepdata state=directory
+- service: name=nginx state=started enabled=yes

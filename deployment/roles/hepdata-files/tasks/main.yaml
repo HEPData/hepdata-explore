@@ -1,0 +1,26 @@
+# vim:ft=ansible:
+---
+- group: name=hepdata
+
+- user: name=hepdata group=hepdata
+
+- file: path=/hepdata state=directory owner=hepdata group=hepdata mode=0755
+
+- name: Check if a data set is present
+  stat: path=/hepdata/data
+  register: dataset
+
+- name: Upload data set
+  unarchive: dest=/hepdata/ src=data.zip
+  when: not dataset.stat.exists
+
+- name: Upload hepdata-explore
+  synchronize: 
+    dest: /hepdata/hepdata-explore/
+    src: ../../../../ # root directory of the project
+    recursive: yes 
+    delete: yes 
+    rsync_opts: 
+      - "--chown=hepdata:hepdata"
+      - "--chmod=755"
+  tags: [sync]

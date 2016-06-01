@@ -1,0 +1,5 @@
+.vagrant
+*-console.log
+*.retry
+elasticsearch-*.tar.gz
+data.zip

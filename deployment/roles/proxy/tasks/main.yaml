@@ -1,0 +1,4 @@
+---
+- name: Add server file to nginx
+  copy: dest=/etc/nginx/servers.d/ src=hepdata.rufian.eu.server
+  notify: reload nginx

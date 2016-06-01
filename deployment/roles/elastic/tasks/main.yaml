@@ -1,0 +1,24 @@
+---
+
+- name: Touch elastic directory
+  file: path=/hepdata/elastic state=directory owner=hepdata group=hepdata
+
+- name: Check if there is a ElasticSearch installation
+  stat: path=/hepdata/elastic/elasticsearch-{{elastic_version}}
+  register: elastic
+
+- name: Unzip ElasticSearch package
+  unarchive: dest=/hepdata/elastic/ src=elasticsearch-{{elastic_version}}.tar.gz owner=hepdata group=hepdata
+  when: not elastic.stat.exists
+
+- name: Set ElasticSearch config
+  copy: dest=/hepdata/elastic/elasticsearch-{{elastic_version}}/config/ src=elasticsearch.yml
+
+- name: Add service
+  template: dest=/etc/systemd/system/ src=elasticsearch.service
+
+- name: Enable ElasticSearch
+  service: name=elasticsearch enabled=yes
+
+- name: Start ElasticSearch
+  service: name=elasticsearch state=started

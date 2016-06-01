@@ -1,0 +1,8 @@
+---
+
+- name: Install dependencies
+  pip:
+    requirements: /hepdata/hepdata-explore/server-aggregator/requirements.txt 
+    virtualenv: /hepdata/env
+    virtualenv_python: python3
+  become_user: hepdata
