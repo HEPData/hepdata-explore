@@ -11,6 +11,9 @@
   unarchive: dest=/hepdata/elastic/ src=elasticsearch-{{elastic_version}}.tar.gz owner=hepdata group=hepdata
   when: not elastic.stat.exists
 
+- name: Set ElasticSearch permissions (workaround Ansible bug)
+  file: path=/hepdata/elastic owner=hepdata group=hepdata recurse=yes
+
 - name: Set ElasticSearch config
   copy: dest=/hepdata/elastic/elasticsearch-{{elastic_version}}/config/ src=elasticsearch.yml
 
