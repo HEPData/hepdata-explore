@@ -41,8 +41,11 @@ gulp.task('minify', ['bundle'], function (cb) {
   ], cb);
 })
 
-gulp.task('production-replace', function () {
-  //
+gulp.task('replace', function () {
+  gulp.src(['index.html'])
+    .pipe(replace(/\.js"/g, '.min.js"'))
+    .pipe(rename({suffix: '.min'}))
+    .pipe(gulp.dest('.'));
 });
 
 gulp.task('default', ['typescript', 'bundle', 'minify']);
