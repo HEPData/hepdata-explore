@@ -47,6 +47,7 @@
     - mosh
     - openjdk-8-jre-headless
     - sqlite3
+    - htop
 
 - name: Set bashrc
   copy: src=my_bashrc.sh dest=/etc/profile.d/my_bashrc.sh
