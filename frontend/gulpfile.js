@@ -4,7 +4,7 @@ var ts = require('gulp-typescript');
 var babel = require('gulp-babel');
 var replace = require('gulp-replace');
 var rjs = require('gulp-requirejs-optimize');
-var uglify = require('gulp-uglify');
+var uglify = require('gulp-uglify-cli');
 var rename = require('gulp-rename');
 var pump = require('pump');
 
@@ -35,10 +35,8 @@ gulp.task('bundle', ['typescript'], function () {
 gulp.task('minify', ['bundle'], function (cb) {
   pump([
     gulp.src('release/hepdata-explore.js'),
-    sourcemaps.init(),
     uglify(),
     rename({suffix: '.min'}),
-    sourcemaps.write('.'),
     gulp.dest('release'),
   ], cb);
 })
