@@ -35,7 +35,7 @@ gulp.task('bundle', ['typescript'], function () {
 gulp.task('minify', ['bundle'], function (cb) {
   pump([
     gulp.src('release/hepdata-explore.js'),
-    uglify(),
+    uglify('--screw-ie8'),
     rename({suffix: '.min'}),
     gulp.dest('release'),
   ], cb);
