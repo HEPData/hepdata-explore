@@ -3,26 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>HEPData Explore</title>
-    <script src="lib/babel-polyfill.js"></script>
-    <script src="lib/knockout-3.4.0.js"></script>
-    <script src="lib/knockout-es5.js"></script>
-    <script src="lib/lunr.js"></script>
-    <script src="lib/jquery-1.12.4.js"></script>
-    <script src="lib/lodash.js"></script>
-    <script src="lib/dragula.js"></script>
-    <script src="lib/knockout-dragula.js"></script>
-    <script src="lib/knockout-error-context.js"></script>
-    <script src="lib/bluebird.js"></script>
-    <script src="lib/d3.js"></script>
-    <script src="lib/map2.js"></script>
-    <script src="lib/stable-stringify.js"></script>
-    <script src="lib/sha256.js"></script>
-    <script src="lib/setImmediate.js"></script>
-    <script src="lib/bootstrap.js"></script>
-    <script src="lib/knockstrap.js"></script>
-    <script src="lib/rx.lite.js"></script>
-    <script src="lib/rx.lite.dom.js"></script>
-    <script src="lib/knockout.rx.js"></script>
+
 
     <link rel="stylesheet" href="invenio.css">
     <link href='https://fonts.googleapis.com/css?family=Noto+Sans' rel='stylesheet' type='text/css'>
@@ -49,9 +30,7 @@
       tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
     });
     </script>
-    <script type="text/javascript"
-            src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
-    </script>
+
 </head>
 <body>
 <div id="fake-header">
@@ -371,9 +350,42 @@
 
 </script>
 
+<script src="lib/babel-polyfill.js"></script>
+<script src="lib/knockout-3.4.0.js"></script>
+<script src="lib/knockout-es5.js"></script>
+<script src="lib/lunr.js"></script>
+<script src="lib/jquery-1.12.4.js"></script>
+<script src="lib/lodash.js"></script>
+<script src="lib/dragula.js"></script>
+<script src="lib/knockout-dragula.js"></script>
+<script src="lib/knockout-error-context.js"></script>
+<script src="lib/bluebird.js"></script>
+<script src="lib/d3.js"></script>
+<script src="lib/map2.js"></script>
+<script src="lib/stable-stringify.js"></script>
+<script src="lib/sha256.js"></script>
+<script src="lib/setImmediate.js"></script>
+<script src="lib/bootstrap.js"></script>
+<script src="lib/knockstrap.js"></script>
+<script src="lib/rx.lite.js"></script>
+<script src="lib/rx.lite.dom.js"></script>
+<script src="lib/knockout.rx.js"></script>
+<script type="text/javascript"
+        src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 <script src="lib/require.js"></script>
-<script src="release/hepdata-explore.js"></script>
+
+<!-- build:bundle -->
+<!-- Here gulp adds the "hepdata-explore.min.js" script for production. -->
+<!-- endbuild -->
+
 <script>
+    require.config({
+        // Directory containing typescript output (without Babel).
+        // Only used if the hepdata-explore[.min].js bundle has not been loaded
+        // (which is preferrable for debugging)
+        baseUrl: 'build/'
+    });
     require(['bootstrap']);
 </script>
 

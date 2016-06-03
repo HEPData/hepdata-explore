@@ -7,6 +7,7 @@ var rjs = require('gulp-requirejs-optimize');
 var uglify = require('gulp-uglify-cli');
 var rename = require('gulp-rename');
 var pump = require('pump');
+var htmlreplace = require('gulp-html-replace');
 
 var tsProject = ts.createProject('./tsconfig.json', {
   typescript: require('typescript')
@@ -43,6 +44,12 @@ gulp.task('minify', ['bundle'], function (cb) {
 
 gulp.task('replace', function () {
   gulp.src(['index.html'])
+    .pipe(htmlreplace({
+      bundle: {
+        src: 'release/hepdata-explore.js',
+        tpl: '<script src="%s"></script>',
+      }
+    }))
     .pipe(replace(/\.js"/g, '.min.js"'))
     .pipe(rename({suffix: '.min'}))
     .pipe(gulp.dest('.'));
