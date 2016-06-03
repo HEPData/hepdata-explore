@@ -55,4 +55,4 @@ gulp.task('replace', function () {
     .pipe(gulp.dest('.'));
 });
 
-gulp.task('default', ['typescript', 'bundle', 'minify']);
+gulp.task('default', ['typescript', 'bundle', 'minify', 'replace']);
