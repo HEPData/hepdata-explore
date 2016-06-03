@@ -7,4 +7,4 @@ popd
 rsync -Ppr \
   --exclude deployment \
   --exclude node_modules \
-  ./ ntrrgc@rufian.eu:/hepdata/hepdata-explore/
+  ./ ntrrgc@hepdata.rufian.eu:/hepdata/hepdata-explore/
