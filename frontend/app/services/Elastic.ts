@@ -13,6 +13,7 @@ import SomeFilter = require("../filters/SomeFilter");
 import AllFilter = require("../filters/AllFilter");
 import {calculateComplementaryFilter} from "../utils/complementaryFilter";
 import {bind} from "../decorators/bind";
+import {config} from "../config";
 
 export interface CountAggregationBucket {
     name: string;
@@ -43,13 +44,7 @@ export class Elastic {
     elasticUrl: string;
 
     constructor() {
-        if (location.hostname.indexOf('rufian.eu') != -1) {
-            // my test server
-            this.elasticUrl = location.origin + '/elastic/hepdata5';
-        } else {
-            // testing on localhost and LAN
-            this.elasticUrl = 'http://' + location.hostname + ':9200/hepdata5';
-        }
+        this.elasticUrl = config.elasticUrl;
     }
 
     @bind()

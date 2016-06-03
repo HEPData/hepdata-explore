@@ -1,15 +1,12 @@
 
 import {jsonGET, plainPUT, HTTPError} from "../base/network";
 import {StateDump} from "../base/StateDump";
+import {config} from "../config";
 class StateStorage {
     baseUrl: string;
 
     constructor() {
-        if (location.host.indexOf('rufian.eu') != -1) {
-            this.baseUrl = '/kv-server';
-        } else {
-            this.baseUrl = 'http://' + location.hostname + ':9201';
-        }
+        this.baseUrl = config.kvServerUrl;
     }
     
     get(id: string): Promise<StateDump> {
