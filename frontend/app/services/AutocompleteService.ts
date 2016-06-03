@@ -25,6 +25,7 @@ interface AutocompleteOptions<SuggestionType> {
     keyFn: (suggestion: SuggestionType) => any;
     suggestionClickedFn: (suggestion: SuggestionType) => void;
     maxSuggestions: number;
+    acceptWithTabKey: boolean;
 }
 
 export class AutocompleteService<SuggestionType> {
@@ -37,6 +38,7 @@ export class AutocompleteService<SuggestionType> {
     public keyFn: (suggestion: SuggestionType) => any;
     public suggestionClickedFn: (suggestion: SuggestionType) => void;
     public maxSuggestions: number;
+    public acceptWithTabKey: boolean;
 
     private _suggestionElements = new WeakMap<SuggestionType, HTMLElement>();
 
@@ -47,6 +49,7 @@ export class AutocompleteService<SuggestionType> {
         this.keyFn = options.keyFn;
         this.suggestionClickedFn = options.suggestionClickedFn;
         this.maxSuggestions = options.maxSuggestions;
+        this.acceptWithTabKey = options.acceptWithTabKey;
 
         this.koQuery.subscribe((query: string) => {
             this.search(query);
@@ -140,7 +143,9 @@ export class AutocompleteService<SuggestionType> {
             this.prevSuggestion();
             return false;
         } else if (!modifier && (event.keyCode == KeyCode.Tab)) {
-            this.acceptSelected();
+            if (this.acceptWithTabKey) {
+                this.acceptSelected();
+            }
             // Keep bubbling so the focus jumps to the next field
             return true;
         } else if (!modifier && (event.keyCode == KeyCode.PageDown)) {

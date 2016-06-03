@@ -65,6 +65,7 @@ class ChoiceFilterComponent {
             keyFn: (s: ChoiceSuggestion) => s.suggestedValue,
             maxSuggestions: 5,
             suggestionClickedFn: this.useSuggestion,
+            acceptWithTabKey: true,
         });
         this.autocomplete.updateSearchResults();
     }

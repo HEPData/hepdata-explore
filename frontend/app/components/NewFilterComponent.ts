@@ -41,6 +41,7 @@ export class NewFilterComponent {
             keyFn: (suggestion) => suggestion.match.filterClass,
             suggestionClickedFn: this.addFilterFromSearchResult,
             maxSuggestions: 100,
+            acceptWithTabKey: false,
         });
         this.autocomplete.updateSearchResults();
     }
