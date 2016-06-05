@@ -57,6 +57,9 @@ export class Elastic {
                     "query": rootFilter.toElasticQuery(),
                     "inner_hits": {},
                 },
+            },
+            "_source": {
+                "exclude": ["tables"]
             }
         };
         return jsonPOST(this.elasticUrl + '/publication/_search', requestData)
