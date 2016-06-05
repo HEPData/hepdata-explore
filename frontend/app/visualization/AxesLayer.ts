@@ -50,6 +50,7 @@ export class AxesLayer extends PlotLayer {
         ctx.save();
         ctx.translate(-0.5, 0.5);
 
+        ctx.beginPath();
         ctx.moveTo(margin.left, margin.top);
         ctx.lineTo(margin.left, H - margin.bottom);
         ctx.lineTo(W - margin.right, H - margin.bottom);
