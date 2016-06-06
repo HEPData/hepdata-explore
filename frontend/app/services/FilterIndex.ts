@@ -2,7 +2,7 @@ import {Filter} from "../filters/Filter";
 import AllFilter = require("../filters/AllFilter");
 import {
     IndepVarFilter, DepVarFilter,
-    ReactionFilter
+    ReactionFilter, ObservableFilter, PhraseFilter
 } from "../filters/filter-factories";
 import SomeFilter = require("../filters/SomeFilter");
 import CMEnergiesFilter = require("../filters/CMEnergiesFilter");
@@ -119,8 +119,18 @@ filterIndex.populate([
     },
     {
         filterClass: ReactionFilter,
-        description: `Returns tables matching a certain reaction`,
-        tags: ['reaction', 'keyword'],
+        description: `Returns tables referring a certain reaction.`,
+        tags: ['reaction'],
+    },
+    {
+        filterClass: ObservableFilter,
+        description: `Returns tables matching a certain observable.`,
+        tags: ['observable'],
+    },
+    {
+        filterClass: PhraseFilter,
+        description: `Returns tables matching a certain phrase (curated keywords).`,
+        tags: ['phrase', 'keyword'],
     },
     {
         filterClass: CMEnergiesFilter,

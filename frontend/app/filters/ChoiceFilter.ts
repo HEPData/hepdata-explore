@@ -27,10 +27,6 @@ class ChoiceFilter extends Filter {
         }
     }
 
-    filterTable(table: PublicationTable): boolean {
-        return (<any>table)[this.field] == this.value;
-    }
-
     getComponent() {
         return {
             name: 'choice-filter',

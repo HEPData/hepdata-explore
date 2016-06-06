@@ -33,6 +33,28 @@ export class IndepVarFilter extends ChoiceFilter {
 }
 
 @registerFilterClass
+export class ObservableFilter extends ChoiceFilter {
+    constructor(value: string = '') {
+        super('observables', value);
+    }
+
+    static getLongName() {
+        return 'Observable'
+    }
+}
+
+@registerFilterClass
+export class PhraseFilter extends ChoiceFilter {
+    constructor(value: string = '') {
+        super('phrases', value);
+    }
+
+    static getLongName() {
+        return 'Phrase'
+    }
+}
+
+@registerFilterClass
 export class ReactionFilter extends ChoiceFilter {
     constructor(value: string = '') {
         super('reactions.string_full', value);
