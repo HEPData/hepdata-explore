@@ -497,7 +497,7 @@ class RecordAggregator(object):
                                     "properties": {
                                         "name": {"type": "string","index": "not_analyzed"},
                                         "qualifiers": {
-                                            "type": "object",
+                                            "type": "object",  # TODO should use nested to allow filtering by qualifier
                                             "properties": {
                                                 "name": {"type": "string","index": "not_analyzed"},
                                                 "value": {"type": "string","index": "not_analyzed"},
