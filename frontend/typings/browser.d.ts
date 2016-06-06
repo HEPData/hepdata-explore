@@ -11,6 +11,7 @@
 /// <reference path="browser/ambient/lodash/index.d.ts" />
 /// <reference path="browser/ambient/lunr/index.d.ts" />
 /// <reference path="browser/ambient/map2/map2.d.ts" />
+/// <reference path="browser/ambient/set2/set2.d.ts" />
 /// <reference path="browser/ambient/rx-dom/index.d.ts" />
 /// <reference path="browser/ambient/rx-lite/index.d.ts" />
 /// <reference path="browser/ambient/rx.async/index.d.ts" />
