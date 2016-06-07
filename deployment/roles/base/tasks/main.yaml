@@ -15,7 +15,7 @@
   when: "{{from_scratch|bool}}"
 
 - name: Install a common set of packages
-  apt: pkg="{{ item }}"
+  apt: pkg="{{ item }}" update_cache=yes
   with_items:
     - aptitude
     - wget
