@@ -59,8 +59,8 @@ def value_is_actually_a_range(value):
 def parse_value_range(value):
     return tuple(
         coerce_float(float(x.strip()))
-        for x in value.split(r'$\pm$', 1)
-    )
+        for x in value.split(r'$\pm$')
+    )[:2]
 
 
 def find_keyword(table, keyword):
