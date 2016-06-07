@@ -148,6 +148,7 @@ export class Plot {
 
     @observable()
     matchingTables: PublicationTable[];
+    tablesByYVar = new Map<string, PublicationTable[]>();
 
     @computedObservable()
     private get matchingTablesByPublication() {
@@ -242,14 +243,14 @@ export class Plot {
         }
         const xVar = this.config.xVar!;
 
-        const tablesByYVar: Map<string, PublicationTable[]> = new Map(
+        this.tablesByYVar = new Map(
             _.map(this.config.yVars, (yVar): [string, PublicationTable[]] =>
                 [yVar, this.tableCache.getTablesWithVariables(xVar, yVar)])
         );
 
         // Collect all tables having data going to be plotted
         let matchingTables: PublicationTable[] = [];
-        for (let tables of Array.from(tablesByYVar.values())) {
+        for (let tables of Array.from(this.tablesByYVar.values())) {
             matchingTables = matchingTables.concat(tables);
         }
         this.matchingTables = matchingTables;

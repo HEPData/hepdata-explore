@@ -274,7 +274,7 @@ export class AppViewModel {
                         this.loadPlotsNonInteractive(req.thenSetPlots);
                     } else {
                         // Run autoplots algorithm
-                        this.updateUnpinnedPlots();
+                        this.runAutoPlots();
                     }
 
                     // Now, and only now, that filter and plots are consistent,
@@ -489,8 +489,10 @@ export class AppViewModel {
             })
     }
 
-    updateUnpinnedPlots() {
+    runAutoPlots() {
+        // Inhibit 'user updated plot' events during the execution of this function
         this._updatedNonInteractively.plots = true;
+
 
         // After the next loop, this variable will hold how many free plots we have
         let remainingPlots = this.autoMaxPlots;
@@ -500,6 +502,12 @@ export class AppViewModel {
         for (let plot of this.plotPool.plots) {
             // Update data
             plot.loadTables();
+
+            // Remove the variables from the plot that no longer have any data 
+            // points
+            plot.config.yVars = _.filter(plot.config.yVars, (yVar) =>
+                plot.tablesByYVar.get(yVar)!.length == 0);
+
             // Kill if no data is matched with the new tables
             if (plot.isEmpty()) {
                 plotsToRetire.push(plot)
@@ -516,7 +524,7 @@ export class AppViewModel {
         if (remainingPlots == 0) {
             return;
         }
-
+        
         // Compute how many data points there are for each (dep var, indep var) pair
         const countByVariablePair = new Map2<string,string,number>();
         for (let table of this.tableCache.allTables) {
@@ -529,14 +537,15 @@ export class AppViewModel {
             }
         }
 
-        // Sort the pairs by data point count
+        // Sort the variable pairs by data point count to get a ranking of the
+        // most populous variables
         const countByVariablePairSorted = _.sortBy(Array.from(countByVariablePair.entries()),
             ([indepVar, depVar, dataPointCount]) => {
                 return -dataPointCount
             });
 
         // Now comes assigning plots to the variable pairs.
-        // It works like this: Each plot has one independent variable and upto
+        // It works like this: Each plot has one independent variable and up to
         // `maxPlotVars` dependent variables.
         const maxPlotVars = 5;
         // `freePlotSlots` plots can be added in total.
