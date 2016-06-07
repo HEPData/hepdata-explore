@@ -6,9 +6,6 @@ import {bind} from "../decorators/bind";
 import {app} from "../AppViewModel";
 import {observable} from "../decorators/observable";
 
-// https://github.com/eligrey/FileSaver.js/
-declare function saveAs(blob: Blob, fileName: string): void;
-
 @KnockoutComponent('hep-plot', {
     template: { fromUrl: 'plot.html' },
 })

@@ -730,5 +730,18 @@ export class AppViewModel {
         return _.uniqBy(this.tableCache.allTables,
             (t) => t.publication.inspire_record).length;
     }
+
+    downloadAllPlots() {
+        const exportedData = {
+            'hepdata-explore-uri': location.href,
+            'filter': this.filterDump,
+            'plots': this.plotPool.plots.map(p => p.export()),
+        };
+        const exportedDataYaml = jsyaml.safeDump(exportedData);
+        const blob = new Blob([exportedDataYaml], {
+            type: 'text/x-yaml;charset=utf-8',
+        });
+        saveAs(blob, 'exported_plots.yaml');
+    }
 }
 export const app = new AppViewModel();

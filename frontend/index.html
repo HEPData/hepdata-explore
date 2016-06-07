@@ -50,10 +50,14 @@
             Loading...
         </li>
         <li class="pull-right crammed-button">
-            <a class="btn btn-primary" href="#">Download selection (YAML)</a>
+            <a class="btn btn-primary" data-bind="click: downloadAllPlots">
+                Download all plots
+            </a>
         </li>
         <li class="pull-right crammed-button">
-            <button class="btn btn-primary" data-bind="click: addCustomPlotDialog">Custom plot</button>
+            <button class="btn btn-primary" data-bind="click: addCustomPlotDialog">
+                Custom plot
+            </button>
         </li>
     </ul>
 </div>
