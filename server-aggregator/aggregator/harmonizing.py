@@ -48,7 +48,7 @@ def coerce_float(value):
     else:
         raise NotNumeric(value)
 
-re_latex_plusminus_range = re.compile('(' + re_src_float + r') *\\\$pm\$ *(' +
+re_latex_plusminus_range = re.compile('(' + re_src_float + r') *\$\\pm\$ *(' +
                                       re_src_float + ')')
 
 
