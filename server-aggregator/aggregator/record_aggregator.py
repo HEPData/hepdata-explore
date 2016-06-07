@@ -100,7 +100,7 @@ def lower_or_null(text):
 
 def extract_variable_name(header):
     if 'units' in header and header['units'].strip() != '':
-        return '%s (%s)' % (header['name'], header['units'])
+        return '%s [%s]' % (header['name'], header['units'])
     else:
         return header['name']
 
