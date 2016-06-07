@@ -39,4 +39,9 @@ export class PlotComponent {
     showPublicationsDialog() {
         app.showPublicationsDialog(this.plot);
     }
+
+    @bind()
+    downloadData() {
+        
+    }
 }

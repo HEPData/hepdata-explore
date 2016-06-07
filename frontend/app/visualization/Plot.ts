@@ -1,6 +1,6 @@
 import {AxesLayer} from "./AxesLayer";
 import TableCache = require("../services/TableCache");
-import {PublicationTable} from "../base/dataFormat";
+import {PublicationTable, DataPoint} from "../base/dataFormat";
 import {RuntimeError} from "../base/errors";
 import {PlotLayer} from "./PlotLayer";
 import {assertDefined, AssertionError, ensure, assert} from "../utils/assert";
@@ -63,6 +63,33 @@ export interface PlotConfigDump {
     xVar: string|null;
     yVars: string[];
     colorPolicy: ColorPolicy;
+}
+
+export interface PlotDataExportPoint {
+    x: number;
+    x_low: number;
+    x_high: number;
+    y: number;
+    y_low: number;
+    y_high: number;
+}
+
+export interface PlotDataExport {
+    tables: {
+        publication: {
+            title: string;
+            inspire_record: number;
+        },
+        description: string;
+        table_num: number;
+    }[],
+    x_var: {
+        name: string;
+    };
+    y_vars: {
+        name: string;
+        data_points: PlotDataExportPoint[];
+    }[];
 }
 
 /** These properties here:
@@ -361,5 +388,49 @@ export class Plot {
     getLegendColorByVariable(yVar: string) {
         assert(typeof yVar == 'string');
         return this.colorScale(yVar);
+    }
+
+    export(): PlotDataExport {
+        if (this.config.xVar == null) {
+            throw new AssertionError('xVar == null');
+        }
+        const xVar = this.config.xVar!;
+        
+        const tables = this.matchingTables.map(t => ({
+            publication: {
+                title: t.publication.title,
+                inspire_record: t.publication.inspire_record,
+            },
+            description: t.description,
+            table_num: t.table_num,
+        }));
+
+        const yVarsDump = this.config.yVars.map(yVar => ({
+            name: yVar,
+            data_points: _.flatten(this.tablesByYVar.get(yVar)!.map(table => {
+                const xCol = findColIndex(xVar, table);
+                const yCol = findColIndex(yVar, table);
+                return table.data_points
+                    .filter(dataPoint => 
+                        dataPoint[xCol].value != null && 
+                        dataPoint[yCol].value != null
+                    )
+                    .map(dataPoint => ({
+                        x: dataPoint[xCol].value!,
+                        x_low: dataPoint[xCol].value! - dataPoint[xCol].error_down,
+                        x_high: dataPoint[xCol].value! + dataPoint[xCol].error_up,
+                        
+                        y: dataPoint[yCol].value!,
+                        y_low: dataPoint[yCol].value! - dataPoint[yCol].error_down,
+                        y_high: dataPoint[yCol].value! + dataPoint[yCol].error_up,
+                    }));
+            })),
+        }));
+        
+        return {
+            tables: tables,
+            x_var: { name: xVar },
+            y_vars: yVarsDump,
+        };
     }
 }

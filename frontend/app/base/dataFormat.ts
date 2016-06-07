@@ -1,4 +1,5 @@
 export interface Publication {
+    title: string;
     comment: string;
     inspire_record: number;
     tables: PublicationTable[];
