@@ -11,6 +11,7 @@
     "gl-matrix": "registry:dt/gl-matrix#2.2.2+20160317120654",
     "jasmine": "registry:dt/jasmine#2.2.0+20160308082659",
     "jquery": "registry:dt/jquery#1.10.0+20160303223636",
+    "js-yaml": "registry:dt/js-yaml#3.5.2+20160316171810",
     "knockout": "registry:dt/knockout#3.2.0+20150312193415",
     "knockout.es5": "registry:dt/knockout.es5#0.0.0+20141027175319",
     "knockout.rx": "registry:dt/knockout.rx#1.0.0+20160317120654",

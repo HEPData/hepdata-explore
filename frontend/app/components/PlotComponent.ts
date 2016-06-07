@@ -6,6 +6,9 @@ import {bind} from "../decorators/bind";
 import {app} from "../AppViewModel";
 import {observable} from "../decorators/observable";
 
+// https://github.com/eligrey/FileSaver.js/
+declare function saveAs(blob: Blob, fileName: string): void;
+
 @KnockoutComponent('hep-plot', {
     template: { fromUrl: 'plot.html' },
 })
@@ -42,6 +45,11 @@ export class PlotComponent {
 
     @bind()
     downloadData() {
-        
+        const exportedPlot = this.plot.export();
+        const exportedPlotYaml = jsyaml.safeDump(exportedPlot);
+        const blob = new Blob([exportedPlotYaml], {
+            type: 'text/x-yaml;charset=utf-8',
+        });
+        saveAs(blob, 'exported_plot.yaml');
     }
 }

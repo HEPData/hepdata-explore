@@ -5,6 +5,7 @@
 /// <reference path="main/ambient/gl-matrix/index.d.ts" />
 /// <reference path="main/ambient/jasmine/index.d.ts" />
 /// <reference path="main/ambient/jquery/index.d.ts" />
+/// <reference path="main/ambient/js-yaml/index.d.ts" />
 /// <reference path="main/ambient/knockout.es5/index.d.ts" />
 /// <reference path="main/ambient/knockout.rx/index.d.ts" />
 /// <reference path="main/ambient/knockout/index.d.ts" />
