@@ -11,12 +11,23 @@ export interface FilterDump {
 }
 
 export abstract class Filter {
+
     // Can't be defined in TypeScript... so there you are.
     //abstract static getLongName(): string;
+
+    /**
+     * Human readable name of the filter that will be used in the UI.
+     *
+     * Must be implemented by every leaf class.
+     */
     static getLongName(): string {
         throw new Error('Invoked abstract method');
     }
 
+
+    /**
+     * Returns a human readable name for this filter.
+     */
     getLongName(): string {
         return (<typeof Filter>this.constructor).getLongName();
     }
@@ -26,23 +37,41 @@ export abstract class Filter {
      * A filter is usually set as not usable when it has just been created and
      * the user has not set their parameters, so they are empty and using them
      * would (in some filters, e.g. DepVar) make the search return zero results.
-     * @returns {boolean}
      */
     isUsable(): boolean {
         return true;
     }
 
+    /**
+     * Returns a query object that is embedded inside a the ElasticSearch
+     * query.
+     *
+     * The returned object will always live inside a ``nested`` filter
+     * with path = "tables".
+     */
     abstract toElasticQuery(): any;
 
+    /**
+     * Returns an specification of the component that should be used to render
+     * this filter in the UI.
+     */
     abstract getComponent(): ComponentRef;
 
-    /** By default tables are only filtered by elastic search. This function
+    /**
+     * By default tables are only filtered by elastic search. This function
      * allows to add an additional client side filter.
      */
     filterTable(table: PublicationTable): boolean {
         return true;
     };
 
+    /**
+     * In some cases (notably CompoundFilter) it may be desirable to disable
+     * removing the filter under some circumstances (e.g. nested children) to
+     * avoid the user deleting the wrong filter and losing nested ones.
+     *
+     * This method allows implementing this restriction.
+     */
     isRemoveAllowed() {
         return true;
     }
@@ -51,7 +80,8 @@ export abstract class Filter {
     // server (and getting shareable short URLs in exchange).
     private _serializableParameters: string[] = [];
 
-    /** This method should be called in the constructor of derived classes to
+    /**
+     * This method should be called in the constructor of derived classes to
      * register the fields that should be serialized and deserialized with 
      * load() and dump()
      * @param newFields New field names.
@@ -80,8 +110,10 @@ export abstract class Filter {
         }
     }
 
-    /** Fields may have nested filters inside. This function serializes them
-     * recursively. */
+    /**
+     * Fields may have nested filters inside. This function serializes them
+     * recursively.
+     */
     private dumpValue(value: any): any {
         if (Array.isArray(value)) {
             return _.map(value, (v) => this.dumpValue(v));
@@ -92,8 +124,10 @@ export abstract class Filter {
         }
     }
 
-    /** Counterpart to dumpValue(), deserializes nested filters recursively if
-     * used as a field value. */
+    /**
+     * Counterpart to dumpValue(), deserializes nested filters recursively if
+     * used as a field value.
+     */
     private loadValue(value: any|null): any {
        if (Array.isArray(value)) {
            return _.map(value, (v) => this.loadValue(v));
@@ -104,7 +138,9 @@ export abstract class Filter {
        }
     }
 
-    /** Serializes this filter. */
+    /**
+     * Serializes this filter.
+     */
     public dump(): FilterDump {
         return {
             type: this.constructor.name,
@@ -112,7 +148,9 @@ export abstract class Filter {
         }
     }
 
-    /** Deserializes a filter. */
+    /**
+     * Deserializes a filter.
+     */
     public static load(dump: FilterDump): Filter {
         const constructor = filterRegistry.get(dump.type);
         if (!constructor)
@@ -123,12 +161,14 @@ export abstract class Filter {
         return instance;
     }
 
-    /** Deeply explores this filter children in search of `oldFilter`. If found,
-     * replaces it with newFilter.
+    /**
+     * Deeply explores this filter children (if any) in search of `oldFilter`.
+     * If found, replaces it with newFilter.
      *
      * Returns boolean indicating whether a replacement was made.
      */
     public replaceFilter(oldFilter: Filter, newFilter: Filter): boolean {
+        // This (and most) filters don't have children, so the search fails.
         return false;
     }
 }

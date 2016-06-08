@@ -672,13 +672,11 @@ export class AppViewModel {
         return stateStorage.get(id);
     }
 
-    /** Deeply explores the filter tree in search of `oldFilter`. If found,
+    /**
+     * Deeply explores the filter tree in search of `oldFilter`. If found,
      * replaces it with `newFilter`.
      *
      * Returns boolean indicating whether a replacement was made.
-     *
-     * @param oldFilter
-     * @param newFilter
      */
     public replaceFilter(oldFilter: Filter, newFilter: Filter): boolean {
         if (this.rootFilter == null) throw new AssertionError();
