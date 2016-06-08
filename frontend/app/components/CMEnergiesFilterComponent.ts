@@ -38,7 +38,9 @@ export class CMEnergiesFilterComponent {
         const updateComponent = (filterValue: number|null) => {
             if (filterValue == null && component[componentField] != '') {
                 component[componentField] = '';
-            } else if (filterValue != null && !floatEquals(parseFloat(component[componentField]), filterValue)) {
+            } else if (filterValue != null &&
+                !floatEquals(parseFloat(component[componentField]), filterValue))
+            {
                 component[componentField] = filterValue.toFixed(1);
             }
         };
@@ -53,9 +55,12 @@ export class CMEnergiesFilterComponent {
                 
                 if (typedValue == '') {
                     filter[filterField] = null;
-                } else if (!isNaN(numberValue) && oldFilterValue != null
-                    && !floatEquals(numberValue, oldFilterValue))
+                } else if (!isNaN(numberValue) && (
+                    oldFilterValue == null ||
+                    !floatEquals(numberValue, oldFilterValue)))
                 {
+                    // If the value from the filter differs from the value from
+                    // the component, update the filter.
                     filter[filterField] = numberValue;
                 }
             }
