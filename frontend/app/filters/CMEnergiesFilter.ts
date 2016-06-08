@@ -70,11 +70,6 @@ class CMEnergiesFilter extends Filter {
         }
     }
 
-    filterTable(table: PublicationTable): boolean {
-        return (this.min == null || table.cmenergies_max >= this.min)
-            && (this.max != null && table.cmenergies_min <= this.max);
-    }
-
     getComponent() {
         return {
             name: 'cmenergies-filter',
