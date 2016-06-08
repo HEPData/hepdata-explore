@@ -1,6 +1,8 @@
 export interface Publication {
     title: string;
+    version: number;
     comment: string;
+    hepdata_doi: string;
     inspire_record: number;
     tables: PublicationTable[];
 }

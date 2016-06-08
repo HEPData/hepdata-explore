@@ -401,9 +401,12 @@ export class Plot {
             publication: {
                 title: t.publication.title,
                 inspire_record: t.publication.inspire_record,
+                hepdata_doi: t.publication.hepdata_doi + '.v' + t.publication.version,
             },
             description: t.description,
             table_num: t.table_num,
+            hepdata_doi: t.publication.hepdata_doi + '.v' + t.publication.version +
+                '/t' + t.table_num,
         }));
 
         const yVarsDump = this.config.yVars.map(yVar => ({

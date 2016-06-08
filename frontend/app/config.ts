@@ -1,6 +1,6 @@
 const prod = location.hostname.indexOf('.rufian.eu') != -1;
 
-const elasticIndex = 'hepdata5';
+const elasticIndex = 'hepdata6';
 
 export const config = {
     // Used for search
