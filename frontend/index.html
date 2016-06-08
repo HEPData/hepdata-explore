@@ -44,7 +44,11 @@
             <span class="number-display" data-bind="text: tableCount"></span>
             tables found in
             <span class="number-display" data-bind="text: publicationCount"></span>
-            publications.
+            publications
+            <span data-bind="if: incomplete">
+                (<span data-bind="text: omittedPublicationsCount"></span>
+                matching publications omitted)
+            </span>
         </li>
         <li data-bind="visible: loadingNewData">
             Loading...
@@ -66,7 +70,7 @@
 
     <div class="sidebar" data-bind="if: rootFilter != null">
 
-        <filter-shell params="{filter: rootFilter}"></filter-shell>
+        <filter-shell params="filter: rootFilter"></filter-shell>
 
     </div>
 

@@ -195,6 +195,20 @@ export class AppViewModel {
     }
 
     /**
+     * True if some matching publications were not retrieved due to too many
+     * results.
+     */
+    @observable()
+    incomplete: boolean = false;
+
+    /**
+     * Amount of matching publications not retrieved due to having too many
+     * results.
+     */
+    @observable()
+    omittedPublicationsCount: number = 0;
+
+    /**
      * While a state dump is being downloaded the filter controls are locked.
      *
      * Why would the user want to edit the filter if their changes are going to
@@ -203,7 +217,7 @@ export class AppViewModel {
      *
      * Just in case, this flag forbids them from doing it.
      *
-     * @type {boolean}
+     * TODO: Use this in the UI.
      */
     public filterLocked = false;
 
@@ -264,10 +278,14 @@ export class AppViewModel {
                     // Show error to the user
                     this.currentSearchError = result;
                 } else {
-                    let [req, newTables] = result;
+                    const [req, searchResult] = result;
+                    const newTables = searchResult.tables;
 
                     // Load the tables returned by the search
                     this.tableCache.replaceAllTables(newTables);
+                    this.incomplete = searchResult.incomplete;
+                    this.omittedPublicationsCount = searchResult.totalPublicationsInServer
+                        - newTables.length;
 
                     if (req.thenSetPlots) {
                         // Replace plots with the specified set

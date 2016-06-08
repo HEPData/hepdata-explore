@@ -25,6 +25,7 @@ interface ElasticQueryResult {
 
     // Matched publications
     hits: {
+        total: number,
         hits: {
             _source: Publication,
             inner_hits: {
@@ -40,6 +41,24 @@ interface ElasticQueryResult {
     };
 }
 
+export interface SearchResult {
+    /**
+     * Matching tables retrieved.
+     */
+    tables: PublicationTable[];
+
+    /**
+     * If there are matching tables that were not retrieved because they were
+     * too many.
+     */
+    incomplete: boolean;
+
+    /**
+     * Total of matching publications, even if they were not retrieved.
+     */
+    totalPublicationsInServer: number;
+}
+
 export class Elastic {
     elasticUrl: string;
 
@@ -48,7 +67,7 @@ export class Elastic {
     }
 
     @bind()
-    fetchFilteredData(rootFilter: Filter): Promise<PublicationTable[]> {
+    fetchFilteredData(rootFilter: Filter): Promise<SearchResult> {
         const requestData = {
             "size": 100,
             "query": {
@@ -82,7 +101,11 @@ export class Elastic {
                     }
                 }
 
-                return returnedTables;
+                return {
+                    totalPublicationsInServer: results.hits.total,
+                    incomplete: results.hits.total != results.hits.hits.length,
+                    tables: returnedTables,
+                };
             })
     }
 
