@@ -165,18 +165,8 @@ class RecordAggregator(object):
         with open(os.path.join(path, 'submission.yaml')) as f:
             submission = list(yaml.load_all(f, Loader=SafeLoader))
 
-        try:
-            with open(os.path.join(path, 'publication.json')) as f:
-                publication_meta = json.load(f)
-        except IOError:
-            # Default data for records with missing publication info
-            publication_meta = {
-                'record': {
-                    'title': 'Unknown title',
-                    'collaborations': [],
-                    'publication_date': None,
-                }
-            }
+        with open(os.path.join(path, 'publication.json')) as f:
+            publication_meta = json.load(f)
 
         header = submission[0]
         tables = submission[1:]
@@ -184,6 +174,8 @@ class RecordAggregator(object):
         inspire_record = find_inspire_record(header)
         publication = dict(
             inspire_record=inspire_record,
+            hepdata_doi=publication_meta['record']['hepdata_doi'],
+            version=publication_meta['version'],
             collaborations=publication_meta['record']['collaborations'],
             # All of these may be None
             title=publication_meta['record']['title'],
@@ -464,6 +456,8 @@ class RecordAggregator(object):
                         "collaborations": {"type": "string","index": "not_analyzed"},
                         "publication_date": {"type": "date", "format": "strict_date_optional_time"},
                         "inspire_record": {"type": "long"},
+                        "version": {"type": "long"},
+                        "hepdata_doi": {"type": "string","index": "not_analyzed"},
                         "tables": {
                             "type": "nested",
                             "properties": {
