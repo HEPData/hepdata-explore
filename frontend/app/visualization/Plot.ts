@@ -72,6 +72,7 @@ export interface PlotDataExportPoint {
     y: number;
     y_low: number;
     y_high: number;
+    table_ref: number;
 }
 
 export interface PlotDataExport {
@@ -408,8 +409,13 @@ export class Plot {
         const yVarsDump = this.config.yVars.map(yVar => ({
             name: yVar,
             data_points: _.flatten(this.tablesByYVar.get(yVar)!.map(table => {
+                // Each data point maintains a reference to the table it came from
+                const tableRef = tables.findIndex(t =>
+                    t.publication.inspire_record == table.publication.inspire_record &&
+                    t.table_num == table.table_num);
                 const xCol = findColIndex(xVar, table);
                 const yCol = findColIndex(yVar, table);
+
                 return table.data_points
                     .filter(dataPoint => 
                         dataPoint[xCol].value != null && 
@@ -423,6 +429,8 @@ export class Plot {
                         y: dataPoint[yCol].value!,
                         y_low: dataPoint[yCol].value! - dataPoint[yCol].error_down,
                         y_high: dataPoint[yCol].value! + dataPoint[yCol].error_up,
+
+                        table_ref: tableRef,
                     }));
             })),
         }));
