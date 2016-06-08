@@ -660,7 +660,7 @@ export class AppViewModel {
 
     private static getDefaultFilter(): Filter {
         return new AllFilter([
-            new IndepVarFilter('PT (GEV)'),
+            new IndepVarFilter('PT [GEV]'),
         ]);
     }
 
