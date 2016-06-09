@@ -26,13 +26,13 @@ export interface FilterIndexSearchResult {
 }
 
 class FilterIndex {
-    private indexText: lunr.Index;
-    private indexTags: lunr.Index;
+    private textIndex: lunr.Index;
+    private tagsIndex: lunr.Index;
     private database: FilterIndexRecord[] = [];
 
     constructor() {
         // Searches for text, ignoring a defined set of stopwords
-        this.indexText = lunr(function() {
+        this.textIndex = lunr(function() {
             this.field('name', {boost: 10});
             this.field('description');
             this.ref('id');
@@ -40,11 +40,11 @@ class FilterIndex {
 
         // Index by manually chosen tags which are thought to be usual when
         // searching for filters but could be in the stopwords set.
-        this.indexTags = lunr(function() {
+        this.tagsIndex = lunr(function() {
             this.field('tags');
             this.ref('id');
         });
-        this.indexTags.pipeline.remove(lunr.stopWordFilter);
+        this.tagsIndex.pipeline.remove(lunr.stopWordFilter);
     }
 
     public populate(records: FilterIndexRecordDefinition[]) {
@@ -55,11 +55,11 @@ class FilterIndex {
             record.name = record.filterClass.getLongName();
 
             this.database.push(record);
-            this.indexText.add(_.defaults({
+            this.textIndex.add(_.defaults({
                 // Strip HTML tags in the index
                 description: FilterIndex.stripHtmlTags(record.description),
             }, record));
-            this.indexTags.add({
+            this.tagsIndex.add({
                 id: record.id,
                 tags: record.tags,
             });
@@ -67,8 +67,8 @@ class FilterIndex {
     }
 
     public search(query: string): FilterIndexSearchResult[] {
-        const resultsTags = this.indexTags.search(query);
-        const resultsText = this.indexText.search(query);
+        const resultsTags = this.tagsIndex.search(query);
+        const resultsText = this.textIndex.search(query);
 
         // Merge the results. Tags matches take priority.
         const resultsMerged = _.uniqBy(resultsTags.concat(resultsText),
