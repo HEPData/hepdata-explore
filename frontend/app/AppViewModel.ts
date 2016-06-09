@@ -524,7 +524,7 @@ export class AppViewModel {
             // Remove the variables from the plot that no longer have any data 
             // points
             plot.config.yVars = _.filter(plot.config.yVars, (yVar) =>
-                plot.tablesByYVar.get(yVar)!.length == 0);
+                plot.tablesByYVar.get(yVar)!.length > 0);
 
             // Kill if no data is matched with the new tables
             if (plot.isEmpty()) {
