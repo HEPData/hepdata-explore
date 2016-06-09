@@ -146,11 +146,10 @@ export class BubbleComponent {
             this.width = params.width;
         }
         (<BubbleFocusComponent>params.bubbleFocus).setBubbleComponent(this);
-        (<any>window).a = this;
 
         this.side = 'down';
-
-        ko.getObservable(this, 'focused').subscribe((focused: boolean) => {
+        
+        const handleFocusedState = (focused: boolean) => {
             this.$bubbleEvents.onNext(focused ? BubbleEvent.Focus : BubbleEvent.Blur);
 
             if (focused) {
@@ -172,7 +171,10 @@ export class BubbleComponent {
                 }
                 this._scrollableParents = [];
             }
-        });
+        };
+
+        ko.getObservable(this, 'focused').subscribe(handleFocusedState);
+        handleFocusedState(this.focused);
     }
 
     public keyDownHook(ev: KeyboardEvent) {
