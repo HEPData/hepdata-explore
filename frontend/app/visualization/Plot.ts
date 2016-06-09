@@ -72,7 +72,7 @@ export interface PlotDataExportPoint {
     y: number;
     y_low: number;
     y_high: number;
-    table_ref: number;
+    hepdata_doi: string;
 }
 
 export interface PlotDataExport {
@@ -396,6 +396,11 @@ export class Plot {
             throw new AssertionError('xVar == null');
         }
         const xVar = this.config.xVar!;
+
+        function getTableDOI(t: PublicationTable) {
+            return t.publication.hepdata_doi + '.v' + t.publication.version +
+                '/t' + t.table_num;
+        }
         
         const tables = this.matchingTables.map(t => ({
             publication: {
@@ -405,17 +410,14 @@ export class Plot {
             },
             description: t.description,
             table_num: t.table_num,
-            hepdata_doi: t.publication.hepdata_doi + '.v' + t.publication.version +
-                '/t' + t.table_num,
+            hepdata_doi: getTableDOI(t),
         }));
 
         const yVarsDump = this.config.yVars.map(yVar => ({
             name: yVar,
             data_points: _.flatten(this.tablesByYVar.get(yVar)!.map(table => {
                 // Each data point maintains a reference to the table it came from
-                const tableRef = tables.findIndex(t =>
-                    t.publication.inspire_record == table.publication.inspire_record &&
-                    t.table_num == table.table_num);
+                const tableDoi = getTableDOI(table);
                 const xCol = findColIndex(xVar, table);
                 const yCol = findColIndex(yVar, table);
 
@@ -433,7 +435,7 @@ export class Plot {
                         y_low: dataPoint[yCol].value! - dataPoint[yCol].error_down,
                         y_high: dataPoint[yCol].value! + dataPoint[yCol].error_up,
 
-                        table_ref: tableRef,
+                        hepdata_doi: tableDoi,
                     }));
             })),
         }));
