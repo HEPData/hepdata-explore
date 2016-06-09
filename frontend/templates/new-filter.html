@@ -3,7 +3,7 @@
         <input type="text" data-bind="
             textInput: ko.getObservable($parent, 'query'),
             hasFocus: ko.getObservable($parent, 'focused'),
-            event: {keydown: $parent.autocomplete.keyPressed}
+            event: bubbleKeyHandlers($parent.autocomplete.keyPressed),
         " placeholder="Add new filter...">
         <hep-bubble params="element: $element, bubbleFocus: $data">
             <!-- ko template: {
