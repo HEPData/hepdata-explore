@@ -105,7 +105,7 @@ filterIndex.populate([
     {
         filterClass: SomeFilter,
         description: `Performs a logical <code>OR</code>. This compound filter matches a table if it matches <b>at least one</b> the filters inside it.`,
-        tags: ['some', 'or', 'compound'],
+        tags: ['some', 'or', 'any', 'compound'],
     },
     {
         filterClass: IndepVarFilter,
