@@ -102,7 +102,7 @@ export class AutocompleteService<SuggestionType> {
             })
     }
 
-    private nextSuggestion() {
+    nextSuggestion() {
         if (this.suggestions.length == 0) {
             return;
         }
@@ -112,7 +112,7 @@ export class AutocompleteService<SuggestionType> {
         this.ensureSuggestionIsVisible(this.suggestions[this.selectedSuggestionIx]);
     }
 
-    private prevSuggestion() {
+    prevSuggestion() {
         if (this.suggestions.length == 0) {
             return;
         }
