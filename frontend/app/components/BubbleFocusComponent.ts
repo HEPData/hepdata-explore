@@ -18,6 +18,13 @@ export class BubbleFocusComponent {
         this._bubble = bubble;
     }
 
+    /**
+     * Returns event handlers to use in the input field where the bubble will
+     * pop out.
+     *
+     * @param nextKeyDownHandler Regular keyDown handler that will be called
+     * when the event is not consumed by the bubble.
+     */
     public bubbleKeyHandlers(nextKeyDownHandler: (component: any, ev: KeyboardEvent) => boolean|undefined) {
         return {
             keydown: (component: any, ev: KeyboardEvent) => {
