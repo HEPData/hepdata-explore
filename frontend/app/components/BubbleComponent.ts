@@ -278,7 +278,6 @@ export class BubbleComponent {
     }
 
     public dispose() {
-        console.log('disposeadnioaeoe');
         ko.untrack(this);
         for (let disposable of this._disposables) {
             disposable.dispose();
