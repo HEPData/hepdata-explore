@@ -11,7 +11,7 @@ import {KnockoutComponent} from "../decorators/KnockoutComponent";
 })
 export class FilterShellComponent {
     _parentFilter: KnockoutObservable<CompoundFilter>;
-    _filter: KnockoutObservable<CompoundFilter>;
+    _filter: KnockoutObservable<Filter>;
 
     get filter(): Filter {
         return this._filter();
