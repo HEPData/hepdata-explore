@@ -66,6 +66,7 @@ class ChoiceFilterComponent {
             maxSuggestions: 5,
             suggestionClickedFn: this.useSuggestion,
             acceptWithTabKey: true,
+            nonUniformPaging: false,
         });
         this.autocomplete.updateSearchResults();
     }

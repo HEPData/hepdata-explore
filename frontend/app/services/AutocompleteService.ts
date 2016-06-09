@@ -26,6 +26,7 @@ interface AutocompleteOptions<SuggestionType> {
     suggestionClickedFn: (suggestion: SuggestionType) => void;
     maxSuggestions: number;
     acceptWithTabKey: boolean;
+    nonUniformPaging: boolean;
 }
 
 export class AutocompleteService<SuggestionType> {
@@ -39,6 +40,7 @@ export class AutocompleteService<SuggestionType> {
     public suggestionClickedFn: (suggestion: SuggestionType) => void;
     public maxSuggestions: number;
     public acceptWithTabKey: boolean;
+    public nonUniformPaging: boolean;
 
     private _suggestionElements = new WeakMap<SuggestionType, HTMLElement>();
 
@@ -50,6 +52,7 @@ export class AutocompleteService<SuggestionType> {
         this.suggestionClickedFn = options.suggestionClickedFn;
         this.maxSuggestions = options.maxSuggestions;
         this.acceptWithTabKey = options.acceptWithTabKey;
+        this.nonUniformPaging = options.nonUniformPaging;
 
         this.koQuery.subscribe((query: string) => {
             this.search(query);
@@ -105,7 +108,7 @@ export class AutocompleteService<SuggestionType> {
         }
 
         this.selectedSuggestionIx = mod(this.selectedSuggestionIx + 1,
-                this.suggestions.length);
+            this.suggestions.length);
         this.ensureSuggestionIsVisible(this.suggestions[this.selectedSuggestionIx]);
     }
 
@@ -210,6 +213,7 @@ export class AutocompleteService<SuggestionType> {
     }
 
     private _scrollPane: HTMLElement|null = null;
+
     /**
      * Scrolls the completion pane to make sure the currently selected
      * suggestion is visible.
@@ -242,13 +246,21 @@ export class AutocompleteService<SuggestionType> {
         }
     }
 
+    private pagingAlgorithm(direction: 'up' | 'down') {
+        if (this.nonUniformPaging) {
+            return this.pagingAlgorithmNonUniform(direction);
+        } else {
+            return this.pagingAlgorithmUniform(direction);
+        }
+    }
+
     /**
      * A paging algorithm to implement keyboard scrolling for the PageDown
      * and PageUp keys.
      *
      * Imitates the behavior of IntelliJ autocompletion for those same keys.
      */
-    private pagingAlgorithm(direction: 'up' | 'down') {
+    private pagingAlgorithmUniform(direction: 'up' | 'down') {
         const scrollPane = this._scrollPane;
         if (!scrollPane) {
             // No scroll pane specified, so nothing to scroll.
@@ -308,6 +320,111 @@ export class AutocompleteService<SuggestionType> {
             const scrollBottom = (newIndexBottom + 1) * elementHeight;
             scrollPane.scrollTop = scrollBottom - viewportHeight;
         }
+    }
+
+    /**
+     * A paging algorithm modified to work with elements of different height.
+     *
+     * It differs from the normal one in that it always brings the selected
+     * suggestion to the top, which is undesirable in general but acceptable
+     * for this case.
+     */
+    private pagingAlgorithmNonUniform(direction: 'up' | 'down') {
+        const scrollPane = this._scrollPane;
+        if (!scrollPane) {
+            // No scroll pane specified, so nothing to scroll.
+            return;
+        }
+
+        // Calculate the limits of the viewport in pixels
+        const viewportHeight = scrollPane.getBoundingClientRect().height;
+
+        // Quit if there are no suggestions (that's the only case in which
+        // selectedSuggestion may be null).
+        const currentSuggestion = this.getSelectedSuggestion();
+        if (!currentSuggestion) {
+            return;
+        }
+        if (this.selectedSuggestionIx == null) throw new AssertionError();
+
+        const getSuggestionTop = (suggestionIx: number) => {
+            const suggestion = this.suggestions[suggestionIx];
+            return this._suggestionElements.get(suggestion)!.offsetTop;
+        };
+        const getSuggestionBottom = (suggestionIx: number) => {
+            const suggestion = this.suggestions[suggestionIx];
+            const element = this._suggestionElements.get(suggestion)!;
+            return element.offsetTop + element.getBoundingClientRect().height;
+        };
+
+        /**
+         * Finds the next suggestion whose top is at or after the specified
+         * goalScrollDistance.
+         */
+        const findSuggestionAtScrollDistanceForward =
+            (startIx: number, goalScrollDistance: number): number|null => {
+                if (startIx >= this.suggestions.length) {
+                    return null;
+                }
+
+                const distance = getSuggestionBottom(startIx);
+                if (distance >= goalScrollDistance) {
+                    return startIx;
+                } else {
+                    return findSuggestionAtScrollDistanceForward(startIx + 1,
+                        goalScrollDistance);
+                }
+            };
+
+        /**
+         * Finds the previous suggestion whose top is before the specified
+         * goalScrollDistance.
+         */
+        const findSuggestionAtScrollDistanceBackwards =
+            (startIx: number, goalScrollDistance: number): number|null => {
+                if (startIx < 0) {
+                    return null;
+                }
+
+                const distance = getSuggestionTop(startIx);
+                if (distance < goalScrollDistance) {
+                    return startIx;
+                } else {
+                    return findSuggestionAtScrollDistanceBackwards(startIx - 1,
+                        goalScrollDistance);
+                }
+            };
+
+
+        let newSuggestionIndex: number;
+        if (direction == 'down') {
+            // Select the item one page down
+            const nextPageSuggestion = findSuggestionAtScrollDistanceForward(
+                this.selectedSuggestionIx + 1,
+                // suggestion one page down
+                getSuggestionTop(this.selectedSuggestionIx) + viewportHeight
+            );
+
+            newSuggestionIndex = (nextPageSuggestion != null
+                ? nextPageSuggestion
+                : this.suggestions.length - 1
+            );
+        } else {
+            // Select the item one page up
+            const prevPageSuggestion = findSuggestionAtScrollDistanceBackwards(
+                this.selectedSuggestionIx - 1,
+                // suggestion one page up
+                getSuggestionBottom(this.selectedSuggestionIx) - viewportHeight
+            );
+
+            newSuggestionIndex = (prevPageSuggestion != null
+                ? prevPageSuggestion
+                : 0 // first suggestion
+            );
+        }
+        this.selectedSuggestionIx = newSuggestionIndex;
+        // The selected element must be at top.
+        scrollPane.scrollTop = getSuggestionTop(newSuggestionIndex);
     }
 
     pageDown() {

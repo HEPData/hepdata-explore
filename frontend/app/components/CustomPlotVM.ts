@@ -71,6 +71,7 @@ export class VariableVM {
                 this.cleanValue = suggestion.name;
             },
             acceptWithTabKey: true,
+            nonUniformPaging: false,
         });
 
         this._subscription = ko.getObservable(this, 'focused')

@@ -42,6 +42,7 @@ export class NewFilterComponent {
             suggestionClickedFn: this.addFilterFromSearchResult,
             maxSuggestions: 100,
             acceptWithTabKey: false,
+            nonUniformPaging: true,
         });
         this.autocomplete.updateSearchResults();
     }
