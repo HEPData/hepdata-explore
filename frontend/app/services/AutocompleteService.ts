@@ -23,7 +23,7 @@ interface AutocompleteOptions<SuggestionType> {
     searchFn: (query: string) => Promise<SuggestionType[]>;
     rankingFn: (suggestion: SuggestionType) => number|number[];
     keyFn: (suggestion: SuggestionType) => any;
-    suggestionClickedFn: (suggestion: SuggestionType) => void;
+    suggestionAcceptedFn: (suggestion: SuggestionType) => void;
     maxSuggestions: number;
     acceptWithTabKey: boolean;
     nonUniformPaging: boolean;
@@ -37,7 +37,7 @@ export class AutocompleteService<SuggestionType> {
     /** Two suggestions from two different searches are considered to be the
      * same if they return the same key. */
     public keyFn: (suggestion: SuggestionType) => any;
-    public suggestionClickedFn: (suggestion: SuggestionType) => void;
+    public suggestionAcceptedFn: (suggestion: SuggestionType) => void;
     public maxSuggestions: number;
     public acceptWithTabKey: boolean;
     public nonUniformPaging: boolean;
@@ -49,7 +49,7 @@ export class AutocompleteService<SuggestionType> {
         this.searchFn = options.searchFn;
         this.rankingFn = options.rankingFn;
         this.keyFn = options.keyFn;
-        this.suggestionClickedFn = options.suggestionClickedFn;
+        this.suggestionAcceptedFn = options.suggestionAcceptedFn;
         this.maxSuggestions = options.maxSuggestions;
         this.acceptWithTabKey = options.acceptWithTabKey;
         this.nonUniformPaging = options.nonUniformPaging;
@@ -179,7 +179,7 @@ export class AutocompleteService<SuggestionType> {
     private _suggestionMouseDown(suggestion: SuggestionType, event: MouseEvent) {
         if (event.button == 0) {
             // Left click
-            this.suggestionClickedFn(suggestion);
+            this.suggestionAcceptedFn(suggestion);
         }
     }
 
@@ -194,7 +194,7 @@ export class AutocompleteService<SuggestionType> {
     public acceptSelected() {
         const selectedSuggestion = this.getSelectedSuggestion();
         if (selectedSuggestion) {
-            this.suggestionClickedFn(selectedSuggestion);
+            this.suggestionAcceptedFn(selectedSuggestion);
         }
     }
 

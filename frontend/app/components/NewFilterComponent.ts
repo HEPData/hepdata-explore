@@ -39,7 +39,7 @@ export class NewFilterComponent {
             },
             rankingFn: (suggestion) => -suggestion.score,
             keyFn: (suggestion) => suggestion.match.filterClass,
-            suggestionClickedFn: this.addFilterFromSearchResult,
+            suggestionAcceptedFn: this.addFilterFromSearchResult,
             maxSuggestions: 100,
             acceptWithTabKey: false,
             nonUniformPaging: true,

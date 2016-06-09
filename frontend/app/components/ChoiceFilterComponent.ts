@@ -64,7 +64,7 @@ class ChoiceFilterComponent {
             rankingFn: (s: ChoiceSuggestion) => -s.absoluteFrequencyFullDB,
             keyFn: (s: ChoiceSuggestion) => s.suggestedValue,
             maxSuggestions: 5,
-            suggestionClickedFn: this.useSuggestion,
+            suggestionAcceptedFn: this.useSuggestion,
             acceptWithTabKey: true,
             nonUniformPaging: false,
         });
