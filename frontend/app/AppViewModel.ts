@@ -6,7 +6,7 @@ import 'base/templateFromUrlLoader';
 // Ensure components are pulled as a dependencies
 import 'bindings/all-bindings';
 import 'components/all-components';
-import {IndepVarFilter, DepVarFilter} from "./filters/filter-factories";
+import {IndepVarFilter, DepVarFilter} from "./filters/concrete-filters";
 
 // Ensure template utility functions are pulled too
 import 'utils/recordCountFormat';

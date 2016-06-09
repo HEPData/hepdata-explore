@@ -3,7 +3,7 @@ import AllFilter = require("../filters/AllFilter");
 import {
     IndepVarFilter, DepVarFilter,
     ReactionFilter, ObservableFilter, PhraseFilter
-} from "../filters/filter-factories";
+} from "../filters/concrete-filters";
 import SomeFilter = require("../filters/SomeFilter");
 import CMEnergiesFilter = require("../filters/CMEnergiesFilter");
 import {TableDescriptionFilter} from "../filters/TableDescriptionFilter";
