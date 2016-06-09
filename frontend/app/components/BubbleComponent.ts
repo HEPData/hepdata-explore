@@ -7,6 +7,7 @@ import {observable} from "../decorators/observable";
 import {computedObservable} from "../decorators/computedObservable";
 import {BubbleFocusComponent} from "./BubbleFocusComponent";
 import {KeyCode} from "../utils/KeyCode";
+import IDisposable = Rx.IDisposable;
 
 interface Point {
     x: number;
@@ -95,37 +96,24 @@ export class BubbleComponent {
 
     private $bubbleEvents = new Rx.Subject<BubbleEvent>();
 
-    private bubbleState$Handler = this.$bubbleEvents
-        .scan((prevState, event) => {
-            if (event == BubbleEvent.Blur) {
-                return BubbleState.Unselected;
-            }
-            if (prevState == BubbleState.Unselected &&
-                event == BubbleEvent.Focus) {
-                return BubbleState.SelectedWithBubble;
-            }
-            if (prevState == BubbleState.SelectedWithBubble &&
-                event == BubbleEvent.EscOrReturn) {
-                return BubbleState.SelectedNoBubble;
-            }
-            if (prevState == BubbleState.SelectedNoBubble &&
-                event == BubbleEvent.CharKey) {
-                return BubbleState.SelectedWithBubble;
-            }
-            return prevState;
-        }, BubbleState.Unselected)
-        .distinctUntilChanged()
-        .forEach((state) => {this.currentBubbleState = state});
-
+    /**
+     * If the bubble is focused, returns the bubble root.
+     * Otherwise, returns null.
+     */
     @computedObservable()
-    get focused(): boolean {
+    get focusedBubbleRoot(): HTMLElement|null {
+        assert(this._bubbleElement != null);
         const element = focusedElement();
         const bubbleRoot = findBubbleFocusAncestor(element);
         if (!bubbleRoot) {
-            return false;
+            return null;
         } else {
             // Check that *this* bubble element is inside the bubble root.
-            return $(bubbleRoot).find(this._bubbleElement).length == 1;
+            if ($(bubbleRoot).find(this._bubbleElement).length == 1) {
+                return bubbleRoot;
+            } else {
+                return null;
+            }
         }
     };
 
@@ -135,6 +123,8 @@ export class BubbleComponent {
 
     /** The element (usually an <input>) the bubble will appear near to. */
     private _linkedElement: HTMLElement|null = null;
+
+    private _disposables: IDisposable[] = [];
 
     constructor(params: any) {
         assertHas(params, [
@@ -148,33 +138,67 @@ export class BubbleComponent {
         (<BubbleFocusComponent>params.bubbleFocus).setBubbleComponent(this);
 
         this.side = 'down';
-        
-        const handleFocusedState = (focused: boolean) => {
-            this.$bubbleEvents.onNext(focused ? BubbleEvent.Focus : BubbleEvent.Blur);
 
-            if (focused) {
-                const bubbleRoot = findBubbleFocusAncestor(document.activeElement);
-                if (bubbleRoot == null) {
-                    throw new AssertionError();
+        this._disposables.push(
+            // Update `currentBubbleState` in response to events
+            this.$bubbleEvents
+            .scan((prevState, event) => {
+                if (event == BubbleEvent.Blur) {
+                    return BubbleState.Unselected;
                 }
-                this._linkedElement = this.findInputField(bubbleRoot);
-                assert(this._linkedElement != null, 'Input field not found');
-                this.calculatePosition();
+                if (prevState == BubbleState.Unselected &&
+                    event == BubbleEvent.Focus) {
+                    return BubbleState.SelectedWithBubble;
+                }
+                if (prevState == BubbleState.SelectedWithBubble &&
+                    event == BubbleEvent.EscOrReturn) {
+                    return BubbleState.SelectedNoBubble;
+                }
+                if (prevState == BubbleState.SelectedNoBubble &&
+                    event == BubbleEvent.CharKey) {
+                    return BubbleState.SelectedWithBubble;
+                }
+                return prevState;
+            }, BubbleState.Unselected)
+            .distinctUntilChanged()
+            .forEach((state) => {
+                this.currentBubbleState = state
+            }));
 
-                this._scrollableParents = findScrollableParents(this._linkedElement);
-                for (let parent of this._scrollableParents) {
-                    parent.addEventListener('scroll', this.scrollListener);
-                }
-            } else {
-                for (let parent of this._scrollableParents) {
-                    parent.removeEventListener('scroll', this.scrollListener);
-                }
-                this._scrollableParents = [];
-            }
-        };
+        this._disposables.push((<KnockoutObservable<HTMLElement|null>>
+            // Each time the focus is switched to enter or exit the BubbleFocusComponent
+            ko.getObservable(this, 'focusedBubbleRoot'))
+            .toObservableWithReplyLatest()
+            // Handle the focus event
+            .do(focusedBubbleRoot => {
+                this.$bubbleEvents.onNext(focusedBubbleRoot
+                    ? BubbleEvent.Focus
+                    : BubbleEvent.Blur);
+            })
+            .forEach(focusedBubbleRoot => {
+                if (focusedBubbleRoot) {
+                    // On focus:
 
-        ko.getObservable(this, 'focused').subscribe(handleFocusedState);
-        handleFocusedState(this.focused);
+                    // Update _linkedElement to be the only input field within
+                    // the BubbleFocusComponent
+                    this._linkedElement = this.findInputField(focusedBubbleRoot);
+                    assert(this._linkedElement != null, 'Input field not found');
+
+                    // Position the bubble near the linked element
+                    this.calculateAndUpdatePosition();
+
+                    this._scrollableParents = findScrollableParents(this._linkedElement);
+                    for (let parent of this._scrollableParents) {
+                        parent.addEventListener('scroll', this.scrollListener);
+                    }
+                } else {
+                    for (let parent of this._scrollableParents) {
+                        parent.removeEventListener('scroll', this.scrollListener);
+                    }
+                    this._scrollableParents = [];
+                }
+            }));
+
     }
 
     public keyDownHook(ev: KeyboardEvent) {
@@ -199,11 +223,12 @@ export class BubbleComponent {
     }
 
     private _ticking = false;
+
     @bind()
     private scrollListener(e: Event) {
         if (!this._ticking) {
             window.requestAnimationFrame(() => {
-                this.calculatePosition();
+                this.calculateAndUpdatePosition();
                 this._ticking = false;
             })
         }
@@ -214,14 +239,14 @@ export class BubbleComponent {
         return <HTMLElement|null>bubbleFocusRoot.querySelector('input');
     }
 
-    private calculatePosition() {
+    private calculateAndUpdatePosition() {
         // getBoundingClientRect() returns a rectangle with the offsets of the
         // element's margins measured from the respective borders of the
         // viewport.
         const elementRect = this._linkedElement!.getBoundingClientRect();
         const tailX = elementRect.left + elementRect.width / 2;
 
-        this.calculateSide();
+        this.side = this.calculateSide();
 
         this.styleLeft = (tailX - this.width / 2) + 'px';
 
@@ -236,25 +261,28 @@ export class BubbleComponent {
         }
     }
 
-    private calculateSide() {
+    private calculateSide(): 'up'|'down' {
         const elementRect = this._linkedElement!.getBoundingClientRect();
 
         const spaceAbove = elementRect.top;
         const spaceBelow = document.documentElement.clientHeight - elementRect.bottom;
 
         if (spaceBelow > this.maxHeight) {
-            this.side = 'down';
+            return 'down';
         } else if (spaceAbove > this.maxHeight) {
-            this.side = 'up';
+            return 'up';
         } else {
             // No space in either... pick the biggest one
-            this.side = spaceAbove > spaceBelow ? 'up' : 'down';
+            return spaceAbove > spaceBelow ? 'up' : 'down';
         }
     }
 
     public dispose() {
+        console.log('disposeadnioaeoe');
         ko.untrack(this);
-        this.bubbleState$Handler.dispose();
+        for (let disposable of this._disposables) {
+            disposable.dispose();
+        }
     }
 
 }
