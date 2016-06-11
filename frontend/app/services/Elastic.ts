@@ -8,7 +8,7 @@ import {
     AssertionError
 } from "../utils/assert";
 import {jsonPOST} from "../base/network";
-import {sum, map} from "../utils/map";
+import {sum, map} from "../utils/functools";
 import SomeFilter = require("../filters/SomeFilter");
 import AllFilter = require("../filters/AllFilter");
 import {bind} from "../decorators/bind";

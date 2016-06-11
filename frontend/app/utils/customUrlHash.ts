@@ -1,4 +1,4 @@
-import {range} from "../utils/map";
+import {range} from "../utils/functools";
 import {assert} from "../utils/assert";
 declare var jsSHA: any;
 

@@ -11,7 +11,7 @@ import {ensure} from "../utils/assert";
 import IDisposable = Rx.IDisposable;
 import {FilterDump} from "../filters/Filter";
 import {rxObservableFromPromise} from "../rx/rxObservableFromPromise";
-import {enumerate} from "../utils/map";
+import {enumerate} from "../utils/functools";
 import {
     registerFilterComponent,
     unregisterFilterComponent

@@ -16,7 +16,7 @@ import TableCache = require("./services/TableCache");
 import {PlotPool} from "./services/PlotPool";
 import {Plot, PlotConfig, PlotConfigDump} from "./visualization/Plot";
 import {assertHas, assert, AssertionError, ensure} from "./utils/assert";
-import {map, imap, sum, union, range} from "./utils/map";
+import {map, imap, sum, union, range} from "./utils/functools";
 import CMEnergiesFilter = require("./filters/CMEnergiesFilter");
 import {Filter, FilterDump} from "./filters/Filter";
 import {StateDump} from "./base/StateDump";

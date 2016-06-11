@@ -7,7 +7,7 @@ import {assertDefined, AssertionError, ensure, assert} from "../utils/assert";
 import {ScatterLayer} from "./ScatterLayer";
 import {observable} from "../decorators/observable";
 import {computedObservable} from "../decorators/computedObservable";
-import {groupBy, map} from "../utils/map";
+import {groupBy, map} from "../utils/functools";
 
 export interface Margins {
     top: number;

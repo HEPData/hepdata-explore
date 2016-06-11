@@ -3,7 +3,7 @@ import {
     AssertionError
 } from "../utils/assert";
 import {bind} from "../decorators/bind";
-import {imap} from "../utils/map";
+import {imap} from "../utils/functools";
 import {observable} from "../decorators/observable";
 import {KeyCode} from "../utils/KeyCode";
 import {combineAsTuple} from "../rx/combineAsTuple";

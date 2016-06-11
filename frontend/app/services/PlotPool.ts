@@ -3,7 +3,7 @@ import TableCache = require("./TableCache");
 import {RuntimeError} from "../base/errors";
 import {observable} from "../decorators/observable";
 import {assert} from "../utils/assert";
-import {map} from "../utils/map";
+import {map} from "../utils/functools";
 
 class ExhaustedPool extends RuntimeError {
     constructor() {
