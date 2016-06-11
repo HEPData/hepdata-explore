@@ -61,7 +61,6 @@ select#indepVarSelect {
 
 .visualization-box {
     overflow: auto;
-    padding: 15px;
 }
 
 .explore-topbar {
@@ -421,6 +420,8 @@ ul.suggestions {
     padding: 10px;
     vertical-align: top;
     margin: 5px;
+    height: 510px;
+    /* background: white; */
 }
 
 .canvas-onion {
@@ -727,4 +728,16 @@ span.footer-separator {
 
 .compound-filter .flag.all:hover {
   background: #2D67D0;
+}
+
+hep-plot-pool {
+  display: block;
+}
+
+.plot-pool {
+  padding: 5px;
+}
+
+hep-plot {
+  display: inline-block;
 }
