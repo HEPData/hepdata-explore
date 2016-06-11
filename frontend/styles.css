@@ -420,8 +420,8 @@ ul.suggestions {
     padding: 10px;
     vertical-align: top;
     margin: 5px;
-    height: 510px;
     /* background: white; */
+    min-height: 500px;
 }
 
 .canvas-onion {
@@ -736,8 +736,9 @@ hep-plot-pool {
 
 .plot-pool {
   padding: 5px;
+  display: block;
 }
 
 hep-plot {
-  display: inline-block;
+   display: inline-block;
 }
