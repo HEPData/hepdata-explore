@@ -8,14 +8,14 @@
         data: filter.children,
         group: 'filters'
     }" style="min-height: 100px;">
-        <filter-shell params="{
+        <filter-shell params="
             filter: $data,
             parentFilter: $parent.filter
-        }"></filter-shell>
+        "></filter-shell>
     </div>
 
 
-    <new-filter params="{
+    <new-filter params="
         parentFilter: filter
-    }"></new-filter>
+    "></new-filter>
 </div>
