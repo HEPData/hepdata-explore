@@ -106,7 +106,8 @@ class ChoiceFilterComponent {
                 }))
             .switch()
             .map((buckets: CountAggregationBucket[]): ChoiceSuggestion[] => {
-                const maxCount = _.maxBy(buckets, b => b.count).count;
+                const greatestBucket = _.maxBy(buckets, b => b.count);
+                const maxCount = greatestBucket ? greatestBucket.count : 0;
                 return buckets.map((bucket) => ({
                     suggestedValue: bucket.name,
                     freqDividedByModeFullDB: bucket.count / maxCount,
