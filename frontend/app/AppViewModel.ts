@@ -538,8 +538,7 @@ export class AppViewModel {
         }
 
         // Continue only if we still have free plots
-        assert(remainingPlots >= 0, 'remainingPlots >= 0');
-        if (remainingPlots == 0) {
+        if (remainingPlots <= 0) {
             return;
         }
         
