@@ -84,7 +84,9 @@ class ChoiceFilterComponent {
             .distinctUntilChanged(complementaryFilter =>
                 stableStringify(complementaryFilter.dump()))
             .do((complement)=> {
-                console.log(JSON.stringify(app.rootFilter!.dump(), null!, 2));
+                console.log(this.filter)
+                console.log(JSON.stringify(complement.dump(), null!, 2));
+                console.log(JSON.stringify(complement.toElasticQuery(), null!, 2));
             })
             // Launch the query
             .map(complementaryFilter =>
