@@ -1,4 +1,3 @@
-import {DataPoint, PublicationTable} from "../base/dataFormat";
 import {Filter} from "./Filter";
 import {observable} from "../decorators/observable";
 

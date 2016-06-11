@@ -1,13 +1,13 @@
 import {AxesLayer} from "./AxesLayer";
-import TableCache = require("../services/TableCache");
-import {PublicationTable, DataPoint} from "../base/dataFormat";
+import {PublicationTable} from "../base/dataFormat";
 import {RuntimeError} from "../base/errors";
 import {PlotLayer} from "./PlotLayer";
-import {assertDefined, AssertionError, ensure, assert} from "../utils/assert";
+import {AssertionError, ensure, assert} from "../utils/assert";
 import {ScatterLayer} from "./ScatterLayer";
 import {observable} from "../decorators/observable";
 import {computedObservable} from "../decorators/computedObservable";
 import {groupBy, map} from "../utils/functools";
+import TableCache = require("../services/TableCache");
 
 export interface Margins {
     top: number;

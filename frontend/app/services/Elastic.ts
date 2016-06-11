@@ -1,18 +1,19 @@
 import {Filter} from "../filters/Filter";
 import {
-    DataPoint, Publication, DataPointError,
-    DataPointColumn, PublicationTable, isSymmetricError
+    DataPoint,
+    Publication,
+    DataPointError,
+    DataPointColumn,
+    PublicationTable,
+    isSymmetricError
 } from "../base/dataFormat";
-import {
-    assert, assertInstance, assertHas,
-    AssertionError
-} from "../utils/assert";
+import {assert, AssertionError} from "../utils/assert";
 import {jsonPOST} from "../base/network";
 import {sum, map} from "../utils/functools";
-import SomeFilter = require("../filters/SomeFilter");
-import AllFilter = require("../filters/AllFilter");
 import {bind} from "../decorators/bind";
 import {config} from "../config";
+import SomeFilter = require("../filters/SomeFilter");
+import AllFilter = require("../filters/AllFilter");
 
 export interface CountAggregationBucket {
     name: string;

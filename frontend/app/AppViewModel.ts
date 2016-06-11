@@ -1,23 +1,17 @@
 import AllFilter = require("filters/AllFilter");
 
 // Ensure template loading works
-import 'base/templateFromUrlLoader';
-
-// Ensure components are pulled as a dependencies
-import 'bindings/all-bindings';
-import 'components/all-components';
-import {IndepVarFilter, DepVarFilter} from "./filters/concrete-filters";
-
-// Ensure template utility functions are pulled too
-import 'utils/recordCountFormat';
+import "base/templateFromUrlLoader";
+import "bindings/all-bindings";
+import "components/all-components";
+import {IndepVarFilter} from "./filters/concrete-filters";
+import "utils/recordCountFormat";
 import {elastic} from "./services/Elastic";
-import {DataPoint, PublicationTable} from "./base/dataFormat";
-import TableCache = require("./services/TableCache");
+import {PublicationTable} from "./base/dataFormat";
 import {PlotPool} from "./services/PlotPool";
-import {Plot, PlotConfig, PlotConfigDump} from "./visualization/Plot";
-import {assertHas, assert, AssertionError, ensure} from "./utils/assert";
-import {map, imap, sum, union, range} from "./utils/functools";
-import CMEnergiesFilter = require("./filters/CMEnergiesFilter");
+import {Plot, PlotConfigDump} from "./visualization/Plot";
+import {assert, AssertionError, ensure} from "./utils/assert";
+import {map, range} from "./utils/functools";
 import {Filter, FilterDump} from "./filters/Filter";
 import {StateDump} from "./base/StateDump";
 import {stateStorage} from "./services/StateStorage";
@@ -27,9 +21,8 @@ import {CustomPlotVM} from "./components/CustomPlotVM";
 import {observable} from "./decorators/observable";
 import "decorators/computedObservable";
 import {computedObservable} from "./decorators/computedObservable";
-import {rxObservableFromPromise} from "./rx/rxObservableFromPromise";
 import {
-    rxObservableFromHash, getCurrentHash,
+    rxObservableFromHash,
     removeLeadingHashtag
 } from "./rx/rxObservableFromHash";
 import "rx/setLoadingOperator";
@@ -38,9 +31,13 @@ import "rx/withOperator";
 import {HTTPError, NetworkError} from "./base/network";
 import {ModalWindow} from "./base/ModalWindow";
 import {ViewPublicationsVM} from "./components/ViewPublicationsVM";
-import {combineAsTuple} from "./rx/combineAsTuple";
 import {pair} from "./base/pair";
-import {RuntimeError} from "./base/errors";
+
+// Ensure components are pulled as a dependencies
+
+// Ensure template utility functions are pulled too
+import TableCache = require("./services/TableCache");
+import CMEnergiesFilter = require("./filters/CMEnergiesFilter");
 
 class SearchError {
     title: string;

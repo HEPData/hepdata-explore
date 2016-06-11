@@ -1,8 +1,8 @@
 import DslParam = require("../base/DslParam");
 import ComponentRef = require("../base/ComponentRef");
-import {DataPoint, PublicationTable} from "../base/dataFormat";
+import {PublicationTable} from "../base/dataFormat";
 import {filterRegistry} from "./filterRegistry";
-import {assert, assertInstance} from "../utils/assert";
+import {assert} from "../utils/assert";
 import {RuntimeError} from "../base/errors";
 
 export interface FilterDump {

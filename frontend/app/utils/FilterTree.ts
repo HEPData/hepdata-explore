@@ -1,6 +1,6 @@
 import {Filter} from "../filters/Filter";
+import {AssertionError} from "./assert";
 import CompoundFilter = require("../filters/CompoundFilter");
-import {assert, AssertionError} from "./assert";
 
 interface TreeNode {
     filter: Filter;

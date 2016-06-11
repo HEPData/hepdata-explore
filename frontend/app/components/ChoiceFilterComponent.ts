@@ -8,7 +8,6 @@ import {bind} from "../decorators/bind";
 import {observable} from "../decorators/observable";
 import {variableTokenizer} from "../utils/variableTokenizer";
 import {ensure} from "../utils/assert";
-import IDisposable = Rx.IDisposable;
 import {FilterDump} from "../filters/Filter";
 import {rxObservableFromPromise} from "../rx/rxObservableFromPromise";
 import {enumerate} from "../utils/functools";
@@ -16,6 +15,7 @@ import {
     registerFilterComponent,
     unregisterFilterComponent
 } from "../base/getFilterComponent";
+import IDisposable = Rx.IDisposable;
 
 interface ChoiceSuggestion {
     suggestedValue: string;

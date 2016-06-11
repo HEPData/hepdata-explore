@@ -1,5 +1,5 @@
 import CompoundFilter = require("./CompoundFilter");
-import {DataPoint, PublicationTable} from "../base/dataFormat";
+import {PublicationTable} from "../base/dataFormat";
 import {Filter} from "./Filter";
 import {registerFilterClass} from "./filterRegistry";
 

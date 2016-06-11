@@ -1,11 +1,10 @@
 import {Plot} from "../visualization/Plot";
-import TableCache = require("../services/TableCache");
 import {AutocompleteService} from "../services/AutocompleteService";
 import {observable} from "../decorators/observable";
-import {map} from "../utils/functools";
 import {computedObservable} from "../decorators/computedObservable";
 import {variableTokenizer} from "../utils/variableTokenizer";
 import {bind} from "../decorators/bind";
+import TableCache = require("../services/TableCache");
 import IDisposable = Rx.IDisposable;
 
 

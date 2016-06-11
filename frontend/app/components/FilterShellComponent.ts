@@ -1,9 +1,6 @@
 import CompoundFilter = require("../filters/CompoundFilter");
 import {Filter} from "../filters/Filter";
-import {
-    assertInstance, assertHas, assertDefined,
-    assert
-} from "../utils/assert";
+import {assertInstance, assert} from "../utils/assert";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 
 @KnockoutComponent('filter-shell', {

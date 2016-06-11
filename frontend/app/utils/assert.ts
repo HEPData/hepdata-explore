@@ -1,6 +1,6 @@
 import isInstance = require('./isInstance');
 import typeOf = require('./typeOf');
-import {RuntimeError} from '../base/errors';
+import {RuntimeError} from "../base/errors";
 
 export class AssertionError extends RuntimeError {
     constructor(message: string = 'Assertion error') {

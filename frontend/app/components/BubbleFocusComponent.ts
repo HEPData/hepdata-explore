@@ -1,4 +1,4 @@
-import {assertHas, assert} from "../utils/assert";
+import {assert} from "../utils/assert";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {BubbleComponent} from "./BubbleComponent";
 

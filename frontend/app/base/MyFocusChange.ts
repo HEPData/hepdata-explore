@@ -52,8 +52,6 @@
 
  */
 
-import {assert} from "../utils/assert";
-
 export interface MyFocusChange extends CustomEvent {
     /** The element that lost focus just now.
      *

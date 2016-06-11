@@ -1,10 +1,10 @@
 import {Plot} from "../visualization/Plot";
 import {assertHas} from "../utils/assert";
-import TableCache = require("../services/TableCache");
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {bind} from "../decorators/bind";
 import {app} from "../AppViewModel";
 import {observable} from "../decorators/observable";
+import TableCache = require("../services/TableCache");
 
 @KnockoutComponent('hep-plot', {
     template: { fromUrl: 'plot.html' },

@@ -1,7 +1,4 @@
-import {
-    assertInstance, assertDefined, assert,
-    AssertionError
-} from "../utils/assert";
+import {AssertionError} from "../utils/assert";
 import {bind} from "../decorators/bind";
 import {imap} from "../utils/functools";
 import {observable} from "../decorators/observable";

@@ -1,8 +1,11 @@
 import CompoundFilter = require("../filters/CompoundFilter");
 import {Filter} from "../filters/Filter";
 import {assertHas} from "../utils/assert";
-import {FilterIndexSearchResult} from "../services/FilterIndex";
-import {filterIndex, FilterIndex} from "../services/FilterIndex";
+import {
+    FilterIndexSearchResult,
+    filterIndex,
+    FilterIndex
+} from "../services/FilterIndex";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {AutocompleteService} from "../services/AutocompleteService";
 import {bind} from "../decorators/bind";

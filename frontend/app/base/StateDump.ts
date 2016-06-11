@@ -1,5 +1,5 @@
 import {FilterDump} from "../filters/Filter";
-import {PlotConfig, PlotConfigDump} from "../visualization/Plot";
+import {PlotConfigDump} from "../visualization/Plot";
 
 export class StateDump {
     version: number;

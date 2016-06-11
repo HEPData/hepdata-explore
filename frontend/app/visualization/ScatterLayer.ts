@@ -2,7 +2,6 @@ import {PlotLayer} from "./PlotLayer";
 import {Plot, findColIndex, findColIndexOrNull} from "./Plot";
 import {assert, ensure} from "../utils/assert";
 import {observable} from "../decorators/observable";
-import {DataPointColumn} from "../base/dataFormat";
 
 export interface CanvasScatterPoint {
     x: number;

@@ -1,9 +1,9 @@
 import {Plot, PlotConfig, PlotConfigDump} from "../visualization/Plot";
-import TableCache = require("./TableCache");
 import {RuntimeError} from "../base/errors";
 import {observable} from "../decorators/observable";
 import {assert} from "../utils/assert";
 import {map} from "../utils/functools";
+import TableCache = require("./TableCache");
 
 class ExhaustedPool extends RuntimeError {
     constructor() {

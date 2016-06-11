@@ -1,6 +1,6 @@
 import {observable} from "./observable";
 import {assertInstance} from "../utils/assert";
-import {ComputedProperties, registerObservable} from "./_koGetObservablePatch";
+import {registerObservable} from "./_koGetObservablePatch";
 
 export interface ComputedObservableOptions {
     pure: boolean;

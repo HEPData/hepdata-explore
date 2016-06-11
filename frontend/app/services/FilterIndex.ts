@@ -1,12 +1,15 @@
 import {Filter} from "../filters/Filter";
-import AllFilter = require("../filters/AllFilter");
 import {
-    IndepVarFilter, DepVarFilter,
-    ReactionFilter, ObservableFilter, PhraseFilter
+    IndepVarFilter,
+    DepVarFilter,
+    ReactionFilter,
+    ObservableFilter,
+    PhraseFilter
 } from "../filters/concrete-filters";
+import {TableDescriptionFilter} from "../filters/TableDescriptionFilter";
+import AllFilter = require("../filters/AllFilter");
 import SomeFilter = require("../filters/SomeFilter");
 import CMEnergiesFilter = require("../filters/CMEnergiesFilter");
-import {TableDescriptionFilter} from "../filters/TableDescriptionFilter";
 
 
 interface FilterIndexRecordDefinition {

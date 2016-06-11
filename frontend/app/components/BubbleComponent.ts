@@ -1,4 +1,4 @@
-import {assertHas, assert, AssertionError} from "../utils/assert";
+import {assertHas, assert} from "../utils/assert";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import "../base/MyFocusChange";
 import {focusedElement} from "../base/focusedElement";

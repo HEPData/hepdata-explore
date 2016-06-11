@@ -1,8 +1,7 @@
-import {PublicationTable} from "../base/dataFormat";
-import DslParam = require("../base/DslParam");
 import {Filter} from "./Filter";
 import {registerFilterClass} from "./filterRegistry";
 import {observable} from "../decorators/observable";
+import DslParam = require("../base/DslParam");
 
 @registerFilterClass
 class CMEnergiesFilter extends Filter {

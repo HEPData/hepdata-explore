@@ -1,7 +1,7 @@
 import {Filter} from "../filters/Filter";
 import {FilterTree} from "./FilterTree";
+import {AssertionError} from "./assert";
 import SomeFilter = require("../filters/SomeFilter");
-import {assertInstance, AssertionError} from "./assert";
 import AllFilter = require("../filters/AllFilter");
 
 export function calculateComplementaryFilter(
