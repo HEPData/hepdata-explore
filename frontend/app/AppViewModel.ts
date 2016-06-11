@@ -216,12 +216,14 @@ export class AppViewModel {
      */
     public filterLocked = false;
 
+    public filterInteractiveUpdates$: Rx.Observable<Filter|null>;
+
     constructor() {
         const appState$ = (<KnockoutObservable<StateDump>>
             ko.getObservable(this, 'appState'))
             .toObservableWithReplyLatest();
 
-        const filterInteractiveUpdates$ = (<KnockoutObservable<FilterDump>>
+        this.filterInteractiveUpdates$ = (<KnockoutObservable<FilterDump>>
             ko.getObservable(this, 'filterDump'))
             .toObservableWithReplyLatest()
             .filter(() => {
@@ -387,7 +389,7 @@ export class AppViewModel {
         // ===========================================
         //
         // For every filter change
-        filterInteractiveUpdates$
+        this.filterInteractiveUpdates$
             // Ignore the first notification, when the application has just been
             // loaded and filter is still null.
             .filter((filter) => filter != null)

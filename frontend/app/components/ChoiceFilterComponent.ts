@@ -66,21 +66,25 @@ class ChoiceFilterComponent {
         // Start with an empty index
         // this.possibleValuesIndex = this.indexFromSuggestions([]);
 
-        const suggestions$ = (<KnockoutObservable<FilterDump|null>>
-            ko.getObservable(app, 'filterDump'))
-            .toObservableWithReplyLatest()
+        const suggestions$ = app.filterInteractiveUpdates$
+            // The application starts without interactive updates, so just in
+            // the application has just started, we load the current rootFilter
+            // as first value
+            .startWith(app.rootFilter)
             // Ignore null root filter state
-            .filter(filterDump => filterDump != null)
-            // Don't continue if our filter is not in the root filter tree 
+            .filter(rootFilter => rootFilter != null)
+            .map(rootFilter => rootFilter!)
+            // Don't continue if our filter is not in the root filter tree
             // (i.e. it was just removed)
-            .filter(() => app.rootFilter!.findFilter(this.filter))
+            .filter(rootFilter => rootFilter.findFilter(this.filter))
             // Calculate the complementary filter
-            .map(() => calculateComplementaryFilter(this.filter, ensure(app.rootFilter)))
+            .map(rootFilter =>
+                calculateComplementaryFilter(this.filter, ensure(rootFilter)))
             // Only continue if the complementary filter has changed
             .distinctUntilChanged(complementaryFilter =>
                 stableStringify(complementaryFilter.dump()))
             .do((complement)=> {
-                console.log(JSON.stringify(complement.dump(), null!, 2));
+                console.log(JSON.stringify(app.rootFilter!.dump(), null!, 2));
             })
             // Launch the query
             .map(complementaryFilter =>
