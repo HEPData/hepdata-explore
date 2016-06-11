@@ -63,6 +63,7 @@ export class AutocompleteService<SuggestionType, IndexType> {
         Rx.Observable.combineLatest(this.queryStream, this.suggestionsIndexStream, combineAsTuple)
             // Execute the domain-specific search function
             .map(([query, index]) => this.searchFn(query, index))
+            .map((suggestions) => _.sortBy(suggestions, this.rankingFn))
             // Load the results
             .forEach(this.loadSuggestions);
     }

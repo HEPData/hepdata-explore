@@ -107,8 +107,7 @@ class ChoiceFilterComponent {
                     absoluteFrequencyFullDB: bucket.count,
                 }));
             })
-            .map(this.indexFromSuggestions)
-            // .shareReplay(1);
+            .map(this.indexFromSuggestions);
 
         this.autocomplete = new AutocompleteService<ChoiceSuggestion, ChoiceIndex>({
             koQuery: ko.getObservable(this, 'valueTyped'),

@@ -79,9 +79,7 @@ export class VariableVM {
 
         this._subscription = ko.getObservable(this, 'focused')
             .subscribe((focused: boolean) => {
-                if (focused) {
-                    // this.autocomplete.updateSearchResults();
-                } else {
+                if (!focused) {
                     // If the field loses focus dirty, restore it to the clean value
                     if (this.fieldValue != this.cleanValue && this.fieldValue != '') {
                         this.fieldValue = this.cleanValue;
@@ -193,6 +191,7 @@ export class CustomPlotVM {
             // Note we're always emitting the same index, but doing so triggers
             // a new search, which will retrieve updated values for the
             // `isCrossMatch` field.
+            .do(()=>{console.log('Updating y var completion');})
 
         // Connect the stream we just created.
         // 
@@ -211,6 +210,7 @@ export class CustomPlotVM {
             ko.getObservable(this, '_yVarsChanged'))
             .toObservableWithReplyLatest()
             .map(() => this.allVariablesIndex)
+            .do(()=>{console.log('Updating x var completion');})
 
         xVarCompletionIndex$
             .subscribe(this.xVarCompletionIndex$)
