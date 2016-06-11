@@ -2,6 +2,10 @@ import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {observable} from "../decorators/observable";
 import {TableDescriptionFilter} from "../filters/TableDescriptionFilter";
 import {app} from "../AppViewModel";
+import {
+    registerFilterComponent,
+    unregisterFilterComponent
+} from "../base/getFilterComponent";
 
 @KnockoutComponent('hep-table-description', {
     template: { fromUrl: 'table-description-filter.html' },
@@ -24,6 +28,8 @@ export class TableDescriptionFilterComponent {
 
     constructor(params: any) {
         this.filter = params.filter;
+
+        registerFilterComponent(this.filter, this)
     }
 
     getTableNames(): string[] {
@@ -36,5 +42,6 @@ export class TableDescriptionFilterComponent {
 
     dispose() {
         ko.untrack(this);
+        unregisterFilterComponent(this.filter);
     }
 }

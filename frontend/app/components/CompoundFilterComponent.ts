@@ -5,6 +5,10 @@ import {app} from "../AppViewModel";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {observable} from "../decorators/observable";
 import {computedObservable} from "../decorators/computedObservable";
+import {
+    registerFilterComponent,
+    unregisterFilterComponent
+} from "../base/getFilterComponent";
 
 // http://ejohn.org/blog/comparing-document-position/
 function htmlContains(a: HTMLElement, b: HTMLElement){
@@ -31,6 +35,8 @@ export class CompoundFilterComponent {
 
     constructor(params:any) {
         this.filter = params.filter;
+
+        registerFilterComponent(this.filter, this);
     }
 
     @computedObservable()
@@ -68,5 +74,10 @@ export class CompoundFilterComponent {
         const newFilter = new otherFilterClass(this.filter.children);
         app.replaceFilter(this.filter, newFilter);
         this.filter = newFilter;
+    }
+
+    dispose() {
+        ko.untrack(this);
+        unregisterFilterComponent(this.filter);
     }
 }

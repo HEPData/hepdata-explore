@@ -2,6 +2,10 @@ import CMEnergiesFilter = require("../filters/CMEnergiesFilter");
 import {floatEquals} from "../utils/floatEquals";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {observable} from "../decorators/observable";
+import {
+    registerFilterComponent,
+    unregisterFilterComponent
+} from "../base/getFilterComponent";
 
 @KnockoutComponent('cmenergies-filter', {
     template: {fromUrl: 'cmenergies-filter.html'},
@@ -28,6 +32,8 @@ export class CMEnergiesFilterComponent {
 
         this.linkNumber('minTyped', 'min');
         this.linkNumber('maxTyped', 'max');
+        
+        registerFilterComponent(this.filter, this);
     }
 
     linkNumber(componentField: string, filterField: string) {
@@ -76,5 +82,6 @@ export class CMEnergiesFilterComponent {
             disposable.dispose();
         }
         ko.untrack(this);
+        unregisterFilterComponent(this.filter);
     }
 }
