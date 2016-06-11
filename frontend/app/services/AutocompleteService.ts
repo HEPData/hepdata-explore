@@ -5,6 +5,7 @@ import {
 import {bind} from "../decorators/bind";
 import {observable} from "../decorators/observable";
 import {KeyCode} from "../utils/KeyCode";
+import {combineAsTuple} from "../rx/combineAsTuple";
 
 /** Simple integer modulo for JavaScript so that
  *   mod(8, 8) = 0
@@ -18,9 +19,10 @@ function mod(dividend: number, divisor: number) {
     return dividend % divisor;
 }
 
-interface AutocompleteOptions<SuggestionType> {
+interface AutocompleteOptions<SuggestionType, IndexType> {
     koQuery: KnockoutObservable<string>;
-    searchFn: (query: string) => Promise<SuggestionType[]>;
+    suggestionsIndexStream: Rx.Observable<IndexType>;
+    searchFn: (query: string, index: IndexType) => SuggestionType[];
     rankingFn: (suggestion: SuggestionType) => number|number[];
     keyFn: (suggestion: SuggestionType) => any;
     suggestionAcceptedFn: (suggestion: SuggestionType) => void;
@@ -29,10 +31,11 @@ interface AutocompleteOptions<SuggestionType> {
     nonUniformPaging: boolean;
 }
 
-export class AutocompleteService<SuggestionType> {
+export class AutocompleteService<SuggestionType, IndexType> {
     /** Returns the current query string */
-    public koQuery: KnockoutObservable<string>;
-    public searchFn: (query: string) => Promise<SuggestionType[]>;
+    public queryStream: Rx.Observable<string>;
+    public suggestionsIndexStream: Rx.Observable<IndexType>;
+    public searchFn: (query: string, index: IndexType) => SuggestionType[];
     public rankingFn: (suggestion: SuggestionType) => number|number[];
     /** Two suggestions from two different searches are considered to be the
      * same if they return the same key. */
@@ -44,8 +47,9 @@ export class AutocompleteService<SuggestionType> {
 
     private _suggestionElements = new WeakMap<SuggestionType, HTMLElement>();
 
-    constructor(options: AutocompleteOptions<SuggestionType>) {
-        this.koQuery = options.koQuery;
+    constructor(options: AutocompleteOptions<SuggestionType, IndexType>) {
+        this.queryStream = options.koQuery.toObservableWithReplyLatest();
+        this.suggestionsIndexStream = options.suggestionsIndexStream;
         this.searchFn = options.searchFn;
         this.rankingFn = options.rankingFn;
         this.keyFn = options.keyFn;
@@ -54,9 +58,13 @@ export class AutocompleteService<SuggestionType> {
         this.acceptWithTabKey = options.acceptWithTabKey;
         this.nonUniformPaging = options.nonUniformPaging;
 
-        this.koQuery.subscribe((query: string) => {
-            this.search(query);
-        });
+        // Once we receive both a query string and an index, and also each time 
+        // one of them is modified thereafter...
+        Rx.Observable.combineLatest(this.queryStream, this.suggestionsIndexStream, combineAsTuple)
+            // Execute the domain-specific search function
+            .map(([query, index]) => this.searchFn(query, index))
+            // Load the results
+            .forEach(this.loadSuggestions);
     }
 
     @observable()
@@ -64,42 +72,43 @@ export class AutocompleteService<SuggestionType> {
     @observable()
     public selectedSuggestionIx: number|null = null;
 
-    public updateSearchResults(): Promise<SuggestionType[]> {
-        return this.search(this.koQuery());
+    /**
+     * Forces a search.
+     * 
+     * @deprecated
+     */
+    public updateSearchResults(): void {
+        // return this.search(this.koQuery());
     }
 
-    private search(query: string): Promise<SuggestionType[]> {
-        // Execute the domain specific search function
-        return this.searchFn(query)
-            .then((results: SuggestionType[]) => {
-                var oldSuggestionsByKey = new Map<any, SuggestionType>();
-                this.suggestions.forEach((suggestion) => {
-                    oldSuggestionsByKey.set(this.keyFn(suggestion), suggestion);
-                });
-                var hit = 0, miss = 0;
+    @bind()
+    private loadSuggestions(results: SuggestionType[]) {
+        var oldSuggestionsByKey = new Map<any, SuggestionType>();
+        this.suggestions.forEach((suggestion) => {
+            oldSuggestionsByKey.set(this.keyFn(suggestion), suggestion);
+        });
+        var hit = 0, miss = 0;
 
-                this.suggestions = _.sortBy(results, this.rankingFn)
-                    .slice(0, this.maxSuggestions)
-                    .map((suggestion) => {
-                        const sameOldSuggestion = oldSuggestionsByKey.get(this.keyFn(suggestion));
-                        if (sameOldSuggestion) {
-                            hit++;
-                            return sameOldSuggestion;
-                        } else {
-                            miss++;
-                            return suggestion;
-                        }
-                    });
-                // console.log('hit %d miss %d', hit, miss);
-
-                // Select the first suggestion
-                if (this.suggestions.length > 0) {
-                    this.selectedSuggestionIx = 0;
+        this.suggestions = _.sortBy(results, this.rankingFn)
+            .slice(0, this.maxSuggestions)
+            .map((suggestion) => {
+                const sameOldSuggestion = oldSuggestionsByKey.get(this.keyFn(suggestion));
+                if (sameOldSuggestion) {
+                    hit++;
+                    return sameOldSuggestion;
                 } else {
-                    this.selectedSuggestionIx = null;
+                    miss++;
+                    return suggestion;
                 }
-                return this.suggestions
-            })
+            });
+        // console.log('hit %d miss %d', hit, miss);
+
+        // Select the first suggestion
+        if (this.suggestions.length > 0) {
+            this.selectedSuggestionIx = 0;
+        } else {
+            this.selectedSuggestionIx = null;
+        }
     }
 
     nextSuggestion() {

@@ -43,16 +43,18 @@ export class VariableVM {
     @observable()
     focused: boolean = false;
 
-    autocomplete: AutocompleteService<VariableChoice>;
+    autocomplete: AutocompleteService<VariableChoice, VariableIndex>;
 
     constructor(opts: {
         initialValue: string|null,
-        searchFn: (query: string) => Promise<VariableChoice[]>
+        searchFn: (query: string, index: VariableIndex) => VariableChoice[],
+        suggestionsIndexStream: Rx.Observable<VariableIndex>,
     }) {
         this.fieldValue = this.cleanValue = opts.initialValue || '';
 
-        this.autocomplete = new AutocompleteService<VariableChoice>({
+        this.autocomplete = new AutocompleteService<VariableChoice, VariableIndex>({
             koQuery: ko.getObservable(this, 'fieldValue'),
+            suggestionsIndexStream: opts.suggestionsIndexStream,
             searchFn: opts.searchFn,
             rankingFn: (s: VariableChoice) => [
                 // The currently selected variable always appears first, then
@@ -67,6 +69,7 @@ export class VariableVM {
             keyFn: (s: VariableChoice) => s.name,
             maxSuggestions: 50,
             suggestionAcceptedFn: (suggestion: VariableChoice) => {
+                console.log('Accepted ' + suggestion.name);
                 this.fieldValue = suggestion.name;
                 this.cleanValue = suggestion.name;
             },
@@ -77,9 +80,9 @@ export class VariableVM {
         this._subscription = ko.getObservable(this, 'focused')
             .subscribe((focused: boolean) => {
                 if (focused) {
-                    this.autocomplete.updateSearchResults();
+                    // this.autocomplete.updateSearchResults();
                 } else {
-                    // If the field loses focuses dirty, restore it to the clean value
+                    // If the field loses focus dirty, restore it to the clean value
                     if (this.fieldValue != this.cleanValue && this.fieldValue != '') {
                         this.fieldValue = this.cleanValue;
                     }
@@ -94,35 +97,52 @@ export class VariableVM {
     }
 }
 
+interface VariableIndex {
+    allVariables: string[];
+    lunrIndex: lunr.Index;
+}
 
 export class CustomPlotVM {
+    xVarCompletionIndex$ = new Rx.ReplaySubject<VariableIndex>(1);
+    yVarCompletionIndex$ = new Rx.ReplaySubject<VariableIndex>(1);
+
     @observable()
     xVar: VariableVM = new VariableVM({
         initialValue: this.plot.config.xVar,
         searchFn: this.getXCompletion,
+        suggestionsIndexStream: this.xVarCompletionIndex$,
     });
 
     @observable()
-    yVars: VariableVM[] = map(this.plot.config.yVars,
-        (varName) => new VariableVM({
+    yVars: VariableVM[] = this.plot.config.yVars
+        .map((varName) => new VariableVM({
             initialValue: varName,
             searchFn: this.getYCompletion,
+            suggestionsIndexStream: this.yVarCompletionIndex$,
         }))
         .concat([new VariableVM({
             initialValue: '',
             searchFn: this.getYCompletion,
-        })]);
+            suggestionsIndexStream: this.yVarCompletionIndex$,
+        })]);    
 
     // Dummy computed used to track when xVar or yVars are modified.
     @computedObservable()
     private get _cleanValuesChanged() {
         this.xVar.cleanValue;
-        for (let item of this.yVars) {
-            item.cleanValue;
-        }
+        this._yVarsChanged;
         return ++this._counterCleanValues;
     }
     private _counterCleanValues = 0;
+
+    @computedObservable()
+    private get _yVarsChanged() {
+        for (let item of this.yVars) {
+            item.cleanValue;
+        }
+        return ++this._yVarsChangedValues;
+    }
+    private _yVarsChangedValues = 0;
 
     @computedObservable()
     private get _fieldValuesChanged() {
@@ -154,9 +174,72 @@ export class CustomPlotVM {
                 for (let yVar of this.yVars) {
                     // The order of the results may (and probably will) change
                     // if xVar is modified.
-                    yVar.autocomplete.updateSearchResults();
+                    // yVar.autocomplete.updateSearchResults();
                 }
             }));
+
+        /* Autocompletion code */
+        this.allVariablesIndex = this.createAllVariablesIndex();
+
+        // Stream of indices for Y variables.
+        // Each time the X variable is updated the autocompletion for the Y
+        // variables must be rebuild.  
+        const yVarCompletionIndex$ = (<KnockoutObservable<string>>
+            ko.getObservable(this.xVar, 'cleanValue'))
+            // For each value of xVar
+            .toObservableWithReplyLatest()
+            // Emit the index.
+            .map(() => this.allVariablesIndex)
+            // Note we're always emitting the same index, but doing so triggers
+            // a new search, which will retrieve updated values for the
+            // `isCrossMatch` field.
+
+        // Connect the stream we just created.
+        // 
+        // VariableVM needs a stream on creation but we need the VariableVM 
+        // object to create the stream.
+        //
+        // To escape the catch-22, we supply VariableVM with an empty Rx.Subject
+        // in this.yVarCompletionIndex$, and connect it later here.
+        yVarCompletionIndex$
+            .subscribe(this.yVarCompletionIndex$);
+
+        // Stream of indices for X variable (similar to the case above).
+        // Each time one of the Y variables is updated the autocompletion for 
+        // the X variable must be rebuild.  
+        const xVarCompletionIndex$ = (<KnockoutObservable<void>>
+            ko.getObservable(this, '_yVarsChanged'))
+            .toObservableWithReplyLatest()
+            .map(() => this.allVariablesIndex)
+
+        xVarCompletionIndex$
+            .subscribe(this.xVarCompletionIndex$)
+    }
+
+    // Exposed as member just for debugging purposes
+    private allVariablesIndex: VariableIndex;
+
+    private createAllVariablesIndex(): VariableIndex {
+        const allVariables = Array.from(this.plot.tableCache.getAllVariableNames());
+
+        const allVariablesIndex = lunr(function() {
+            this.field('value');
+            this.ref('index');
+            this.tokenizer(variableTokenizer);
+        });
+        allVariablesIndex.pipeline.remove(lunr.stopWordFilter);
+
+        allVariables.forEach((value, index) => {
+            allVariablesIndex.add({
+                'value': value,
+                'index': index,
+            });
+        });
+
+        return {
+            allVariables: allVariables,
+            lunrIndex: allVariablesIndex,
+        };
     }
 
     updateVariableFields() {
@@ -172,6 +255,7 @@ export class CustomPlotVM {
             this.yVars.push(new VariableVM({
                 initialValue: '',
                 searchFn: this.getYCompletion,
+                suggestionsIndexStream: this.yVarCompletionIndex$,
             }));
         }
     }
@@ -220,87 +304,53 @@ export class CustomPlotVM {
     }
 
     @bind()
-    getXCompletion(query: string): Promise<VariableChoice[]> {
-        const allVariables = Array.from(this.plot.tableCache.getAllVariableNames());
-
-        const allVariablesIndex = lunr(function() {
-            this.field('value');
-            this.ref('index');
-            this.tokenizer(variableTokenizer);
-        });
-        allVariablesIndex.pipeline.remove(lunr.stopWordFilter);
-
-        allVariables.forEach((value, index) => {
-            allVariablesIndex.add({
-                'value': value,
-                'index': index,
-            });
-        });
-
+    getXCompletion(query: string, index: VariableIndex): VariableChoice[] {
         const yVarsSet = new Set(this.getPlottableYVars());
         if (query != '') {
-            const results = allVariablesIndex.search(query)
-                .map((result, index) => ({
-                    position: index,
-                    name: allVariables[result.ref],
+            return index.lunrIndex.search(query)
+                .map((result, i) => ({
+                    position: i,
+                    name: index.allVariables[result.ref],
                     isCrossMatch: !!this.plot.tableCache.hasTableWithVariables(
-                        allVariables[result.ref],
+                        index.allVariables[result.ref],
                         yVarsSet
                     ),
                 }));
-            return Promise.resolve(results);
         } else {
-            const results = map(allVariables, (xVar, i) => ({
-                position: i,
-                name: xVar,
-                isCrossMatch: !!this.plot.tableCache.hasTableWithVariables(
-                    xVar,
-                    yVarsSet
-                )
-            }));
-            return Promise.resolve(results);
+            return index.allVariables
+                .map((xVar, i) => ({
+                    position: i,
+                    name: xVar,
+                    isCrossMatch: !!this.plot.tableCache.hasTableWithVariables(
+                        xVar,
+                        yVarsSet
+                    )
+                }));
         }
     }
 
     @bind()
-    getYCompletion(query: string): Promise<VariableChoice[]> {
-        const allVariables = Array.from(this.plot.tableCache.getAllVariableNames());
-
-        const allVariablesIndex = lunr(function () {
-            this.field('value');
-            this.ref('index');
-            this.tokenizer(variableTokenizer);
-        });
-        allVariablesIndex.pipeline.remove(lunr.stopWordFilter);
-
-        allVariables.forEach((value, index) => {
-            allVariablesIndex.add({
-                value: value,
-                index: index,
-            });
-        });
-
+    getYCompletion(query: string, index: VariableIndex): VariableChoice[] {
         if (query != '') {
-            const results = allVariablesIndex.search(query)
-                .map((result, index) => ({
-                    position: index,
-                    name: allVariables[result.ref],
+            return index.lunrIndex.search(query)
+                .map((result, i) => ({
+                    position: i,
+                    name: index.allVariables[result.ref],
                     isCrossMatch: !!this.plot.tableCache.hasTableWithVariables(
                         this.xVar.cleanValue,
-                        allVariables[result.ref]
+                        index.allVariables[result.ref]
                     )
                 }));
-            return Promise.resolve(results);
         } else {
-            const results = map(allVariables, (yVar, i) => ({
-                position: i,
-                name: yVar,
-                isCrossMatch: !!this.plot.tableCache.hasTableWithVariables(
-                    this.xVar.cleanValue,
-                    yVar
-                )
-            }));
-            return Promise.resolve(results);
+            return index.allVariables
+                .map((yVar, i) => ({
+                    position: i,
+                    name: yVar,
+                    isCrossMatch: !!this.plot.tableCache.hasTableWithVariables(
+                        this.xVar.cleanValue,
+                        yVar
+                    )
+                }));
         }
     }
 

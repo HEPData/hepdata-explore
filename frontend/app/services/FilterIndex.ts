@@ -25,7 +25,7 @@ export interface FilterIndexSearchResult {
     score: number
 }
 
-class FilterIndex {
+export class FilterIndex {
     private textIndex: lunr.Index;
     private tagsIndex: lunr.Index;
     private database: FilterIndexRecord[] = [];

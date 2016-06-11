@@ -6,9 +6,9 @@ import {observable} from "../decorators/observable";
 @KnockoutComponent('suggestions-box', {
     template: { fromUrl: 'suggestions-box.html' },
 })
-export class SuggestionsBoxComponent<SuggestionType> {
+export class SuggestionsBoxComponent<SuggestionType, IndexType> {
     @observable()
-    autocomplete: AutocompleteService<SuggestionType>;
+    autocomplete: AutocompleteService<SuggestionType, IndexType>;
     @observable()
     template: string;
 

@@ -2,7 +2,7 @@ import CompoundFilter = require("../filters/CompoundFilter");
 import {Filter} from "../filters/Filter";
 import {assertHas} from "../utils/assert";
 import {FilterIndexSearchResult} from "../services/FilterIndex";
-import {filterIndex} from "../services/FilterIndex";
+import {filterIndex, FilterIndex} from "../services/FilterIndex";
 import {KnockoutComponent} from "../decorators/KnockoutComponent";
 import {AutocompleteService} from "../services/AutocompleteService";
 import {bind} from "../decorators/bind";
@@ -22,7 +22,7 @@ export class NewFilterComponent {
      */
     @observable()
     focused = true;
-    autocomplete: AutocompleteService<FilterIndexSearchResult>;
+    autocomplete: AutocompleteService<FilterIndexSearchResult, FilterIndex>;
 
     constructor(params:any) {
         assertHas(params, ['parentFilter']);
@@ -30,11 +30,12 @@ export class NewFilterComponent {
 
         this.autocomplete = new AutocompleteService({
             koQuery: ko.computed(() => this.query),
-            searchFn: (query: string) => {
+            suggestionsIndexStream: Rx.Observable.just(filterIndex),
+            searchFn: (query: string, filterIndex: FilterIndex) => {
                 if (query != '') {
-                    return Promise.resolve(filterIndex.search(query));
+                    return filterIndex.search(query);
                 } else {
-                    return Promise.resolve(filterIndex.returnAll());
+                    return filterIndex.returnAll();
                 }
             },
             rankingFn: (suggestion) => -suggestion.score,

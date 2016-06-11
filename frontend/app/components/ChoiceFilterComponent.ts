@@ -12,6 +12,10 @@ import IDisposable = Rx.IDisposable;
 import {FilterDump} from "../filters/Filter";
 import {rxObservableFromPromise} from "../rx/rxObservableFromPromise";
 import {enumerate} from "../utils/map";
+import {
+    registerFilterComponent,
+    unregisterFilterComponent
+} from "../base/getFilterComponent";
 
 interface ChoiceSuggestion {
     suggestedValue: string;
@@ -21,18 +25,29 @@ interface ChoiceSuggestion {
     freqDividedByModeFullDB: number;
 }
 
+/**
+ * A class having enough data to perform autocompletion searches.
+ * 
+ * It contains a list of all possible suggestions and a lunr index created from
+ * them.
+ */
+interface ChoiceIndex {
+    allSuggestions: ChoiceSuggestion[];
+    lunrIndex: lunr.Index;
+}
+
 @KnockoutComponent('choice-filter', {
     template: { fromUrl: 'choice-filter.html' },
 })
 class ChoiceFilterComponent {
     @observable()
     filter: ChoiceFilter;
-    autocomplete: AutocompleteService<ChoiceSuggestion>;
+    autocomplete: AutocompleteService<ChoiceSuggestion, ChoiceIndex>;
 
     @observable()
     valueTyped: string = '';
-    allPossibleValuesPromise: Promise<ChoiceSuggestion[]>;
-    possibleValuesIndex: lunr.Index;
+    // allPossibleValuesPromise: Promise<ChoiceSuggestion[]>;
+    // possibleValuesIndex: lunr.Index;
 
     /** This observable property is used by the template to focus the text box
      * when the component is created.
@@ -46,8 +61,10 @@ class ChoiceFilterComponent {
         this.filter = params.filter;
         this.valueTyped = this.filter.value;
 
+        registerFilterComponent(this.filter, this);
+
         // Start with an empty index
-        this.possibleValuesIndex = this.indexFromSuggestions([]);
+        // this.possibleValuesIndex = this.indexFromSuggestions([]);
 
         const suggestions$ = (<KnockoutObservable<FilterDump|null>>
             ko.getObservable(app, 'filterDump'))
@@ -67,7 +84,7 @@ class ChoiceFilterComponent {
             // Only continue if the complementary filter has changed
             .distinctUntilChanged(complementaryFilter =>
                 stableStringify(complementaryFilter.dump()))
-            .do(()=>{console.log('Querying complementary filter');})
+            .do(()=>{console.log('Querying complementary filter on variable ' + this.filter.field);})
             // Launch the query
             .map(complementaryFilter =>
                 elastic.fetchCountByField(this.filter.field, complementaryFilter))
@@ -95,23 +112,12 @@ class ChoiceFilterComponent {
                     absoluteFrequencyFullDB: bucket.count,
                 }));
             })
-            .shareReplay(1);
+            .map(this.indexFromSuggestions)
+            // .shareReplay(1);
 
-        this.allPossibleValuesPromise = suggestions$
-            .take(1)
-            .toPromise(Promise);
-
-        this._disposables.push(
-            suggestions$
-            .forEach((suggestions) => {
-                console.log(suggestions[0]);
-                this.possibleValuesIndex = this.indexFromSuggestions(suggestions);
-                this.autocomplete.updateSearchResults();
-            })
-        );
-
-        this.autocomplete = new AutocompleteService<ChoiceSuggestion>({
+        this.autocomplete = new AutocompleteService<ChoiceSuggestion, ChoiceIndex>({
             koQuery: ko.getObservable(this, 'valueTyped'),
+            suggestionsIndexStream: suggestions$,
             searchFn: this.search,
             rankingFn: (s: ChoiceSuggestion) => -s.absoluteFrequencyFullDB,
             keyFn: (s: ChoiceSuggestion) => s.suggestedValue,
@@ -123,37 +129,40 @@ class ChoiceFilterComponent {
     }
 
     @bind()
-    indexFromSuggestions(suggestions: ChoiceSuggestion[]) {
+    indexFromSuggestions(suggestions: ChoiceSuggestion[]): ChoiceIndex {
+        console.log('Creating index on ' + this.filter.field);
         // There is no way to clear an index in lunr, so we just create a new
         // one from scratch
-        const possibleValuesIndex = lunr(function() {
+        const lunrIndex = lunr(function() {
             this.field('value');
-            this.ref('index');
+            this.ref('ref');
             this.tokenizer(variableTokenizer);
         });
-        possibleValuesIndex.pipeline.remove(lunr.stopWordFilter);
+        lunrIndex.pipeline.remove(lunr.stopWordFilter);
 
-        for (let [index, suggestion] of enumerate(suggestions)) {
-            possibleValuesIndex.add({
+        for (let [ref, suggestion] of enumerate(suggestions)) {
+            lunrIndex.add({
                 'value': suggestion.suggestedValue,
-                'index': index,
+                'ref': ref,
             });
         }
 
-        return possibleValuesIndex;
+        return {
+            allSuggestions: suggestions,
+            lunrIndex: lunrIndex,
+        };
     }
 
     @bind()
-    search(query: string): Promise<ChoiceSuggestion[]> {
-        return this.allPossibleValuesPromise
-            .then((allPossibleValues) => {
-                if (query != '') {
-                    return this.possibleValuesIndex.search(query)
-                        .map((result) => allPossibleValues[result.ref]);
-                } else {
-                    return allPossibleValues;
-                }
-            })
+    search(query: string, index: ChoiceIndex): ChoiceSuggestion[] {
+        console.log('Searching suggestions on ' + this.filter.field);
+        if (query != '') {
+            return index.lunrIndex
+                .search(query)
+                .map((result) => index.allSuggestions[result.ref]);
+        } else {
+            return index.allSuggestions;
+        }
     }
 
     useSelectedValue() {
@@ -174,5 +183,6 @@ class ChoiceFilterComponent {
         for (let disposable of this._disposables) {
             disposable.dispose();
         }
+        unregisterFilterComponent(this.filter);
     }
 }
