@@ -4,7 +4,7 @@ import {
     DepVarFilter,
     ReactionFilter,
     ObservableFilter,
-    PhraseFilter
+    PhraseFilter, CollaborationFilter
 } from "../filters/concrete-filters";
 import {TableDescriptionFilter} from "../filters/TableDescriptionFilter";
 import AllFilter = require("../filters/AllFilter");
@@ -119,6 +119,11 @@ filterIndex.populate([
         filterClass: DepVarFilter,
         description: `Returns tables with a certain dependent variable.`,
         tags: ['y', 'dep', 'dependent', 'variable'],
+    },
+    {
+        filterClass: CollaborationFilter,
+        description: `Returns tables that are part of publications by a certain collaboration.`,
+        tags: ['collaboration', 'research', 'group', 'experiment'],
     },
     {
         filterClass: ReactionFilter,

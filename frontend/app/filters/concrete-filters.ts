@@ -55,6 +55,17 @@ export class PhraseFilter extends ChoiceFilter {
 }
 
 @registerFilterClass
+export class CollaborationFilter extends ChoiceFilter {
+    constructor(value: string = '') {
+        super('collaborations', value);
+    }
+
+    static getLongName() {
+        return 'Collaboration'
+    }
+}
+
+@registerFilterClass
 export class ReactionFilter extends ChoiceFilter {
     constructor(value: string = '') {
         // See bug below
