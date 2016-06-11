@@ -57,7 +57,11 @@ export class PhraseFilter extends ChoiceFilter {
 @registerFilterClass
 export class ReactionFilter extends ChoiceFilter {
     constructor(value: string = '') {
-        super('reactions.string_full', value);
+        // See bug below
+        // super('reactions.string_full', value);
+
+        // Use denormalized property as a workaround
+        super('reactions_full', value);
     }
 
     static getLongName() {
@@ -68,6 +72,13 @@ export class ReactionFilter extends ChoiceFilter {
         return _.find(table.reactions, (r) => r.string_full == this.value) != null;
     }
 
+    /* Because of this bug, we cannot use nested queries in filters, since they
+     * break filtered aggregations, which we need in ChoiceFilterComponent to
+     * show the count of tables per value.
+     *
+     * https://github.com/elastic/elasticsearch/issues/11749
+     */
+    /*
     toElasticQuery(): any {
         return {
             "nested": {
@@ -80,4 +91,5 @@ export class ReactionFilter extends ChoiceFilter {
             }
         }
     }
+    */
 }

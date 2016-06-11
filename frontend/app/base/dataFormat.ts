@@ -30,8 +30,10 @@ export interface PublicationTable {
     cmenergies_min: number;
     cmenergies_max: number;
     reactions: Reaction[];
+    reactions_full: string[];
     observables: string[];
     phrases: string[];
+    collaborations: string[];
 
     indep_vars: {
         name: string;
