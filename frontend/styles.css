@@ -110,7 +110,7 @@ div#fake-footer {
     height: 40px;
     background: #894b9d;
     color: white;
-    padding: 13px;
+    padding: 10px;
     box-sizing: border-box;
     font-size: 14px;
     text-align: center;
@@ -700,4 +700,19 @@ ul.publication-list ul {
   /* right: 0; */
   /* bottom: 0; */
   background: rgba(0, 0, 0, 0.5);
+}
+
+.footer-text {
+  font-style: normal;
+  font-weight: normal;
+  text-align: left;
+}
+
+.footer-text a {
+  color: white;
+}
+
+span.footer-separator {
+  margin: 0 3px;
+  font-weight: normal;
 }
