@@ -11,7 +11,6 @@ import {jsonPOST} from "../base/network";
 import {sum, map} from "../utils/map";
 import SomeFilter = require("../filters/SomeFilter");
 import AllFilter = require("../filters/AllFilter");
-import {calculateComplementaryFilter} from "../utils/complementaryFilter";
 import {bind} from "../decorators/bind";
 import {config} from "../config";
 

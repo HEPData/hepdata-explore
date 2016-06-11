@@ -7,7 +7,7 @@ import AllFilter = require("../filters/AllFilter");
 export function calculateComplementaryFilter(
     excluded: Filter,
     rootFilter: Filter
-): Filter|null
+): Filter
 {
     const tree = new FilterTree(rootFilter);
 
@@ -28,7 +28,7 @@ export function calculateComplementaryFilter(
     } else {
         // Reached the root of the tree without finding an AllFilter, return the
         // empty filter.
-        return null;
+        return new AllFilter([]);
     }
 }
 

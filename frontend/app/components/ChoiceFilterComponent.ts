@@ -76,11 +76,6 @@ class ChoiceFilterComponent {
             .filter(() => app.rootFilter!.findFilter(this.filter))
             // Calculate the complementary filter
             .map(() => calculateComplementaryFilter(this.filter, ensure(app.rootFilter)))
-            // It should never be null since there should always be a root
-            // compound filter... but just in case filter out the potential
-            // cases where there is not.
-            .filter(complementaryFilter => complementaryFilter != null)
-            .map(it => it!)
             // Only continue if the complementary filter has changed
             .distinctUntilChanged(complementaryFilter =>
                 stableStringify(complementaryFilter.dump()))
