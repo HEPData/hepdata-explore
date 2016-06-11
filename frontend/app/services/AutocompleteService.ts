@@ -3,9 +3,11 @@ import {
     AssertionError
 } from "../utils/assert";
 import {bind} from "../decorators/bind";
+import {imap} from "../utils/map";
 import {observable} from "../decorators/observable";
 import {KeyCode} from "../utils/KeyCode";
 import {combineAsTuple} from "../rx/combineAsTuple";
+import {pair} from "../base/pair";
 
 /** Simple integer modulo for JavaScript so that
  *   mod(8, 8) = 0
@@ -58,14 +60,46 @@ export class AutocompleteService<SuggestionType, IndexType> {
         this.acceptWithTabKey = options.acceptWithTabKey;
         this.nonUniformPaging = options.nonUniformPaging;
 
+        interface ScanOperator {
+            oldSuggestionsByKey: Map<any, SuggestionType>;
+            suggestions: SuggestionType[]|null;
+        }
+
         // Once we receive both a query string and an index, and also each time 
         // one of them is modified thereafter...
         Rx.Observable.combineLatest(this.queryStream, this.suggestionsIndexStream, combineAsTuple)
             // Execute the domain-specific search function
             .map(([query, index]) =>
                 this.searchFn(query, index))
+            // Sort the suggestions with the domain-specific ranking function
             .map((suggestions) =>
                 _.sortBy(suggestions, this.rankingFn))
+            // Limit the number of returned results
+            .map((suggestions) =>
+                suggestions.slice(0, this.maxSuggestions))
+            // Use the domain-specific key function to reuse old suggestions,
+            // thus avoiding the creation of new unnecessary DOM elements
+            .scan((x: ScanOperator, suggestions: SuggestionType[]): ScanOperator => {
+                const mappedSuggestions = suggestions
+                    .map(suggestion =>
+                        x.oldSuggestionsByKey.get(
+                            this.keyFn(suggestion)
+                        ) || suggestion);
+
+                const newSuggestionsByKey = new Map<any, SuggestionType>(
+                    imap(suggestions, suggestion =>
+                        pair([this.keyFn(suggestion), suggestion]))
+                );
+
+                return {
+                    suggestions: mappedSuggestions,
+                    oldSuggestionsByKey: newSuggestionsByKey,
+                }
+            }, <ScanOperator>{
+                oldSuggestionsByKey: new Map<any, SuggestionType>(),
+                suggestions: null,
+            })
+            .map(it => it.suggestions!)
             // Load the results
             .forEach(this.loadSuggestions);
     }
