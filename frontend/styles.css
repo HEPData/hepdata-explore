@@ -716,3 +716,15 @@ span.footer-separator {
   margin: 0 3px;
   font-weight: normal;
 }
+
+.compound-filter .flag {
+  cursor: pointer;
+}
+
+.compound-filter .flag.some:hover {
+  background: #50C77E;
+}
+
+.compound-filter .flag.all:hover {
+  background: #2D67D0;
+}
