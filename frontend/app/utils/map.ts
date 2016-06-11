@@ -57,6 +57,14 @@ export function groupBy<K,V>(list: Iterable<V>, keyFn: (value: V) => K): Map<K,V
     return ret;
 }
 
+export function* enumerate<T>(list: Iterable<T>, startFrom = 0): Iterable<[number, T]> {
+    let counter = startFrom;
+    for (let item of list) {
+        yield [counter, item];
+        counter++;
+    }
+}
+
 function test() {
     interface Point {
         x: number;

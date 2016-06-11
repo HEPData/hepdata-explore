@@ -42,8 +42,6 @@ import {combineAsTuple} from "./rx/combineAsTuple";
 import {pair} from "./base/pair";
 import {RuntimeError} from "./base/errors";
 
-declare function stableStringify(thing: any): string;
-
 class SearchError {
     title: string;
     message: string;

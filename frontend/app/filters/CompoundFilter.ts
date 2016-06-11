@@ -27,6 +27,16 @@ abstract class CompoundFilter extends Filter {
     abstract getFlagText(): string;
     abstract getFlagClass(): string;
 
+    public findFilter(filter: Filter): boolean {
+        for (let child of this.children) {
+            const found = child.findFilter(filter);
+            if (found) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public replaceFilter(oldFilter: Filter, newFilter: Filter): boolean {
         for (let i = 0; i < this.children.length; i++) {
             const child = this.children[i];

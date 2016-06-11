@@ -162,6 +162,15 @@ export abstract class Filter {
     }
 
     /**
+     * Deeply explores this filter children (if any) in search of `filter`.
+     * 
+     * Returns whether the filter was found.
+     */
+    public findFilter(filter: Filter): boolean {
+        return this == filter;
+    }
+
+    /**
      * Deeply explores this filter children (if any) in search of `oldFilter`.
      * If found, replaces it with newFilter.
      *
