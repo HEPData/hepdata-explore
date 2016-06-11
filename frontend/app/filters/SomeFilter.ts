@@ -9,11 +9,14 @@ class SomeFilter extends CompoundFilter {
         return 'Some matching';
     }
     toElasticQuery(): any {
+        const usableChildren = this.getUsableChildren();
+
         return {
             "bool": {
-                "should": _.map(this.getUsableChildren(),
-                    (child: Filter) => child.toElasticQuery()),
-                "minimum_should_match": 1,
+                "should": usableChildren.map((child: Filter) =>
+                    child.toElasticQuery()),
+                // An empty SomeFilter will allow any table
+                "minimum_should_match": (usableChildren.length > 0 ? 1 : 0),
             }
         }
     }
