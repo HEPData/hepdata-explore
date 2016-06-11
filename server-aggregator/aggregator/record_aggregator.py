@@ -188,7 +188,7 @@ class RecordAggregator(object):
         processed_tables = []
         for table in tables:
             try:
-                new_table = self.process_table(path, header, table)
+                new_table = self.process_table(path, header, publication_meta, table)
                 processed_tables.append(new_table)
             except RejectedTable as err:
                 print('Warning: Rejected table. ins%s, %s. Reason: %s' %
@@ -200,7 +200,8 @@ class RecordAggregator(object):
         self.write_publication(publication)
         self.count_submissions += 1
 
-    def process_table(self, submission_path, submission_header, table):
+    def process_table(self, submission_path, submission_header,
+                      publication_meta, table):
         """
         Stores values from a submission's table.
 
@@ -359,8 +360,11 @@ class RecordAggregator(object):
             cmenergies_min=cmenergies_min,
             cmenergies_max=cmenergies_max,
             reactions=reactions,
+            reactions_full=[r['string_full'] for r in reactions],
             observables=observables,
             phrases=phrases,
+
+            collaborations=publication_meta['record']['collaborations'],
 
             indep_vars=indep_var_meta,
             dep_vars=dep_var_meta,
@@ -477,6 +481,10 @@ class RecordAggregator(object):
                                         "particles_out": {"type": "string","index": "not_analyzed"},
                                     }
                                 },
+
+                                "collaborations": {"type": "string","index": "not_analyzed"},  # denormalization
+                                "reaction_full": {"type": "string","index": "not_analyzed"},  # denormalization
+
                                 "observables": {"type": "string","index": "not_analyzed"},
                                 "phrases": {"type": "string","index": "not_analyzed"},
 

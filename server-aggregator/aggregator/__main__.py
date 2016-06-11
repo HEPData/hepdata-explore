@@ -66,7 +66,7 @@ def _add(index, submission_paths, only_these=None):
 
 
 def add(*submission_paths):
-    _add('hepdata6', submission_paths)
+    _add('hepdata7', submission_paths)
 
 
 def add_demo_subset(*submission_paths):
