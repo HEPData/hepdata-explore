@@ -187,18 +187,46 @@ export class BubbleComponent {
                     // Position the bubble near the linked element
                     this.calculateAndUpdatePosition();
 
-                    this._scrollableParents = findScrollableParents(this._linkedElement);
-                    for (let parent of this._scrollableParents) {
-                        parent.addEventListener('scroll', this.scrollListener);
-                    }
+                    this.setUpPositionListeners();
                 } else {
-                    for (let parent of this._scrollableParents) {
-                        parent.removeEventListener('scroll', this.scrollListener);
-                    }
-                    this._scrollableParents = [];
+                    this.tearDownPositionListeners();
                 }
             }));
+    }
 
+    private _mutationObserver: MutationObserver|null;
+
+    private setUpPositionListeners() {
+        // Listen to scroll events
+        this._scrollableParents = findScrollableParents(this._linkedElement);
+        for (let parent of this._scrollableParents) {
+            parent.addEventListener('scroll', this.updatePositionInNextFrame);
+        }
+
+        // Each time a new element is added or removed in the panel the position
+        // of the input field may change.
+        // Use MutationObserver to update the position in these cases.
+        this._mutationObserver = new MutationObserver((mutations) => {
+            this.updatePositionInNextFrame();
+        });
+        // Observe the outermost parent, since it contains the rest
+        const observedParent = this._scrollableParents[this._scrollableParents.length - 1];
+        this._mutationObserver.observe(observedParent, {
+            childList: true,
+            subtree: true,
+        });
+    }
+
+    private tearDownPositionListeners() {
+        for (let parent of this._scrollableParents) {
+            parent.removeEventListener('scroll', this.updatePositionInNextFrame);
+        }
+        this._scrollableParents = [];
+
+        if (this._mutationObserver) {
+            this._mutationObserver.disconnect();
+            this._mutationObserver = null;
+        }
     }
 
     public keyDownHook(ev: KeyboardEvent) {
@@ -225,7 +253,7 @@ export class BubbleComponent {
     private _ticking = false;
 
     @bind()
-    private scrollListener(e: Event) {
+    private updatePositionInNextFrame() {
         if (!this._ticking) {
             window.requestAnimationFrame(() => {
                 this.calculateAndUpdatePosition();
