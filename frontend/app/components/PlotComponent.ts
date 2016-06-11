@@ -49,4 +49,13 @@ export class PlotComponent {
         });
         saveAs(blob, 'exported_plot.yaml');
     }
+
+    @bind()
+    removePlot() {
+        app.plotPool.plots.remove(this.plot);
+    }
+
+    dispose() {
+        ko.untrack(this);
+    }
 }
