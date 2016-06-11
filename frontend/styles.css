@@ -742,3 +742,25 @@ hep-plot-pool {
 hep-plot {
    display: inline-block;
 }
+
+.plot-button {
+  background: #F1F1F1;
+  border: none;
+  padding: 2px 7px;
+  margin-left: 4px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+}
+
+.plot-button.pinned {
+  background: #EAEAB1;
+  border: 1px solid #98935D;
+}
+
+.plot-button:hover {
+  background: #EEE0ED;
+}
+
+.plot-button.pinned:hover {
+  background: #DEDEAD;
+}

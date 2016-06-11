@@ -709,6 +709,10 @@ export class AppViewModel {
     public showEditPlotDialog(plot: Plot) {
         const customPlotVM = new CustomPlotVM(plot.clone());
         this.customPlotModal.show('Edit plot', customPlotVM).then(() => {
+            // Set the modified plot as pinned to ensure the user does not lose
+            // it accidentally
+            customPlotVM.plot.config.pinned = true;
+
             // Bring the updated configuration to the original plot
             plot.config = customPlotVM.plot.config;
             return null;
@@ -729,6 +733,10 @@ export class AppViewModel {
     public addCustomPlotDialog() {
         const customPlotVM = new CustomPlotVM(new Plot(this.tableCache));
         this.customPlotModal.show('Add plot', customPlotVM).then(() => {
+            // Set the created plot as pinned to ensure the user does not lose
+            // it accidentally
+            customPlotVM.plot.config.pinned = true;
+
             const plot = this.plotPool.spawnPlot();
             plot.config = customPlotVM.plot.config;
         }).catch(() => {

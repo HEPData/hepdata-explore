@@ -8,12 +8,15 @@
         x: <span data-bind="text: plot.xScaleType"></span>
         y: <span data-bind="text: plot.yScaleType"></span>
 
-        <button>
-            <i class="fa fa-thumb-tack"></i>
-        </button>
-        <button data-bind="click: removePlot">
-            <i class="fa fa-trash-o"></i>
-        </button>
+        <div style="float: right">
+            <button class="plot-button" data-bind="click: togglePinned, css: {pinned: plot.config.pinned}">
+                <i class="fa fa-thumb-tack"></i>
+            </button>
+            <button class="plot-button" data-bind="click: removePlot">
+                <i class="fa fa-trash-o"></i>
+            </button>
+        </div>
+        <div style="clear: both"></div>
     </div>
 
     <div class="canvas-onion" data-bind="embedDom: plot.canvasOnion"></div>

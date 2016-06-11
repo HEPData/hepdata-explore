@@ -55,6 +55,11 @@ export class PlotComponent {
         app.plotPool.plots.remove(this.plot);
     }
 
+    @bind()
+    togglePinned() {
+        this.plot.config.pinned = !this.plot.config.pinned;
+    }
+
     dispose() {
         ko.untrack(this);
     }
