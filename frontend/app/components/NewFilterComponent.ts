@@ -45,7 +45,6 @@ export class NewFilterComponent {
             acceptWithTabKey: false,
             nonUniformPaging: true,
         });
-        this.autocomplete.updateSearchResults();
     }
 
     @bind()

@@ -167,15 +167,6 @@ export class CustomPlotVM {
                 this.updateVariableFields();
             }));
 
-        this._disposables.push(
-            ko.getObservable(this.xVar, 'cleanValue').subscribe(() => {
-                for (let yVar of this.yVars) {
-                    // The order of the results may (and probably will) change
-                    // if xVar is modified.
-                    // yVar.autocomplete.updateSearchResults();
-                }
-            }));
-
         /* Autocompletion code */
         this.allVariablesIndex = this.createAllVariablesIndex();
 

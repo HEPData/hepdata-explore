@@ -109,15 +109,6 @@ export class AutocompleteService<SuggestionType, IndexType> {
     @observable()
     public selectedSuggestionIx: number|null = null;
 
-    /**
-     * Forces a search.
-     * 
-     * @deprecated
-     */
-    public updateSearchResults(): void {
-        // return this.search(this.koQuery());
-    }
-
     @bind()
     private loadSuggestions(results: SuggestionType[]) {
         var oldSuggestionsByKey = new Map<any, SuggestionType>();
