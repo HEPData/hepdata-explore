@@ -90,6 +90,7 @@ export class VariableVM {
     private _subscription: KnockoutSubscription;
     dispose() {
         this._subscription.dispose();
+        this.autocomplete.dispose();
         ko.untrack(this);
     }
 }

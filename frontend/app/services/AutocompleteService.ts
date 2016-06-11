@@ -5,6 +5,7 @@ import {observable} from "../decorators/observable";
 import {KeyCode} from "../utils/KeyCode";
 import {combineAsTuple} from "../rx/combineAsTuple";
 import {pair} from "../base/pair";
+import IDisposable = Rx.IDisposable;
 
 /** Simple integer modulo for JavaScript so that
  *   mod(8, 8) = 0
@@ -46,6 +47,8 @@ export class AutocompleteService<SuggestionType, IndexType> {
 
     private _suggestionElements = new WeakMap<SuggestionType, HTMLElement>();
 
+    private _disposables: IDisposable[] = [];
+
     constructor(options: AutocompleteOptions<SuggestionType, IndexType>) {
         this.queryStream = options.koQuery.toObservableWithReplyLatest();
         this.suggestionsIndexStream = options.suggestionsIndexStream;
@@ -62,9 +65,10 @@ export class AutocompleteService<SuggestionType, IndexType> {
             suggestions: SuggestionType[]|null;
         }
 
-        // Once we receive both a query string and an index, and also each time 
-        // one of them is modified thereafter...
-        Rx.Observable.combineLatest(this.queryStream, this.suggestionsIndexStream, combineAsTuple)
+        this._disposables.push(
+            // Once we receive both a query string and an index, and also each time
+            // one of them is modified thereafter...
+            Rx.Observable.combineLatest(this.queryStream, this.suggestionsIndexStream, combineAsTuple)
             // Execute the domain-specific search function
             .map(([query, index]) =>
                 this.searchFn(query, index))
@@ -98,7 +102,7 @@ export class AutocompleteService<SuggestionType, IndexType> {
             })
             .map(it => it.suggestions!)
             // Load the results
-            .forEach(this.loadSuggestions);
+            .forEach(this.loadSuggestions));
     }
 
     @observable()
@@ -473,5 +477,12 @@ export class AutocompleteService<SuggestionType, IndexType> {
         return (element: HTMLElement) => {
             this._scrollPane = element;
         };
+    }
+
+    dispose() {
+        ko.untrack(this);
+        for (let disposable of this._disposables) {
+            disposable.dispose();
+        }
     }
 }

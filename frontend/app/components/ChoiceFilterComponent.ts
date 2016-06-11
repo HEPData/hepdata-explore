@@ -79,7 +79,9 @@ class ChoiceFilterComponent {
             // Only continue if the complementary filter has changed
             .distinctUntilChanged(complementaryFilter =>
                 stableStringify(complementaryFilter.dump()))
-            .do(()=>{console.log('Querying complementary filter on variable ' + this.filter.field);})
+            .do((complement)=> {
+                console.log(JSON.stringify(complement.dump(), null!, 2));
+            })
             // Launch the query
             .map(complementaryFilter =>
                 elastic.fetchCountByField(this.filter.field, complementaryFilter))
@@ -173,6 +175,7 @@ class ChoiceFilterComponent {
     }
 
     dispose() {
+        this.autocomplete.dispose();
         ko.untrack(this);
         for (let disposable of this._disposables) {
             disposable.dispose();
