@@ -483,7 +483,7 @@ class RecordAggregator(object):
                                 },
 
                                 "collaborations": {"type": "string","index": "not_analyzed"},  # denormalization
-                                "reaction_full": {"type": "string","index": "not_analyzed"},  # denormalization
+                                "reactions_full": {"type": "string","index": "not_analyzed"},  # denormalization
 
                                 "observables": {"type": "string","index": "not_analyzed"},
                                 "phrases": {"type": "string","index": "not_analyzed"},
