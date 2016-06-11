@@ -252,7 +252,10 @@ export class AppViewModel {
         // Each time a piece of the application requests a search
         $searchRequests
             // If it's different than the previous search
-            .distinctUntilChanged(stableStringify)
+            .distinctUntilChanged((searchRequest) => stableStringify({
+                filter: searchRequest.filter.dump(),
+                thenSetPlots: searchRequest.thenSetPlots,
+            }))
             // Request the data for the new filter, but keep the entire request
             // object handy, as it contains data we will need later.
             //
