@@ -28,13 +28,17 @@ abstract class CompoundFilter extends Filter {
     abstract getFlagClass(): string;
 
     public findFilter(filter: Filter): boolean {
-        for (let child of this.children) {
-            const found = child.findFilter(filter);
-            if (found) {
-                return true;
+        if (this == filter) {
+            return true;
+        } else {
+            for (let child of this.children) {
+                const found = child.findFilter(filter);
+                if (found) {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
     }
 
     public replaceFilter(oldFilter: Filter, newFilter: Filter): boolean {
