@@ -40,7 +40,7 @@
 <div class="hep_breadcrumbs">
     <ul>
         <li id="topbar-title">Data Query Engine</li>
-        <li id="data-point-count">
+        <li id="data-point-count" style="display: none;" data-bind="visible: true">
             <span class="number-display" data-bind="text: tableCount"></span>
             tables found in
             <span class="number-display" data-bind="text: publicationCount"></span>
@@ -50,7 +50,7 @@
                 matching publications omitted)
             </span>
         </li>
-        <li data-bind="visible: loadingNewData">
+        <li data-bind="visible: loadingNewData" style="display: none;" data-bind="visible: true">
             Loading...
         </li>
         <li class="pull-right crammed-button">
