@@ -115,30 +115,25 @@ export class Elastic {
     {
         let elasticFilter: any = undefined;
         if (filter) {
-            elasticFilter = {
-                "nested": {
-                    "path": "tables",
-                    "query": filter.toElasticQuery(),
-                }
-            };
+            elasticFilter = filter.toElasticQuery();
         } else {
             // Empty filter that matches anything
             elasticFilter = {
-                "bool": {
-                    "must": []
-                }
+                "match_all": {}
             }
         }
 
         return jsonPOST(this.elasticUrl + '/publication/_search', {
             "size": 0,
             "aggs": {
-                "tables_filtered": {
-                    "filter": elasticFilter,
+                "tables": {
+                    "nested": {
+                        "path": "tables",
+                    },
                     "aggs": {
-                        "tables": {
-                            "nested": {
-                                "path": Elastic.getPathForFieldPath(field)
+                        "tables_filtered": {
+                            "filter": {
+                                "query": elasticFilter
                             },
                             "aggs": {
                                 "variables": {
@@ -153,7 +148,7 @@ export class Elastic {
                 }
             }
         }).then((results) => {
-            return _(results.aggregations.tables_filtered.tables.variables.buckets)
+            return _(results.aggregations.tables.tables_filtered.variables.buckets)
                 .map((bucket: any) => ({
                     name: bucket.key,
                     count: bucket.doc_count
