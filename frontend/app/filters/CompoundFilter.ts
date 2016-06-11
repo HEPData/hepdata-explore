@@ -45,7 +45,9 @@ abstract class CompoundFilter extends Filter {
         for (let i = 0; i < this.children.length; i++) {
             const child = this.children[i];
             if (child === oldFilter) {
-                this.children[i] = newFilter;
+                // Replace the filter (can't use this.children[i] due to a ko
+                // observable gotcha)
+                this.children.splice(i, 1, newFilter);
                 return true;
             } else {
                 const foundInsideChild = child.replaceFilter(oldFilter, newFilter);
