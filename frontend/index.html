@@ -360,7 +360,7 @@
                             <svg class="legend-circle" width="10" height="10"
                                  data-bind="if: $parents[1].plot.config.colorPolicy == 'per-table'">
                                 <circle r="2.5" cx="5" cy="5" data-bind="attr: {
-                                    fill: $parents[1].plot.getLegendColorByTable($data)
+                                    fill: $parents[1].plot.scatterLayer.getLegendColorByTable($data)
                                 }"></circle>
                             </svg>
 
