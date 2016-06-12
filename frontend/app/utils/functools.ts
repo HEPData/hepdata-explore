@@ -44,6 +44,14 @@ export function* range(limit: number) {
     }
 }
 
+export function* filter<T>(list: Iterable<T>, conditionFn: (val: T) => boolean): Iterable<T> {
+    for (let item of list) {
+        if (conditionFn(item)) {
+            yield item;
+        }
+    }
+}
+
 export function groupBy<K,V>(list: Iterable<V>, keyFn: (value: V) => K): Map<K,V[]> {
     const ret = new Map<K,V[]>();
     for (let value of list) {

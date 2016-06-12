@@ -1,4 +1,4 @@
-module.exports = Set2;
+// https://github.com/josephg/set2 by Joseph Gentle, MIT License
 
 // Create a new Set2. The constructor takes optional data of the form [[a1,b1],
 // [a2,b2], ...].

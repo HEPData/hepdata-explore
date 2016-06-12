@@ -1,3 +1,5 @@
+// https://github.com/josephg/set2 by Joseph Gentle, MIT License
+
 // Create a new Map2. The constructor takes in an iterable of data values in
 // the form of [[k1, k2, v], [k1, k2, v], ...].
 function Map2(data) {
