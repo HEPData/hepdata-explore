@@ -160,7 +160,11 @@
                         crossMatch: isCrossMatch,
                     },
                     event: {
-                        mousedown: $parent.autocomplete.koMouseDownHandler($data)
+                        mousedown: function(comp, event) {
+                            // Accept the suggestion and close the bubble
+                            $parent.autocomplete.koMouseDownHandler($data)(comp, event);
+                            $parent.closeBubble();
+                        }
                     },
                     leak: $parent.autocomplete.leakSuggestionElementHandler($data)
                 ">
@@ -201,6 +205,7 @@
                                     name: 'variableAutocomplete',
                                     data: {
                                         autocomplete: $parents[1].autocomplete,
+                                        closeBubble: closeBubble,
                                         maxHeight: 120,
                                     }
                                 }"></div>
@@ -223,6 +228,7 @@
                                         name: 'variableAutocomplete',
                                         data: {
                                             autocomplete: $parents[1].autocomplete,
+                                            closeBubble: closeBubble,
                                             maxHeight: 120,
                                         }
                                     }"></div>

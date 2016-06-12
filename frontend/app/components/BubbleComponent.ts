@@ -196,6 +196,11 @@ export class BubbleComponent {
 
     private _mutationObserver: MutationObserver|null;
 
+    @bind()
+    public closeBubble() {
+        this.$bubbleEvents.onNext(BubbleEvent.EscOrReturn);
+    }
+
     private setUpPositionListeners() {
         // Listen to scroll events
         this._scrollableParents = findScrollableParents(this._linkedElement);
