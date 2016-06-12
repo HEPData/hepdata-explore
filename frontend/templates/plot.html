@@ -1,14 +1,16 @@
 <div class="plot-box">
     <div>
-        <span class="drag-handle">
-            <img src="img/drag-handle.svg">
+        <span  data-bind="if: controlsVisible">
+            <span class="drag-handle">
+                <img src="img/drag-handle.svg">
+            </span>
         </span>
 
         <span data-bind="text: plot.getPointCount()"></span> points.
         x: <span data-bind="text: plot.xScaleType"></span>
         y: <span data-bind="text: plot.yScaleType"></span>
 
-        <div style="float: right">
+        <div style="float: right" data-bind="if: controlsVisible">
             <button class="plot-button" data-bind="click: togglePinned, css: {pinned: plot.config.pinned}"
              title="Pin a plot to keep it intact when you edit the filters">
                 <i class="fa fa-thumb-tack"></i>
