@@ -160,12 +160,18 @@ export function autoPlots(plotPool: PlotPool, maxPlots: number) {
     }
 
     for (let blueprint of plotBlueprints) {
+        let plot: Plot;
         if (blueprint.existingPlot) {
             // Update existing plots (they have a linked blueprint)
             blueprint.existingPlot.config.yVars = blueprint.yVars;
+            plot = blueprint.existingPlot;
         } else {
             // Create a new plot based on this blueprint
-            plotPool.spawnPlot().spawn(blueprint.xVar, blueprint.yVars);
+            plot = plotPool.spawnPlot().spawn(blueprint.xVar, blueprint.yVars);
         }
+
+        // Use an appropriate color policy
+        plot.config.colorPolicy = plot.config.yVars.length > 1
+            ? 'per-variable' : 'per-table';
     }
 }
