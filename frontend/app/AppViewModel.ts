@@ -286,8 +286,11 @@ export class AppViewModel {
                     // Load the tables returned by the search
                     this.tableCache.replaceAllTables(newTables);
                     this.incomplete = searchResult.incomplete;
+
+                    const countRetrievedPublications = _.uniqBy(this.tableCache.allTables, t =>
+                        t.publication).length;
                     this.omittedPublicationsCount = searchResult.totalPublicationsInServer
-                        - newTables.length;
+                        - countRetrievedPublications;
 
                     if (req.thenSetPlots) {
                         // Replace plots with the specified set
