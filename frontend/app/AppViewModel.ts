@@ -39,6 +39,7 @@ import {pair} from "./base/pair";
 import TableCache = require("./services/TableCache");
 import CMEnergiesFilter = require("./filters/CMEnergiesFilter");
 import {autoPlots} from "./services/autoPlots";
+import {migrateStateDump} from "./services/migrateStateDump";
 
 class SearchError {
     title: string;
@@ -157,7 +158,7 @@ export class AppViewModel {
             return null;
         }
         return {
-            version: 1,
+            version: 2,
             filter: this.rootFilter.dump(),
             plots: this.plotsDump,
         };
@@ -355,7 +356,7 @@ export class AppViewModel {
                 if (result instanceof SearchError) {
                     this.currentStateLoadError = result;
                 } else {
-                    const stateDump = <StateDump>result;
+                    const stateDump = migrateStateDump(<StateDump>result);
 
                     console.log('Loaded state dump');
                     const filter = Filter.load(stateDump.filter);
