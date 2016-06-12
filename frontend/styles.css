@@ -764,3 +764,7 @@ hep-plot {
 .plot-button.pinned:hover {
   background: #DEDEAD;
 }
+
+.custom-plot .modal-footer a[data-dismiss="modal"] {
+  display: none;
+}
