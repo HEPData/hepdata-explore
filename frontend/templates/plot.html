@@ -23,7 +23,10 @@
         <div style="clear: both"></div>
     </div>
 
-    <div class="canvas-onion" data-bind="embedDom: plot.canvasOnion"></div>
+    <div style="position: relative">
+        <div class="canvas-onion" data-bind="embedDom: plot.canvasOnion"></div>
+        <span class="x-axis-label" data-bind="latex: plot.config.xVar, attr: {title: plot.config.xVar}"></span>
+    </div>
 
     <ul class="plot-legend" data-bind="foreach: plot.config.yVars">
         <li>

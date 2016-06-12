@@ -421,7 +421,7 @@ ul.suggestions {
     vertical-align: top;
     margin: 5px;
     /* background: white; */
-    min-height: 500px;
+    min-height: 506px;
 }
 
 .canvas-onion {
@@ -601,6 +601,7 @@ img.bubble-tail {
 .plot-legend {
     padding-left: 20px;
     list-style: none;
+    margin-top: 4px;
 }
 
 .legend-span {
@@ -767,4 +768,12 @@ hep-plot {
 
 .custom-plot .modal-footer a[data-dismiss="modal"] {
   display: none;
+}
+
+.x-axis-label {
+  position: absolute;
+  bottom: 0px;
+  left: 39px;
+  text-align: center;
+  right: 15px;
 }

@@ -96,14 +96,5 @@ export class AxesLayer extends PlotLayer {
         }
 
         ctx.restore();
-
-        // draw X label
-        {
-            const xVar = ensure(this.plot.config.xVar);
-            const axisXCenter = margin.left + (w / 2);
-            const textW = ctx.measureText(xVar).width;
-            ctx.font = '14px' + fontFace;
-            ctx.fillText(xVar, axisXCenter - textW / 2, margin.top + h + 30);
-        }
     }
 }
