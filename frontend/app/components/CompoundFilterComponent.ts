@@ -9,21 +9,13 @@ import {
     registerFilterComponent,
     unregisterFilterComponent
 } from "../base/getFilterComponent";
+import {insideElementOfClass} from "../utils/insideElementOfClass";
 
 // http://ejohn.org/blog/comparing-document-position/
 function htmlContains(a: HTMLElement, b: HTMLElement){
     return a.contains ?
     a != b && a.contains(b) :
         !!(a.compareDocumentPosition(b) & 16);
-}
-
-function insideElementOfClass(element: HTMLElement, className: string): boolean {
-    if (element !== null) {
-        return element.classList.contains('drag-handle')
-            || insideElementOfClass(element.parentElement, className);
-    } else {
-        return false;
-    }
 }
 
 @KnockoutComponent('compound-filter', {

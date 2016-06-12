@@ -1,4 +1,7 @@
-<div class="plot-pool" data-bind="dragula: plotPool.plots">
+<div class="plot-pool" data-bind="dragula: {
+    data: plotPool.plots,
+    moves: dragulaMoves,
+}">
     <hep-plot params="
         plot: $data,
         tableCache: $parent.plotPool.tableCache,
