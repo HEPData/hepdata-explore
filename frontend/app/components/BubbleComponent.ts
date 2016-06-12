@@ -203,18 +203,20 @@ export class BubbleComponent {
             parent.addEventListener('scroll', this.updatePositionInNextFrame);
         }
 
-        // Each time a new element is added or removed in the panel the position
-        // of the input field may change.
-        // Use MutationObserver to update the position in these cases.
-        this._mutationObserver = new MutationObserver((mutations) => {
-            this.updatePositionInNextFrame();
-        });
-        // Observe the outermost parent, since it contains the rest
-        const observedParent = this._scrollableParents[this._scrollableParents.length - 1];
-        this._mutationObserver.observe(observedParent, {
-            childList: true,
-            subtree: true,
-        });
+        if (this._scrollableParents.length > 0) {
+            // Each time a new element is added or removed in the panel the position
+            // of the input field may change.
+            // Use MutationObserver to update the position in these cases.
+            this._mutationObserver = new MutationObserver((mutations) => {
+                this.updatePositionInNextFrame();
+            });
+            // Observe the outermost parent, since it contains the rest
+            const observedParent = this._scrollableParents[this._scrollableParents.length - 1];
+            this._mutationObserver.observe(observedParent, {
+                childList: true,
+                subtree: true,
+            });
+        }
     }
 
     private tearDownPositionListeners() {
