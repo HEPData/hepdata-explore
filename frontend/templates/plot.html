@@ -9,10 +9,12 @@
         y: <span data-bind="text: plot.yScaleType"></span>
 
         <div style="float: right">
-            <button class="plot-button" data-bind="click: togglePinned, css: {pinned: plot.config.pinned}">
+            <button class="plot-button" data-bind="click: togglePinned, css: {pinned: plot.config.pinned}"
+             title="Pin a plot to keep it intact when you edit the filters">
                 <i class="fa fa-thumb-tack"></i>
             </button>
-            <button class="plot-button" data-bind="click: removePlot">
+            <button class="plot-button" data-bind="click: removePlot"
+             title="Remove this plot">
                 <i class="fa fa-trash-o"></i>
             </button>
         </div>
@@ -33,7 +35,7 @@
     </ul>
     <div class="controls" data-bind="if: controlsVisible">
         <button class="btn btn-primary" data-bind="click: downloadData"
-                title="Download plot data">
+                title="Download this plot data (YAML format)">
             <i class="fa fa-download"></i>
         </button>
         <button class="btn btn-primary" data-bind="click: showEditPlot">
