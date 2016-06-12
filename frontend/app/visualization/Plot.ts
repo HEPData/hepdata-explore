@@ -349,10 +349,7 @@ export class Plot {
             .domain([this.dataMinY, this.dataMaxY])
             .range([this.height - this.margins.bottom, this.margins.top]);
 
-        var t0 = performance.now();
         this.redraw();
-        var t1 = performance.now();
-        console.log("Call to doWork took " + (t1 - t0) + " milliseconds.");
     }
 
     public redraw() {
