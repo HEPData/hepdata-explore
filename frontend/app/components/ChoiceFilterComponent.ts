@@ -126,7 +126,7 @@ class ChoiceFilterComponent {
             keyFn: (s: ChoiceSuggestion) => s.suggestedValue,
             maxSuggestions: 5,
             suggestionAcceptedFn: this.useSuggestion,
-            acceptWithTabKey: true,
+            acceptWithTabKey: false,
             nonUniformPaging: false,
         });
     }

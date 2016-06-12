@@ -76,7 +76,7 @@ export class VariableVM {
                 this.fieldValue = suggestion.name;
                 this.cleanValue = suggestion.name;
             },
-            acceptWithTabKey: true,
+            acceptWithTabKey: false,
             nonUniformPaging: false,
         });
 
