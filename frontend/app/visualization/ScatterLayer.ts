@@ -1,7 +1,9 @@
 import {PlotLayer} from "./PlotLayer";
-import {Plot, findColIndex, findColIndexOrNull} from "./Plot";
+import {Plot, findColIndex, findColIndexOrNull, YVarConfig} from "./Plot";
 import {assert, ensure} from "../utils/assert";
 import {observable} from "../decorators/observable";
+import {PublicationTable} from "../base/dataFormat";
+import {RuntimeError} from "../base/errors";
 
 export interface CanvasScatterPoint {
     x: number;
@@ -61,8 +63,39 @@ export class ScatterLayer extends PlotLayer {
 
         ctx.restore();
     }
+
+    private tableColorScale = d3.scale.category10();
+
+    private resetTableColorScale() {
+        this.tableColorScale = d3.scale.category10();
+    }
+
+    private getLegendColor(table: PublicationTable, yVar: YVarConfig) {
+        if (this.plot.config.colorPolicy == 'per-table') {
+            return this.getLegendColorByTable(table);
+        } else if (this.plot.config.colorPolicy == 'per-variable') {
+            return this.getLegendColorByVariable(yVar);
+        } else {
+            throw new RuntimeError('Unsupported colorPolicy value');
+        }
+    }
+
+    private getLegendColorByTable(table: PublicationTable) {
+        assert(table.table_num != null);
+        assert(table.publication.inspire_record != null);
+        return this.tableColorScale(table.table_num + '-' + table.publication.inspire_record);
+    }
+
+    private getLegendColorByVariable(yVar: YVarConfig) {
+        assert(yVar.color != undefined);
+        return yVar.color;
+    }
     
     public replaceDataPoints() {
+        // We want the same tables in the same order to have always the same
+        // color association.
+        this.resetTableColorScale();
+
         const plot = this.plot;
         const xScale = plot.xScale;
         const yScale = plot.yScale;
@@ -71,16 +104,16 @@ export class ScatterLayer extends PlotLayer {
         const points: CanvasScatterPoint[] = [];
 
         for (let yVar of plot.config.yVars) {
-            const tables = plot.tableCache.getTablesWithVariables(xVar, yVar);
+            const tables = plot.tableCache.getTablesWithVariables(xVar, yVar.name);
             for (let table of tables) {
                 const colX = findColIndex(xVar, table);
-                const colY = findColIndexOrNull(yVar, table);
+                const colY = findColIndexOrNull(yVar.name, table);
                 if (colY == null) {
                     // This table does not have this yVar, but may have other y
                     // variables.
                     continue;
                 }
-                const color = this.plot.getLegendColor(table, yVar);
+                const color = this.getLegendColor(table, yVar);
 
                 for (let row of table.data_points) {
                     const x = row[colX].value;

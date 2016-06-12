@@ -1,4 +1,7 @@
-import {Plot} from "../visualization/Plot";
+import {
+    Plot, YVarConfig,
+    pickRandomColorForVariable
+} from "../visualization/Plot";
 import {AutocompleteService} from "../services/AutocompleteService";
 import {observable} from "../decorators/observable";
 import {computedObservable} from "../decorators/computedObservable";
@@ -23,6 +26,11 @@ export class VariableChoice {
     isCrossMatch: boolean;
 }
 
+interface VariableVMOptions {
+    initialValue: string|null,
+    searchFn: (query: string, index: VariableIndex) => VariableChoice[],
+    suggestionsIndexStream: Rx.Observable<VariableIndex>,
+}
 
 export class VariableVM {
     /**
@@ -44,11 +52,7 @@ export class VariableVM {
 
     autocomplete: AutocompleteService<VariableChoice, VariableIndex>;
 
-    constructor(opts: {
-        initialValue: string|null,
-        searchFn: (query: string, index: VariableIndex) => VariableChoice[],
-        suggestionsIndexStream: Rx.Observable<VariableIndex>,
-    }) {
+    constructor(opts: VariableVMOptions) {
         this.fieldValue = this.cleanValue = opts.initialValue || '';
 
         this.autocomplete = new AutocompleteService<VariableChoice, VariableIndex>({
@@ -95,6 +99,27 @@ export class VariableVM {
     }
 }
 
+interface YVariableVMOptions extends VariableVMOptions {
+    color: string;
+}
+
+/** Extends VariableVM adding a color property */
+class YVariableVM extends VariableVM {
+    color: string;
+
+    constructor(opts: YVariableVMOptions) {
+        super(opts);
+        this.color = opts.color;
+    }
+
+    asYVarConfig(): YVarConfig {
+        return {
+            name: this.cleanValue,
+            color: this.color,
+        }
+    }
+}
+
 interface VariableIndex {
     allVariables: string[];
     lunrIndex: lunr.Index;
@@ -112,17 +137,7 @@ export class CustomPlotVM {
     });
 
     @observable()
-    yVars: VariableVM[] = this.plot.config.yVars
-        .map((varName) => new VariableVM({
-            initialValue: varName,
-            searchFn: this.getYCompletion,
-            suggestionsIndexStream: this.yVarCompletionIndex$,
-        }))
-        .concat([new VariableVM({
-            initialValue: '',
-            searchFn: this.getYCompletion,
-            suggestionsIndexStream: this.yVarCompletionIndex$,
-        })]);    
+    yVars: YVariableVM[];
 
     // Dummy computed used to track when xVar or yVars are modified.
     @computedObservable()
@@ -157,6 +172,21 @@ export class CustomPlotVM {
     private _disposables: IDisposable[] = [];
 
     constructor(public plot: Plot) {
+        const initialYVars = this.plot.config.yVars
+            .map(yVar => new YVariableVM({
+                initialValue: yVar.name,
+                color: yVar.color,
+                searchFn: this.getYCompletion,
+                suggestionsIndexStream: this.yVarCompletionIndex$,
+            }));
+        this.yVars = initialYVars
+            .concat([new YVariableVM({
+                initialValue: '',
+                color: pickRandomColorForVariable(initialYVars),
+                searchFn: this.getYCompletion,
+                suggestionsIndexStream: this.yVarCompletionIndex$,
+            })])
+
         this._disposables.push(
             ko.getObservable(this, '_cleanValuesChanged').subscribe(() => {
                 this.updatePlot();
@@ -243,8 +273,9 @@ export class CustomPlotVM {
 
         const lastYVar = this.yVars[this.yVars.length - 1];
         if (lastYVar.fieldValue != '') {
-            this.yVars.push(new VariableVM({
+            this.yVars.push(new YVariableVM({
                 initialValue: '',
+                color: pickRandomColorForVariable(this.yVars),
                 searchFn: this.getYCompletion,
                 suggestionsIndexStream: this.yVarCompletionIndex$,
             }));
@@ -262,21 +293,21 @@ export class CustomPlotVM {
     }
 
     isYVarsClean(): boolean {
-        return !_.find(this.getPlottableYVars(), (yVar: string) =>
-            yVar.trim() == '');
+        return !this.getPlottableYVars().find((yVar) =>
+            yVar.cleanValue.trim() == '');
     }
 
     /** Returns yVars, minus the last empty value that is reserved to let the
      * user add a new y variable. */
-    getPlottableYVars() {
-        let ret: string[] = [];
+    getPlottableYVars(): YVariableVM[] {
+        let ret: YVariableVM[] = [];
         for (let i = 0; i < this.yVars.length - 1; i++) {
-            ret.push(this.yVars[i].cleanValue);
+            ret.push(this.yVars[i]);
         }
         if (this.yVars.length >= 1
             && this.yVars[this.yVars.length - 1].cleanValue.trim() != '')
         {
-            ret.push(this.yVars[this.yVars.length - 1].cleanValue);
+            ret.push(this.yVars[this.yVars.length - 1]);
         }
         return ret;
     }
@@ -290,13 +321,13 @@ export class CustomPlotVM {
         {
             // Replace this.plot.config.yVars contents
             this.plot.config.yVars.splice(0, this.plot.config.yVars.length,
-                ...this.getPlottableYVars());
+                ...this.getPlottableYVars().map(y => y.asYVarConfig()));
         }
     }
 
     @bind()
     getXCompletion(query: string, index: VariableIndex): VariableChoice[] {
-        const yVarsSet = new Set(this.getPlottableYVars());
+        const yVarsSet = new Set(this.getPlottableYVars().map(y => y.cleanValue));
         if (query != '') {
             return index.lunrIndex.search(query)
                 .map((result, i) => ({

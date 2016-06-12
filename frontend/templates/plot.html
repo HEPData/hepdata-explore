@@ -25,10 +25,10 @@
         <li>
             <svg class="legend-circle" width="10" height="10" data-bind="if: $parent.plot.config.colorPolicy == 'per-variable'">
                 <circle r="2.5" cx="5" cy="5" data-bind="attr: {
-                    fill: $parent.plot.getLegendColorByVariable($data)
+                    fill: color
                 }"></circle>
             </svg>
-            <span class="legend-span" data-bind="latex: $data, attr: {title: $data}"></span>
+            <span class="legend-span" data-bind="latex: name, attr: {title: name}"></span>
         </li>
     </ul>
     <div class="controls" data-bind="if: controlsVisible">

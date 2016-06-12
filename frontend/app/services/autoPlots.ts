@@ -1,4 +1,4 @@
-import {Plot} from "../visualization/Plot";
+import {Plot, YVarConfig, addYVariable} from "../visualization/Plot";
 import {filter} from "../utils/functools";
 import {assert} from "../utils/assert";
 import {PlotPool} from "./PlotPool";
@@ -20,13 +20,13 @@ export function autoPlots(plotPool: PlotPool, maxPlots: number) {
             // If the plot is automatic (non pinned), remove the variables
             // from the plot that no longer have any data points
             plot.config.yVars = _.filter(plot.config.yVars, (yVar) =>
-            plot.tablesByYVar.get(yVar)!.length > 0);
+                plot.tablesByYVar.get(yVar.name)!.length > 0);
         }
 
         // Track existing variable pairs
         const xVar = plot.config.xVar;
         if (xVar) { // ignore ill configured plots
-            for (let yVar of plot.config.yVars) {
+            for (let yVar of plot.config.yVars.map(y => y.name)) {
                 existingVariablePairs.add(xVar, yVar);
             }
         }
@@ -88,12 +88,12 @@ export function autoPlots(plotPool: PlotPool, maxPlots: number) {
         /** Will be assigned an independent variable. */
         xVar: string;
         /** Will be assigned one or more dependent variables. */
-        yVars: string[];
+        yVars: YVarConfig[];
 
         /** This blueprint may be linked to an existing plot */
         existingPlot: Plot|null;
 
-        constructor(xVar: string, yVars: string[] = [], existingPlot: Plot|null = null) {
+        constructor(xVar: string, yVars: YVarConfig[] = [], existingPlot: Plot|null = null) {
             assert(freePlotSlots > 0, 'No plot slots available');
             this.xVar = xVar;
             this.yVars = yVars;
@@ -106,7 +106,7 @@ export function autoPlots(plotPool: PlotPool, maxPlots: number) {
 
         addVariable(yVar: string) {
             assert(this.yVars.length < maxPlotVars, 'No variable slots available');
-            this.yVars.push(yVar);
+            addYVariable(this.yVars, yVar);
         }
     }
 

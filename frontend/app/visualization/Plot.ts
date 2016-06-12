@@ -6,8 +6,9 @@ import {AssertionError, ensure, assert} from "../utils/assert";
 import {ScatterLayer} from "./ScatterLayer";
 import {observable} from "../decorators/observable";
 import {computedObservable} from "../decorators/computedObservable";
-import {groupBy, map} from "../utils/functools";
+import {groupBy, map, range} from "../utils/functools";
 import TableCache = require("../services/TableCache");
+import {hashString} from "../utils/hashString";
 
 export interface Margins {
     top: number;
@@ -58,10 +59,17 @@ export function findColIndexOrNull(variableName: string, table: PublicationTable
 export type ScaleType = "lin" | "log";
 export type ColorPolicy = 'per-variable' | 'per-table';
 
-export interface PlotConfigDump {
+export interface PlotConfigDumpV1 {
     pinned: boolean;
     xVar: string|null;
     yVars: string[];
+    colorPolicy: ColorPolicy;
+}
+
+export interface PlotConfigDump {
+    pinned: boolean;
+    xVar: string|null;
+    yVars: YVarConfig[];
     colorPolicy: ColorPolicy;
 }
 
@@ -93,6 +101,49 @@ export interface PlotDataExport {
     }[];
 }
 
+const colorPalette = map(range(10), d3.scale.category10<number>());
+
+export interface YVarConfig {
+    name: string;
+    color: string;
+}
+
+export interface IColor {
+    color: string;
+}
+
+export function pickColorForVariable(yVars: IColor[], yVarName: string): string {
+    const usedColors = new Set(yVars.map(yVar => yVar.color));
+    const availableColor = colorPalette.find(color => !usedColors.has(color));
+
+    if (availableColor) {
+        return availableColor;
+    } else {
+        return colorPalette[hashString(yVarName) % colorPalette.length];
+    }
+}
+
+export function pickRandomColorForVariable(yVars: IColor[]): string {
+    const usedColors = new Set(yVars.map(yVar => yVar.color));
+    const availableColor = colorPalette.find(color => !usedColors.has(color));
+
+    if (availableColor) {
+        return availableColor;
+    } else {
+        return colorPalette[Math.round(Math.random() * colorPalette.length)];
+    }
+}
+
+/** Adds a new variable and assigns it a color. */
+export function addYVariable(yVars: YVarConfig[], yVarName: string) {
+    const yVar = {
+        name: yVarName,
+        color: pickColorForVariable(yVars, yVarName),
+    };
+    yVars.push(yVar);
+    return yVar;
+}
+
 /** These properties here:
  * - are configurable by the user
  * - conform the serialized representation of the plot
@@ -106,7 +157,7 @@ export class PlotConfig {
     @observable()
     xVar: string|null = null;
     @observable()
-    yVars: string[] = [];
+    yVars: YVarConfig[] = [];
 
     @observable()
     colorPolicy: ColorPolicy = 'per-variable';
@@ -241,7 +292,7 @@ export class Plot {
         this.canvasOnion.insertBefore(layer.canvas, null!);
     }
 
-    spawn(xVar: string, yVars: string[]): this {
+    spawn(xVar: string, yVars: YVarConfig[]): this {
         this.config.xVar = xVar;
         this.config.yVars = yVars;
 
@@ -271,8 +322,9 @@ export class Plot {
         }
         const xVar = this.config.xVar!;
 
-        this.tablesByYVar = new Map(
-            _.map(this.config.yVars, (yVar): [string, PublicationTable[]] =>
+        this.tablesByYVar = new Map(this.config.yVars
+            .map(y => y.name)
+            .map((yVar): [string, PublicationTable[]] =>
                 [yVar, this.tableCache.getTablesWithVariables(xVar, yVar)])
         );
 
@@ -320,7 +372,7 @@ export class Plot {
         let dataMaxY = -Infinity;
         const xVar = ensure(this.config.xVar);
         
-        for (let yVar of this.config.yVars) {
+        for (let yVar of this.config.yVars.map(y => y.name)) {
             for (let table of allTables) {
                 const xCol = findColIndex(xVar, table);
                 const yCol = findColIndexOrNull(yVar, table);
@@ -369,28 +421,6 @@ export class Plot {
         return this.dataMinX + ' to ' + this.dataMaxX;
     }
 
-    private colorScale = d3.scale.category10();
-    getLegendColor(table: PublicationTable, yVar: string) {
-        if (this.config.colorPolicy == 'per-table') {
-            return this.getLegendColorByTable(table);
-        } else if (this.config.colorPolicy == 'per-variable') {
-            return this.getLegendColorByVariable(yVar);
-        } else {
-            throw new RuntimeError('Unsupported colorPolicy value');
-        }
-    }
-
-    getLegendColorByTable(table: PublicationTable) {
-        assert(table.table_num != null);
-        assert(table.publication.inspire_record != null);
-        return this.colorScale(table.table_num + '-' + table.publication.inspire_record);
-    }
-
-    getLegendColorByVariable(yVar: string) {
-        assert(typeof yVar == 'string');
-        return this.colorScale(yVar);
-    }
-
     export(): PlotDataExport {
         if (this.config.xVar == null) {
             throw new AssertionError('xVar == null');
@@ -414,12 +444,12 @@ export class Plot {
         }));
 
         const yVarsDump = this.config.yVars.map(yVar => ({
-            name: yVar,
-            data_points: _.flatten(this.tablesByYVar.get(yVar)!.map(table => {
+            name: yVar.name,
+            data_points: _.flatten(this.tablesByYVar.get(yVar.name)!.map(table => {
                 // Each data point maintains a reference to the table it came from
                 const tableDoi = getTableDOI(table);
                 const xCol = findColIndex(xVar, table);
-                const yCol = findColIndex(yVar, table);
+                const yCol = findColIndex(yVar.name, table);
 
                 return table.data_points
                     .filter(dataPoint => 
