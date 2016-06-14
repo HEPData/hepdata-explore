@@ -1,10 +1,10 @@
 # HEPData Explore
 
-HEPData Explore is a data retrieval and visualization tool for high energy physics.
+[HEPData Explore](http://hepdata.rufian.eu/) is a data retrieval and visualization tool for high energy physics.
 
 Data tables from scholarly publishing recorded in [HEPData.net](http://hepdata.net) are fed into an index that makes it possible to retrieve subsets according to user defined criteria and visualize them in the application.
 
-HEPData Explore can put together several tables in a same plot -- even if they belong to different publications, as long as they share a pair of variables.
+HEPData Explore can put together several tables in a same plot — even if they belong to different publications, as long as they share a pair of variables.
 
 ![Screenshot](http://i.imgur.com/JPApPJa.png)
 
