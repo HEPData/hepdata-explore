@@ -13,4 +13,7 @@ export function registerFilterClass(constructor: Constructor<Filter>) {
     assert(className != 'Filter', 'Must be a concrete class');
     assert(!filterRegistry.has(className), 'Already registered');
     filterRegistry.set(className, constructor);
+
+    // Export the filter for easy programmatic access in the console
+    (<any>window)[className] = constructor;
 }
