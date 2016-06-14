@@ -264,9 +264,9 @@ export class AppViewModel {
             // that in case of error, retries *create* a new promise (and
             // therefore a new HTTP request) instead of reusing the value of
             // the old one.
-            .map((req) => Rx.Observable.defer(() => Rx.Observable.fromPromise(
+            .map((req) => Rx.Observable.defer(() =>
                 elastic.fetchFilteredData(req.filter)
-                    .then(newTables => pair([req, newTables]))
+                    .then(newTables => pair([req, newTables])
             )))
             // Turn the loading indicator on
             .do(() => {this.loadingNewData = true})
