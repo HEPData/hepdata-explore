@@ -19,7 +19,7 @@ class CMEnergiesFilter extends Filter {
     }
 
     static getLongName() {
-        return 'CM Energies filter';
+        return 'Center of mass energy';
     }
 
     toElasticQuery(): any {
