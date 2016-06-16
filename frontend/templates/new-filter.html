@@ -5,12 +5,12 @@
             hasFocus: ko.getObservable($parent, 'focused'),
             event: bubbleKeyHandlers($parent.autocomplete.keyPressed),
         " placeholder="Add new filter...">
-        <hep-bubble params="element: $element, bubbleFocus: $data">
+        <hep-bubble params="element: $element, bubbleFocus: $data, maxHeight: 285">
             <!-- ko template: {
                 name: 'newFilterAutocomplete',
                 data: {
                     autocomplete: $parents[1].autocomplete,
-                    maxHeight: maxHeight,
+                    maxHeightInside: maxHeightInside,
                 }
             } --><!-- /ko -->
         </hep-bubble>

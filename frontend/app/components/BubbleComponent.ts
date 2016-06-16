@@ -90,6 +90,11 @@ export class BubbleComponent {
     currentBubbleState = BubbleState.Unselected;
 
     @computedObservable()
+    get maxHeightInside() {
+        return this.maxHeight - 21 * 2;
+    }
+
+    @computedObservable()
     get visible() {
         return (this.currentBubbleState == BubbleState.SelectedWithBubble);
     }
@@ -130,8 +135,10 @@ export class BubbleComponent {
         assertHas(params, [
             {name: 'element', type: HTMLElement},
             {name: 'bubbleFocus', type: BubbleFocusComponent},
+            {name: 'maxHeight', type: Number},
         ]);
         this._bubbleElement = params.element;
+        this.maxHeight = params.maxHeight;
         if (params.width) {
             this.width = params.width;
         }

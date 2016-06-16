@@ -152,8 +152,9 @@
 }"></div>
 
 <script id="variableAutocomplete" type="text/html">
-    <div class="scroll-pane" style="max-height: 300px" tabindex="-1"
+    <div class="scroll-pane" tabindex="-1"
         data-bind="
+            style: {maxHeight: maxHeightInside + 'px'},
             if: autocomplete.suggestions.length > 0,
             leak: autocomplete.leakScrollPaneHandler()
         ">
@@ -205,13 +206,14 @@
                                 event: bubbleKeyHandlers($parent.autocomplete.keyPressedHandleEnter),
                                 hasFocus: ko.getObservable($parent, 'focused'),
                             ">
-                            <hep-bubble params="element: $element, bubbleFocus: $data, width: 500">
+                            <!-- beware: there is another hep-bubble below. You may want to make changes to both -->
+                            <hep-bubble params="element: $element, bubbleFocus: $data, width: 500, maxHeight: 300">
                                 <div data-bind="template: {
                                     name: 'variableAutocomplete',
                                     data: {
                                         autocomplete: $parents[1].autocomplete,
                                         closeBubble: closeBubble,
-                                        maxHeight: 120,
+                                        maxHeightInside: maxHeightInside,
                                     }
                                 }"></div>
                             </hep-bubble>
@@ -228,13 +230,13 @@
                                     event: bubbleKeyHandlers($parent.autocomplete.keyPressedHandleEnter),
                                     hasFocus: ko.getObservable($parent, 'focused')
                                 ">
-                                <hep-bubble params="element: $element, bubbleFocus: $data, width: 500">
+                                <hep-bubble params="element: $element, bubbleFocus: $data, width: 500, maxHeight: 300">
                                     <div data-bind="template: {
                                         name: 'variableAutocomplete',
                                         data: {
                                             autocomplete: $parents[1].autocomplete,
                                             closeBubble: closeBubble,
-                                            maxHeight: 120,
+                                            maxHeightInside: maxHeightInside,
                                         }
                                     }"></div>
                                 </hep-bubble>
@@ -293,8 +295,9 @@
 </script>
 
 <script id="newFilterAutocomplete" type="text/html">
-    <div class="scroll-pane" style="max-height: 300px" tabindex="-1"
+    <div class="scroll-pane" tabindex="-1"
         data-bind="
+            style: {maxHeight: maxHeightInside + 'px'},
             if: autocomplete.suggestions.length > 0,
             leak: autocomplete.leakScrollPaneHandler()
         ">

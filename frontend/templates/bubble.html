@@ -9,7 +9,6 @@
         top: side == 'down' ? '0px' : null,
         bottom: side == 'up' ? '0px' : null,
         width: '100%',
-        maxHeight: maxHeight + 'px',
     }">
         <tr>
             <td class="bubble-top-left"></td>
@@ -22,9 +21,7 @@
 
         <tr>
             <td class="bubble-middle-left"></td>
-            <td class="bubble-content" data-bind="style: {
-                maxHeight: (maxHeight - 21 * 2) + 'px'
-            }">
+            <td class="bubble-content">
                 <!-- ko template: { nodes: $componentTemplateNodes } --><!-- /ko -->
             </td>
             <td class="bubble-middle-right"></td>
