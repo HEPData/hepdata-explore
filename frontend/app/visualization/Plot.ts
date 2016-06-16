@@ -117,9 +117,9 @@ export function pickColorForVariable(yVars: IColor[], yVarName: string): string 
     const availableColor = colorPalette.find(color => !usedColors.has(color));
 
     if (availableColor) {
-        return availableColor;
+        return ensure(availableColor);
     } else {
-        return colorPalette[hashString(yVarName) % colorPalette.length];
+        return ensure(colorPalette[hashString(yVarName) % colorPalette.length]);
     }
 }
 
@@ -128,9 +128,9 @@ export function pickRandomColorForVariable(yVars: IColor[]): string {
     const availableColor = colorPalette.find(color => !usedColors.has(color));
 
     if (availableColor) {
-        return availableColor;
+        return ensure(availableColor);
     } else {
-        return colorPalette[Math.round(Math.random() * colorPalette.length)];
+        return ensure(colorPalette[Math.round(Math.random() * colorPalette.length)]);
     }
 }
 
