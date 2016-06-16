@@ -76,7 +76,7 @@ export function autoPlots(plotPool: PlotPool, maxPlots: number) {
     // Now comes assigning plots to the variable pairs.
     // It works like this: Each plot has one independent variable and up to
     // `maxPlotVars` dependent variables.
-    const maxPlotVars = 5;
+    const maxPlotVars = Infinity;
     // `freePlotSlots` plots can be added in total.
     let freePlotSlots = remainingPlots;
 
