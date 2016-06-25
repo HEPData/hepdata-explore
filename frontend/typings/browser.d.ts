@@ -20,9 +20,3 @@
 /// <reference path="browser/ambient/rx.time/index.d.ts" />
 /// <reference path="browser/ambient/rx/index.d.ts" />
 /// <reference path="browser/ambient/set2/set2.d.ts" />
-
-
-// https://github.com/eligrey/FileSaver.js/
-declare function saveAs(blob: Blob, fileName: string): void;
-
-declare function stableStringify(thing: any): string;
