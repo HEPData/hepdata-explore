@@ -68,7 +68,7 @@ export class AutocompleteService<SuggestionType, IndexType> {
         this._disposables.push(
             // Once we receive both a query string and an index, and also each time
             // one of them is modified thereafter...
-            Rx.Observable.combineLatest(this.queryStream, this.suggestionsIndexStream, combineAsTuple)
+            Rx.Observable.combineLatest(this.queryStream, this.suggestionsIndexStream)
             // Execute the domain-specific search function
             .map(([query, index]) =>
                 this.searchFn(query, index))
