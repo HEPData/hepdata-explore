@@ -16,7 +16,12 @@ def download_publication(publication_path):
     if os.path.exists(dest_file_path):
         return
 
-    inspire_record = re_record.match(publication_path).groups()[0]
+    match = re_record.match(publication_path)
+    if match:
+        inspire_record = match.groups()[0]
+    else:
+        print('Ignoring directory with invalid format: %s' % publication_path)
+        return
 
     response = requests.get('https://hepdata.net/record/ins' + inspire_record +
                             '?format=json&light=true')
