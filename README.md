@@ -85,6 +85,6 @@ Optionally, once you have set up everything, you can use [foreman](https://ddoll
 
 ## About the project
 
-HEPData Explore is being developed by [Juan Luis Boya García](http://ntrrgc.me/) at [University of Salamanca](http://www.usal.es/) in collaboration with [CERN](http://home.cern/).
+HEPData Explore is being developed by [Alicia Boya García](http://ntrrgc.me/) at [University of Salamanca](http://www.usal.es/) in collaboration with [CERN](http://home.cern/).
 
 This project is supervised by the [HEPData team](https://hepdata.net/about).

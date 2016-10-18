@@ -18,7 +18,7 @@
  * This file is licensed independently from the rest of HEPData Explore to allow
  * easier reuse in other projects.
  *
- * Copyright (c) 2016 Juan Luis Boya García
+ * Copyright (c) 2016 Alicia Boya García
  *
  * MIT License
  *

@@ -1,6 +1,6 @@
 // Type definitions for Map2
 // Project: https://github.com/josephg/set2
-// Definitions by: Juan Luis Boya García <https://github.com/ntrrgc>
+// Definitions by: Alicia Boya García <https://github.com/ntrrgc>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 declare class Set2<V1,V2> {
